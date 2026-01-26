@@ -6,6 +6,7 @@ import * as Joi from 'Joi';
 import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AppModules } from './modules';
       },
     ]),
     ...AppModules,
+
   ],
   controllers: [AppController],
   providers: [AppService],
