@@ -3,8 +3,8 @@ import { UserDto } from './dto/user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { UserQueryDto } from '../../commons/dtos/user-query.dto';
+import { QueryHelper } from '../../commons/helpers/query.helper';
 
 @Injectable()
 export class UserService {

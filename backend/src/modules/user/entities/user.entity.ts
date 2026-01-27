@@ -1,5 +1,6 @@
-import { Role } from '../../../commons/enums/role.enums';
+import { Role } from '../../../commons/enums/role.enum';
 import * as bcrypt from 'bcrypt';
+import { Mission } from '../../../modules/mission/entities/mission.entity';
 
 import {
   Entity,
@@ -10,12 +11,16 @@ import {
   Index,
   BeforeInsert,
   BeforeUpdate,
+  OneToMany,
 } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @OneToMany(() => Mission, (mission) => mission.user)
+  missions: Mission[];
 
   @Column({ length: 100 })
   name: string;
@@ -27,6 +32,8 @@ export class User {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
+    if (!this.password) return;
+
     this.password = await bcrypt.hash(this.password, 10);
   }
 

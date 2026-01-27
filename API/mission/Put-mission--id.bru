@@ -1,19 +1,18 @@
 meta {
-  name: Post-auth/login
+  name: Put-mission/:id
   type: http
-  seq: 1
+  seq: 3
 }
 
-post {
-  url: {{api}}/auth/login
+put {
+  url: {{api}}/mission/7
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "email" : "ball@gmail.com",
-    "password" : "1234"
+    "userId": 4
   }
 }
 
