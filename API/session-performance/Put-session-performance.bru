@@ -1,0 +1,23 @@
+meta {
+  name: Put-session-performance
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{api}}/session-performance/5
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "plank_session_id": 3,
+    "accuracy_avg": 95
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

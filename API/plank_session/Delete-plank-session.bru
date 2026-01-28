@@ -1,0 +1,16 @@
+meta {
+  name: Delete-plank-session
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{api}}/plank-session/1
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

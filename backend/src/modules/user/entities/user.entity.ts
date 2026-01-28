@@ -13,6 +13,7 @@ import {
   BeforeUpdate,
   OneToMany,
 } from 'typeorm';
+import { PlankSession } from '../../../modules/plank-session/entities/plank-session.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -21,6 +22,10 @@ export class User {
 
   @OneToMany(() => Mission, (mission) => mission.user)
   missions: Mission[];
+
+  @OneToMany(() => PlankSession, (plankSession) => plankSession.user)
+  plankSessions: PlankSession[];
+
 
   @Column({ length: 100 })
   name: string;
