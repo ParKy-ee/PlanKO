@@ -1,0 +1,28 @@
+meta {
+  name: Post-program
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{api}}/program
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "programName": "heellll",
+    "programType": "daily",
+    "period": 30,
+    "frequency": 1,
+    "workDays": [1, 2, 3, 4, 5],
+    "restDays": [6, 0],
+    "status": "active"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

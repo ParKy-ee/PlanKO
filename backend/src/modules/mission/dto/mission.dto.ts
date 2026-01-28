@@ -8,6 +8,10 @@ export class MissionDto {
     target?: string;
 
     @IsOptional()
+    @IsNumber()
+    missionByProgramId?: number;
+
+    @IsOptional()
     @IsEnum(Status)
     status?: Status;
 

@@ -5,14 +5,19 @@ meta {
 }
 
 put {
-  url: {{api}}/mission/7
+  url: {{api}}/mission/1
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "userId": 4
+  //   "target" : "diet",
+  //   "startAt" : "2026-01-26T00:00:00.000Z",
+  //   "endAt" : "2026-01-27T00:00:00.000Z",
+  //   "status" : "PENDING",
+    "userId" : 3,
+    "missionByProgramId" : 1
   }
 }
 
