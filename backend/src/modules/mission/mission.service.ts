@@ -91,12 +91,11 @@ export class MissionService {
       user: { id: userId },
     });
 
-    // 2. ลบความสัมพันธ์เก่า
     await this.missionByProgramRepository.delete({
       mission: { id },
     });
 
-    // 3. สร้างความสัมพันธ์ใหม่
+
     const missionByProgram = this.missionByProgramRepository.create({
       mission: { id },
       program: { id: missionByProgramId },

@@ -10,7 +10,7 @@ export class MissionByProgramController {
   constructor(private readonly missionByProgramService: MissionByProgramService) { }
 
   @Get('')
-  get(@Param('programId') programId: number) {
+  get() {
     return this.missionByProgramService.getMissionsByProgram();
   }
 
