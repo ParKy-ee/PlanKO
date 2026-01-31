@@ -1,0 +1,27 @@
+meta {
+  name: Put-mission/:id
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{api}}/mission/4
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+  //   "target" : "diet",
+  //   "startAt" : "2026-01-26T00:00:00.000Z",
+  //   "endAt" : "2026-01-27T00:00:00.000Z",
+  //   "status" : "PENDING",
+    "userId" : 3,
+    "missionByProgramId" : 1
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Post-session-performance
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{api}}/session-performance
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "plank_session_id": 2,
+    "score": 850,
+    "duration": 600,
+    "accuracy_avg": 92,
+    "perfect_count": 120,
+    "good_count": 30,
+    "bad_count": 10,
+    "missed_count": 5,
+    "figure_count": 165
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

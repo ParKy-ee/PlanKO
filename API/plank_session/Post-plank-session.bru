@@ -1,0 +1,28 @@
+meta {
+  name: Post-plank-session
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{api}}/plank-session
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "user_id": 2,
+    "start_time": 1706784000000,
+    "end_time": 1706784600000,
+    "mode": "eesay",
+    "status" : "completed",
+    "total_score": 100,
+    "completed": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

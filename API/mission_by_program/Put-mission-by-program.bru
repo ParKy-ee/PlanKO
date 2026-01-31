@@ -1,0 +1,23 @@
+meta {
+  name: Put-mission-by-program
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{api}}/mission-by-program/2
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "missionId" : 4,
+    "programId" : 3
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
