@@ -4,15 +4,16 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { TransformInterceptor } from './commons/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './commons/fitters/http-exception.fillter';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: 'http://localhost:3001',
+  app.use(cors({
+    origin: true,
     credentials: true,
-  });
+  }));
   app.use(cookieParser());
   app.setGlobalPrefix('api');
 

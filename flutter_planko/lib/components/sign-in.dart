@@ -1,10 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_planko/pages/home.dart';
+import 'package:flutter_planko/services/auth.dart';
 
-class SignIn extends StatelessWidget {
-  SignIn({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> login() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบ')));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final token = await AuthService.login(email, password);
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      if (token != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Email หรือ Password ไม่ถูกต้อง')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +75,15 @@ class SignIn extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // ⭐ สำคัญ
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            'Sign in',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
           SizedBox(height: 20),
 
           TextField(
@@ -45,7 +107,7 @@ class SignIn extends StatelessWidget {
 
           SizedBox(height: 20),
 
-          ElevatedButton(onPressed: () {}, child: Text('Sign in')),
+          ElevatedButton(onPressed: login, child: Text('Sign in')),
 
           SizedBox(height: 12),
 

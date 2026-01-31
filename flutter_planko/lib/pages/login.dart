@@ -14,17 +14,17 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(title: Text('PlanKO')),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Center(
+                child: Text(
                   'Sign in',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                SignIn(),
-              ],
-            ),
+              ),
+              SignIn(),
+            ],
           ),
         ),
       ),
