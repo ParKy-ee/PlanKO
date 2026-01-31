@@ -6,7 +6,7 @@ export class SessionPerfomance {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => PlankSession, (plankSession) => plankSession.sessionPerfomances)
+    @ManyToOne(() => PlankSession, (plankSession) => plankSession.sessionPerfomances, { onDelete: "CASCADE" })
     @JoinColumn({ name: "plank_session_id" })
     plankSession: PlankSession;
 

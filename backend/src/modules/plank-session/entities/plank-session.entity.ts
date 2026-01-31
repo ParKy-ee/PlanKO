@@ -2,6 +2,8 @@
 import { SessionPerfomance } from "../../../modules/seesion-perfomance/entities/seesion-perfomance.entity";
 import { User } from "../../../modules/user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { DateStatus } from "../../../commons/enums/date-status.enum";
+
 
 @Entity({ name: "plank_session" })
 export class PlankSession {
@@ -29,6 +31,9 @@ export class PlankSession {
 
     @Column()
     total_score: number;
+
+    @Column({ type: "enum", enum: DateStatus, default: DateStatus.PENDING })
+    status: typeof DateStatus;
 
     @Column()
     completed: boolean;

@@ -26,6 +26,7 @@ export class PlankSessionService {
       end_time: new Date(createPlankSessionDto.end_time),
       duration: (createPlankSessionDto.end_time - createPlankSessionDto.start_time) / 1000,
       total_score: createPlankSessionDto.total_score,
+      status: createPlankSessionDto.status,
       completed: createPlankSessionDto.completed,
       user: {
         id: createPlankSessionDto.user_id

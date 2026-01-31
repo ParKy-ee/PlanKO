@@ -1,5 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsNotEmpty, IsNumber, IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsBoolean, IsOptional, IsEnum } from 'class-validator';
+import { DateStatus } from 'src/commons/enums/date-status.enum';
 
 
 export class PlankSessionDto {
@@ -18,6 +19,10 @@ export class PlankSessionDto {
     @IsOptional()
     @IsString()
     mode: string;
+
+    @IsOptional()
+    @IsEnum(DateStatus)
+    status: typeof DateStatus;
 
     @IsOptional()
     @IsNumber()
