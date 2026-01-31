@@ -42,7 +42,7 @@ export class PlankSessionService {
   async findAll(query: BasePlankSessionQueryDto) {
     const { data, meta } = await QueryHelper.paginate(this.plankSessionRepository, query, {
       sortField: 'created_at',
-      searchableFields: ['mode', 'completed', 'total_score', 'duration', 'start_time', 'end_time', 'user'],
+      searchableFields: ['mode', 'completed', 'total_score', 'duration', 'start_time', 'end_time', 'user', 'status'],
       relations: ['user'],
 
     });
@@ -93,6 +93,8 @@ export class PlankSessionService {
       payload.total_score = dto.total_score;
     if (dto.completed !== undefined)
       payload.completed = dto.completed;
+    if (dto.status !== undefined)
+      payload.status = dto.status;
 
     return await this.plankSessionRepository.update(id, payload);
   }
