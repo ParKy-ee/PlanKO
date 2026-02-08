@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/components/navbar.dart';
+import 'package:flutter_planko/database/db_helper.dart';
 import 'package:flutter_planko/pages/activity.dart';
 import 'package:flutter_planko/pages/calendar.dart';
 import 'package:flutter_planko/pages/profile.dart';
@@ -13,6 +14,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await DatabaseHelper.instance.readUser();
+
+    debugPrint(user.toString());
+  }
 
   final List<Widget> _pages = [
     const HomeView(),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/pages/welcome.dart';
+import 'package:flutter_planko/pages/home.dart';
 import 'package:flutter_planko/services/api/auth/auth.dart';
 
 class SignIn extends StatefulWidget {
@@ -45,7 +45,7 @@ class _SignInState extends State<SignIn> {
       if (token != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => WelcomePage()),
+          MaterialPageRoute(builder: (_) => HomePage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

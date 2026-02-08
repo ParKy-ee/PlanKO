@@ -23,7 +23,6 @@ export class AuthController {
     });
     return {
       user: req.use,
-      access_token
     };
   }
 

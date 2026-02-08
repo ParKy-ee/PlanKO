@@ -29,6 +29,12 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   http: ^1.2.0
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0
+  sqflite_common_ffi_web: ^0.4.0
+  dio: ^5.4.0
+  flutter_riverpod: ^2.5.0
+  flutter_secure_storage: ^9.0.0
   flutter:
     sdk: flutter
 
