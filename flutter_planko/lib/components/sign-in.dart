@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/pages/welcome.dart';
-import 'package:flutter_planko/services/api/auth/auth.dart';
+import 'package:flutter_planko/services/auth/auth.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -113,7 +113,10 @@ class _SignInState extends State<SignIn> {
 
           Center(child: Text("Don't have an account?")),
 
-          TextButton(onPressed: () {}, child: Text('Sign up')),
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/register'),
+            child: Text('Sign up'),
+          ),
         ],
       ),
     );

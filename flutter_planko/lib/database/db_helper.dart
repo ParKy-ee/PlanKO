@@ -41,4 +41,9 @@ class DatabaseHelper {
       )
     ''');
   }
+
+  Future<List<Map<String, Object?>>> getUser() async {
+    final db = await database;
+    return await db.query('user_model');
+  }
 }

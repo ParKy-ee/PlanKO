@@ -23,6 +23,7 @@ export class AuthController {
     });
     return {
       user: req.use,
+      access_token,
     };
   }
 
@@ -30,6 +31,7 @@ export class AuthController {
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req) {
+
     return req.user;
   }
 
@@ -45,4 +47,5 @@ export class AuthController {
       message: 'Logged out successfully',
     };
   }
+
 }

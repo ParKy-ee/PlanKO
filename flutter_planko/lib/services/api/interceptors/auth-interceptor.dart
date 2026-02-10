@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_planko/services/api/auth/secure-storage.dart';
+import 'package:flutter_planko/services/auth/secure-storage.dart';
 
 class AuthInterceptor extends Interceptor {
   final SecureStorage _storage = SecureStorage();
