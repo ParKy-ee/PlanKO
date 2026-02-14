@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/pages/profile.dart';
+import 'package:flutter_planko/database/db_helper.dart';
+import 'package:flutter_planko/pages/admin/dashboard.dart';
+import 'package:flutter_planko/pages/admin/program-manage.dart';
+import 'package:flutter_planko/pages/admin/user-manage.dart';
+import 'package:flutter_planko/pages/regiseter.dart';
 import 'package:flutter_planko/services/api/client.dart';
-import 'package:flutter_planko/services/auth/secure-storage.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'pages/welcome.dart';
 import 'pages/login.dart';
 import 'pages/home.dart';
@@ -36,7 +38,13 @@ class _PlanKOState extends State<PlanKO> {
 
   Future<String> checkToken() async {
     try {
-      await client.getProfile();
+      final user = await client.getProfile();
+      if (user.isNotEmpty) {
+        final role = user['data']['role'];
+        if (role == 'admin') {
+          return '/admin/dashboard';
+        }
+      }
       return '/home';
     } catch (e) {
       return '/login';
@@ -56,6 +64,10 @@ class _PlanKOState extends State<PlanKO> {
               '/user': (context) => const WelcomePage(),
               '/login': (context) => const LoginPage(),
               '/home': (context) => const HomePage(),
+              '/register': (context) => const RegisterPage(),
+              '/admin/dashboard': (context) => const DashboardPage(),
+              '/admin/user-manage': (context) => const UserManagePage(),
+              '/admin/program-manage': (context) => const ProgramManagePage(),
             },
           );
         }

@@ -3,8 +3,8 @@ import { IsOptional } from "class-validator";
 export class MissionByProgramDto {
 
     @IsOptional()
-    missionId?: number;
+    missionId: number;
 
     @IsOptional()
-    programId?: number;
+    programId: number;
 }

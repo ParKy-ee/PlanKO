@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { ProgramType } from "src/commons/enums/prtogram-type.enum";
 
 export class ProgramDto {
@@ -25,6 +25,14 @@ export class ProgramDto {
     @IsNumber({}, { each: true })
     restDays?: number[];
     @IsOptional()
-    @IsString()
-    status?: string;
+    @IsBoolean()
+    status?: boolean;
+
+    @IsOptional()
+    @IsNumber()
+    rest?: number;
+
+    @IsOptional()
+    @IsNumber()
+    postureId?: number;
 }

@@ -1,16 +1,15 @@
 meta {
-  name: Put-program
+  name: Get-posture
   type: http
-  seq: 3
+  seq: 2
 }
 
-delete {
-  url: {{api}}/program/5
+get {
+  url: {{api}}/posture
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
-  timeout: 0
 }

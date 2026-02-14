@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 30),
             buildStatsSection(localUser),
             const SizedBox(height: 30),
-            buildAdditionalOptions(),
+            buildAdditionalOptions(context),
             const SizedBox(height: 30),
           ],
         ),

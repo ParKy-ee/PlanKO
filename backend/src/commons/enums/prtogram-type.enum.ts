@@ -1,5 +1,5 @@
 export enum ProgramType {
-    DAILY = 'daily',
-    WEEKLY = 'weekly',
-    MONTHLY = 'monthly',
+    WEIGHTLOSS = 'Weightloss',
+    WEIGHTGAIN = 'Weightgain',
+    MAINTENANCE = 'Maintenance',
 }

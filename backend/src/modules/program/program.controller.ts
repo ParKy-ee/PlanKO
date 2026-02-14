@@ -9,6 +9,7 @@ export class ProgramController {
 
   @Post()
   create(@Body() ProgramDto: ProgramDto) {
+    console.log(ProgramDto);
     return this.programService.create(ProgramDto);
   }
 

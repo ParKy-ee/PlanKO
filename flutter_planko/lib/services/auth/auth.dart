@@ -3,7 +3,7 @@ import 'package:flutter_planko/services/auth/secure-storage.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:3001/api/v1';
+  static const String baseUrl = 'http://10.0.2.2:3001/api/v1';
 
   static Future<String?> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/auth/login');
