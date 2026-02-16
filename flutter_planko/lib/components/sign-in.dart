@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/pages/welcome.dart';
+import 'package:flutter_planko/pages/user/welcome.dart';
 import 'package:flutter_planko/services/auth/auth.dart';
 
 class SignIn extends StatefulWidget {

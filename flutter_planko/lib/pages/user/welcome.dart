@@ -77,7 +77,7 @@ class _WelcomePageState extends State<WelcomePage> {
             ElevatedButton(
               onPressed: () async {
                 await insertUser();
-                Navigator.pushNamed(context, '/home', arguments: 'home');
+                Navigator.pushNamed(context, '/mission');
               },
               child: Text('sent'),
             ),

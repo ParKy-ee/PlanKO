@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/database/db_helper.dart';
 import 'package:flutter_planko/pages/admin/dashboard.dart';
 import 'package:flutter_planko/pages/admin/program-manage.dart';
 import 'package:flutter_planko/pages/admin/user-manage.dart';
-import 'package:flutter_planko/pages/regiseter.dart';
+import 'package:flutter_planko/pages/user/mission.dart';
+import 'package:flutter_planko/pages/user/regiseter.dart';
 import 'package:flutter_planko/services/api/client.dart';
-import 'pages/welcome.dart';
-import 'pages/login.dart';
-import 'pages/home.dart';
+import 'pages/user/welcome.dart';
+import 'pages/user/login.dart';
+import 'pages/user/home.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:flutter/foundation.dart';
@@ -68,6 +68,7 @@ class _PlanKOState extends State<PlanKO> {
               '/admin/dashboard': (context) => const DashboardPage(),
               '/admin/user-manage': (context) => const UserManagePage(),
               '/admin/program-manage': (context) => const ProgramManagePage(),
+              '/mission': (context) => const MissionPage(),
             },
           );
         }

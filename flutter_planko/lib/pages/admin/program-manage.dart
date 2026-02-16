@@ -14,6 +14,17 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
   final TextEditingController _programType = TextEditingController();
   final TextEditingController _period = TextEditingController();
   final TextEditingController _frequency = TextEditingController();
+  final TextEditingController _rest = TextEditingController();
+  List<int> postureId = [];
+  List<dynamic> posture = [];
+  final Set<int> _selectedPostures = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getPosture();
+  }
 
   final Set<String> _selectedWorkDays = {};
 
@@ -56,24 +67,51 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
     });
   }
 
+  Future<void> _getPosture() async {
+    try {
+      final response = await Client().getPosture();
+      if (mounted) {
+        setState(() {
+          posture = response['data'];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading postures: $e')));
+      }
+    }
+  }
+
   Future<void> _createProgram() async {
     if (_formKey.currentState!.validate()) {
       try {
-        final response = await Client().createProgram({
-          'programName': _programName.text,
-          'programType': _programType.text,
-          'period': int.parse(_period.text),
-          'frequency': int.parse(_frequency.text),
-          'workDays': _selectedWorkDays.map(int.parse).toList(),
-          'restDays': days
-              .where((day) => !_selectedWorkDays.contains(day))
-              .map(int.parse)
-              .toList(),
-        });
-        print(response);
-        if (response['success']) {
+        for (int id in postureId) {
+          final response = await Client().createProgram({
+            'programName': _programName.text,
+            'programType': _programType.text,
+            'period': int.parse(_period.text),
+            'frequency': int.parse(_frequency.text),
+            'workDays': _selectedWorkDays.map(int.parse).toList(),
+            'restDays': days
+                .where((day) => !_selectedWorkDays.contains(day))
+                .map(int.parse)
+                .toList(),
+            'postureId': id,
+            'rest': int.tryParse(_rest.text) ?? 0,
+          });
+          if (!response['success']) {
+            throw Exception('Failed to create program for posture $id');
+          }
+        }
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Program created successfully')),
+            const SnackBar(content: Text('Programs created successfully')),
           );
           Navigator.pop(context);
         }
@@ -164,8 +202,17 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _frequency,
-                      label: 'Frequency(times/week)',
+                      label: 'Frequency (times/week)',
                       icon: Icons.repeat,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextField(
+                      controller: _rest,
+                      label: 'Rest (sec)',
+                      icon: Icons.timer,
                       keyboardType: TextInputType.number,
                     ),
                   ),
@@ -179,6 +226,7 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
                 style: TextStyle(color: Colors.grey, fontSize: 13),
               ),
               const SizedBox(height: 12),
+              // Days of the week
               Wrap(
                 spacing: 8.0,
                 runSpacing: 8.0,
@@ -209,6 +257,65 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
                 }).toList(),
               ),
               const SizedBox(height: 40),
+              _buildSectionTitle('Select Postures'),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose the exercises to include in this program:',
+                style: TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              // Postures
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: posture.map((postureItem) {
+                        final bool isSelected = _selectedPostures.contains(
+                          postureItem['id'],
+                        );
+                        return FilterChip(
+                          label: Text(postureItem['postureName']),
+                          selected: isSelected,
+                          onSelected: (bool value) {
+                            setState(() {
+                              if (value) {
+                                _selectedPostures.add(postureItem['id']);
+                                postureId.add(postureItem['id']);
+                              } else {
+                                _selectedPostures.remove(postureItem['id']);
+                                postureId.remove(postureItem['id']);
+                              }
+                            });
+                          },
+                          showCheckmark: false,
+                          selectedColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          backgroundColor: Colors.grey.shade100,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? Colors.transparent
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          avatar: isSelected
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 18,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        );
+                      }).toList(),
+                    ),
+              const SizedBox(height: 32),
               SizedBox(
                 height: 52,
                 child: ElevatedButton(

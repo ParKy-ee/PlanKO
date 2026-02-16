@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/components/navbar.dart';
 import 'package:flutter_planko/database/db_helper.dart';
-import 'package:flutter_planko/pages/activity.dart';
-import 'package:flutter_planko/pages/calendar.dart';
-import 'package:flutter_planko/pages/profile.dart';
+import 'package:flutter_planko/pages/user/activity.dart';
+import 'package:flutter_planko/pages/user/calendar.dart';
+import 'package:flutter_planko/pages/user/login.dart';
+import 'package:flutter_planko/pages/user/profile.dart';
+import 'package:flutter_planko/services/api/client.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -57,9 +59,47 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Home();
+  }
+}
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final Client client = Client();
+
+  void logout() async {
+    try {
+      await client.logout();
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('PlanKO'), backgroundColor: Colors.blue),
-      body: const Center(child: Text('Home Page')),
+      body: Center(
+        child: Column(
+          children: [
+            Text('Home Page'),
+            ElevatedButton(onPressed: () => logout(), child: Text('Logout')),
+          ],
+        ),
+      ),
     );
   }
 }

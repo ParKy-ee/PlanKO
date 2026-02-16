@@ -41,9 +41,11 @@ export class MissionService {
   async findAll(query: UserQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
     const { data: missions, meta } = await QueryHelper.paginate(this.missionRepository, query, {
       sortField: 'id',
-      searchableFields: ['target', 'status', 'startAt', 'endAt', 'user'],
-      relations: ['user', 'missionByPrograms'],
+      searchableFields: ['target', 'status', 'startAt', 'endAt', 'user', 'missionByPrograms.program'],
+      relations: ['user', 'missionByPrograms', 'missionByPrograms.program'],
     });
+
+
 
     return {
       data: missions.map((mission) => {
