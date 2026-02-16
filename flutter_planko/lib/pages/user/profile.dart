@@ -3,7 +3,7 @@ import 'package:flutter_planko/components/profile/Additional-Op.dart';
 import 'package:flutter_planko/components/profile/State-Section.dart';
 import 'package:flutter_planko/components/profile/buid-heaer.dart';
 import 'package:flutter_planko/components/profile/build-info.dart';
-import 'package:flutter_planko/database/db_helper.dart';
+
 import 'package:flutter_planko/services/api/client.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -16,7 +16,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final Client client = Client();
   Map<String, dynamic>? profile;
-  Map<String, dynamic>? localUser;
+
   List<dynamic>? missions;
   bool isLoading = true;
   String error = '';
@@ -30,7 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadProfile() async {
     try {
       final response = await client.getProfile();
-      final user = await DatabaseHelper.instance.getUser();
       final missionResponse = await client.getMission();
 
       if (!mounted) return;
@@ -42,9 +41,6 @@ class _ProfilePageState extends State<ProfilePage> {
         if (missionResponse['data'] != null) {
           missions = missionResponse['data'];
         }
-        localUser = user.isNotEmpty
-            ? Map<String, dynamic>.from(user.first)
-            : null;
         isLoading = false;
       });
     } catch (e) {
@@ -87,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 50),
             buildUserInfo(profile),
             const SizedBox(height: 30),
-            buildStatsSection(localUser),
+            buildStatsSection(profile),
             const SizedBox(height: 30),
             _buildMissionSection(),
             const SizedBox(height: 30),

@@ -13,7 +13,7 @@ class Client {
   Client.internal() {
     dio = Dio(
       BaseOptions(
-        baseUrl: 'http://localhost:3001/api/v1',
+        baseUrl: 'http://10.0.2.2:3001/api/v1',
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5),
         headers: {'Content-Type': 'application/json'},
@@ -28,6 +28,15 @@ class Client {
         logPrint: (obj) => debugPrint(obj.toString()),
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
+    print(data);
+    final response = await dio.put('/user/${data['id']}', data: data);
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update profile');
+    }
+    return response.data;
   }
 
   Future<Map<String, dynamic>> getProfile() async {

@@ -3,7 +3,7 @@ import 'package:flutter_planko/components/navbar.dart';
 import 'package:flutter_planko/database/db_helper.dart';
 import 'package:flutter_planko/pages/user/activity.dart';
 import 'package:flutter_planko/pages/user/calendar.dart';
-import 'package:flutter_planko/pages/user/login.dart';
+import 'package:flutter_planko/services/auth/secure-storage.dart';
 import 'package:flutter_planko/pages/user/profile.dart';
 import 'package:flutter_planko/services/api/client.dart';
 
@@ -76,15 +76,13 @@ class _HomeState extends State<Home> {
   void logout() async {
     try {
       await client.logout();
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginPage()),
-      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('เกิดข้อผิดพลาด: $e')));
+      debugPrint('Logout error: $e');
+    } finally {
+      await SecureStorage().deleteAccessToken();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     }
   }
 
