@@ -49,12 +49,12 @@ class _MissionPageState extends State<MissionPage> {
     final periodWeeks = program['period'] as int;
     final startAt = DateTime.now();
     final endAt = startAt.add(Duration(days: periodWeeks * 7));
+    final profileResponse = await Client().getProfile();
+    final userId = profileResponse['data']['user']['id'];
 
     // Convert to ISO 8601 string as requested
     final startAtIso = startAt.toUtc().toIso8601String();
     final endAtIso = endAt.toUtc().toIso8601String();
-
-    final userId = await FlutterSecureStorage().read(key: 'userId');
 
     try {
       await Client().createMission({
@@ -111,6 +111,7 @@ class _MissionPageState extends State<MissionPage> {
           ),
           ElevatedButton(
             onPressed: () {
+              _createMission(program);
               Navigator.pushNamed(context, '/home');
             },
             child: const Text('Join Mission'),

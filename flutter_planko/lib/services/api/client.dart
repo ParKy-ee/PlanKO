@@ -25,7 +25,7 @@ class Client {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (obj) => debugPrint(obj.toString()),
+        // logPrint: (obj) => debugPrint(obj.toString()),
       ),
     );
   }
@@ -106,8 +106,8 @@ class Client {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getMission() async {
-    final response = await dio.get('/mission');
+  Future<Map<String, dynamic>> getMission(int userId) async {
+    final response = await dio.get('/mission?userId=$userId');
     if (response.statusCode != 200) {
       throw Exception('Failed to get mission');
     }
@@ -118,6 +118,25 @@ class Client {
     final response = await dio.post('/mission', data: data);
     if (response.statusCode != 201) {
       throw Exception('Failed to create mission');
+    }
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateMission(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await dio.put('/mission/$id', data: data);
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update mission');
+    }
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> deleteMission(int id) async {
+    final response = await dio.delete('/mission/$id');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete mission');
     }
     return response.data;
   }

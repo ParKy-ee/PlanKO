@@ -25,8 +25,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadUser() async {
     final user = await DatabaseHelper.instance.readUser();
-
-    debugPrint(user.toString());
   }
 
   final List<Widget> _pages = [
@@ -95,6 +93,10 @@ class _HomeState extends State<Home> {
           children: [
             Text('Home Page'),
             ElevatedButton(onPressed: () => logout(), child: Text('Logout')),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/mission'),
+              child: Text('Mission'),
+            ),
           ],
         ),
       ),

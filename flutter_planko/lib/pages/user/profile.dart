@@ -30,16 +30,28 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadProfile() async {
     try {
       final response = await client.getProfile();
-      final missionResponse = await client.getMission();
 
       if (!mounted) return;
 
       setState(() {
         if (response['data'] != null) {
-          profile = Map<String, dynamic>.from(response['data']);
-        }
-        if (missionResponse['data'] != null) {
-          missions = missionResponse['data'];
+          final data = response['data'];
+          if (data['user'] != null) {
+            profile = Map<String, dynamic>.from(data['user']);
+          }
+          // The new structure has "missions" as a single object (or possibly a list if multiple, but here "missions" object shown)
+          // But wait, the sample shows "missions": { "id": 13, ... }
+          // The previous code expected a list in 'missionByPrograms' inside the mission.
+          // However, the provided JSON shows "missions" as a flat object with 'target', 'startAt' etc.
+          // It does NOT show 'missionByPrograms'.
+          // If 'missionByPrograms' is missing, the UI _buildMissionSection will fail or show nothing.
+          // I will assume for now we wrap it in a list. But the UI code expects:
+          // final missionByPrograms = mission['missionByPrograms'] as List?;
+          // If the JSON doesn't have it, the mission section will be hidden.
+          // Given the user prompt "edit from this response", I must just map it correctly so it doesn't crash.
+          if (data['missions'] != null) {
+            missions = [data['missions']];
+          }
         }
         isLoading = false;
       });
@@ -101,17 +113,35 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     final mission = missions!.last; // Display the latest mission
-    final missionByPrograms = mission['missionByPrograms'] as List?;
+    final missionByPrograms = mission['missionByPrograms'];
 
-    if (missionByPrograms == null || missionByPrograms.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    Map<String, dynamic> programData;
+    String titleLabel = 'ACTIVE PROGRAM';
 
-    // Assuming we want to show the program from the first entry if multiple exist
-    final programData = missionByPrograms.first['program'];
-
-    if (programData == null) {
-      return const SizedBox.shrink();
+    // Determine if we have Program data or just Mission data
+    if (missionByPrograms != null &&
+        (missionByPrograms is List) &&
+        missionByPrograms.isNotEmpty &&
+        missionByPrograms.first['program'] != null) {
+      programData = missionByPrograms.first['program'];
+    } else {
+      // Fallback: Show Mission details if no Program details
+      titleLabel = 'ACTIVE MISSION';
+      int days = 0;
+      if (mission['startAt'] != null && mission['endAt'] != null) {
+        try {
+          final s = DateTime.parse(mission['startAt']);
+          final e = DateTime.parse(mission['endAt']);
+          days = e.difference(s).inDays;
+        } catch (_) {}
+      }
+      programData = {
+        'programName': mission['target'] ?? 'My Mission',
+        'programType': mission['status'] ?? 'Active',
+        'period': days,
+        'workDays': [], // No schedule for pure mission
+        'restDays': [],
+      };
     }
 
     return Container(
@@ -142,9 +172,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'ACTIVE PROGRAM',
-                      style: TextStyle(
+                    Text(
+                      titleLabel,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -153,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      programData['programName'] ?? 'No Program Name',
+                      programData['programName'] ?? 'No Name',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -180,7 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 24),
           _buildInfoRow(
             Icons.category_rounded,
-            'Type',
+            titleLabel == 'ACTIVE MISSION' ? 'Status' : 'Type',
             programData['programType'] ?? 'General',
           ),
           const SizedBox(height: 16),
@@ -196,31 +226,34 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
           const SizedBox(height: 24),
-          const Divider(color: Colors.white24),
-          const SizedBox(height: 16),
-          const Text(
-            'SCHEDULE',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
+          if (programData['workDays'] != null &&
+              (programData['workDays'] as List).isNotEmpty) ...[
+            const Divider(color: Colors.white24),
+            const SizedBox(height: 16),
+            const Text(
+              'SCHEDULE',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildDayPills(
-            'Work Days',
-            programData['workDays'],
-            Colors.white,
-            Colors.blue.shade900,
-          ),
-          const SizedBox(height: 12),
-          _buildDayPills(
-            'Rest Days',
-            programData['restDays'],
-            Colors.white54,
-            Colors.white10,
-          ),
+            const SizedBox(height: 12),
+            _buildDayPills(
+              'Work Days',
+              programData['workDays'],
+              Colors.white,
+              Colors.blue.shade900,
+            ),
+            const SizedBox(height: 12),
+            _buildDayPills(
+              'Rest Days',
+              programData['restDays'],
+              Colors.white54,
+              Colors.white10,
+            ),
+          ],
         ],
       ),
     );

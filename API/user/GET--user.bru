@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{api}}/user/?
+  url: {{api}}/user
   body: none
   auth: inherit
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
 }
 
 settings {

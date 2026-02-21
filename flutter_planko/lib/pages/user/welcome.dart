@@ -43,10 +43,9 @@ class _WelcomePageState extends State<WelcomePage> {
     try {
       // 1. Get current user profile to get ID
       final profileResponse = await client.getProfile();
-      final userId = profileResponse['data']['id'];
+      final userId = profileResponse['data']['user']['id'];
 
       if (userId == null) throw Exception('User ID not found');
-
       // 2. Update profile
       await client.updateProfile({
         'id': userId,

@@ -17,7 +17,7 @@ export class MissionController {
   }
 
   @Get()
-  findAll(@Query() query: UserQueryDto) {
+  findAll(@Query() query: MissionDto) {
     return this.missionService.findAll(query);
   }
 

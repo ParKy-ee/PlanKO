@@ -17,11 +17,13 @@ export class MissionService {
   ) { }
 
   async create(missionDto: MissionDto) {
+
+
     const { userId, ...rest } = missionDto;
 
     const mission = this.missionRepository.create({
       ...rest,
-      user: { id: userId },
+      user: { id: Number(userId) },
     });
 
     await this.missionRepository.save(mission);
@@ -38,12 +40,21 @@ export class MissionService {
       data: mission,
     };
   }
-  async findAll(query: UserQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
+  async findAll(query: MissionDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
+
+    const where: any = {};
+    if (query.userId && !isNaN(Number(query.userId))) {
+      where.user = { id: Number(query.userId) };
+    }
+
     const { data: missions, meta } = await QueryHelper.paginate(this.missionRepository, query, {
       sortField: 'id',
       searchableFields: ['target', 'status', 'startAt', 'endAt', 'user', 'missionByPrograms.program'],
       relations: ['user', 'missionByPrograms', 'missionByPrograms.program'],
+      where: where,
     });
+
+
 
 
 
@@ -90,7 +101,7 @@ export class MissionService {
     // 1. update mission
     await this.missionRepository.update(id, {
       ...missionData,
-      user: { id: userId },
+      user: { id: Number(userId) },
     });
 
     await this.missionByProgramRepository.delete({

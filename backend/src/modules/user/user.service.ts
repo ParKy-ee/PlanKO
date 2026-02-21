@@ -18,7 +18,8 @@ export class UserService {
   async findAll(query: UserQueryDto): Promise<{ data: User[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
     const { data: users, meta } = await QueryHelper.paginate(this.userRepository, query, {
       sortField: 'id',
-      searchableFields: ['name', 'email', 'role'],
+      searchableFields: ['name', 'email', 'role', 'missions.missionByPrograms.program.programName', 'missions.missionByPrograms.program.programType'],
+      relations: ['missions', 'missions.missionByPrograms', 'missions.missionByPrograms.program'],
     });
 
     return {

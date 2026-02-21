@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/pages/user/home.dart';
+import 'package:flutter_planko/pages/user/welcome.dart';
 
 import 'package:flutter_planko/services/api/client.dart';
 import 'package:flutter_planko/services/auth/auth.dart';
@@ -41,14 +42,23 @@ class _SignInState extends State<SignIn> {
 
     try {
       final token = await AuthService.login(email, password);
+      final user = await Client().getProfile();
 
       if (!mounted) return;
       Navigator.pop(context);
+
       if (token != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => HomePage()),
-        );
+        if (user['data']['user']['weight'] == null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => WelcomePage()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => HomePage()),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Email หรือ Password ไม่ถูกต้อง')),
