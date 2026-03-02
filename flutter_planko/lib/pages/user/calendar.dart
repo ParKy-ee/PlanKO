@@ -20,7 +20,7 @@ class _CalendarPageState extends State<CalendarPage> {
   bool _isLoading = true;
   String? _errorMessage;
   Map<String, dynamic>? _currentMission;
-  Set<int> _workWeekDays = {};
+  final Set<int> _workWeekDays = {};
 
   @override
   void initState() {
@@ -113,8 +113,9 @@ class _CalendarPageState extends State<CalendarPage> {
     );
     final end = DateTime(_rangeEnd!.year, _rangeEnd!.month, _rangeEnd!.day);
 
-    if (normalizedDay.isBefore(start) || normalizedDay.isAfter(end))
+    if (normalizedDay.isBefore(start) || normalizedDay.isAfter(end)) {
       return false;
+    }
 
     return _workWeekDays.contains(day.weekday);
   }

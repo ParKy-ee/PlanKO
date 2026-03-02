@@ -59,7 +59,7 @@ class _MissionPageState extends State<MissionPage> {
     try {
       await Client().createMission({
         'target': _targetController.text,
-        'userId': userId,
+        'userId': userId.toString(),
         'startAt': startAtIso,
         'endAt': endAtIso,
         'status': 'PENDING',
@@ -71,7 +71,7 @@ class _MissionPageState extends State<MissionPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Mission created successfully!')),
         );
-        Navigator.pop(context); // Or navigate to dashboard
+        Navigator.pushNamed(context, '/home'); // Or navigate to dashboard
       }
     } catch (e) {
       if (mounted) {

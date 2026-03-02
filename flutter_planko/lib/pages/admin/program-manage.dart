@@ -160,7 +160,9 @@ class _ProgramManagePageState extends State<ProgramManagePage> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 decoration: _inputDecoration('Program Type', Icons.category),
-                value: _programType.text.isNotEmpty ? _programType.text : null,
+                initialValue: _programType.text.isNotEmpty
+                    ? _programType.text
+                    : null,
                 items: const [
                   DropdownMenuItem(
                     value: 'Weightloss',

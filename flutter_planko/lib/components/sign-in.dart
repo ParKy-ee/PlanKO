@@ -42,6 +42,7 @@ class _SignInState extends State<SignIn> {
 
     try {
       final token = await AuthService.login(email, password);
+
       final user = await Client().getProfile();
 
       if (!mounted) return;
