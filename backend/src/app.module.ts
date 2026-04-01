@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import * as Joi from 'Joi';
+import * as Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
