@@ -14,7 +14,6 @@ import { AppModules } from './modules';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
       validationSchema: Joi.object({
         POSTGRES_HOST: Joi.string().required(),
         POSTGRES_PORT: Joi.number().default(5432),
@@ -23,11 +22,6 @@ import { AppModules } from './modules';
         POSTGRES_DB: Joi.string().required(),
         PORT: Joi.number().default(3001),
         NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
-        autoLoadEntities: true,
-        synchronize: true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
       }),
     }),
     DatabaseModule,
