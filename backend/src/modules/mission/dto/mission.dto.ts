@@ -1,7 +1,8 @@
 import { IsDate, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { Status } from "../../../commons/enums/status.enum";
+import { BaseQueryDto } from "src/commons/dtos/base-query.dto";
 
-export class MissionDto {
+export class MissionDto extends BaseQueryDto {
 
     @IsOptional()
     @IsString()
@@ -24,7 +25,7 @@ export class MissionDto {
     endAt?: string;
 
     @IsOptional()
-    @IsNumber()
-    userId?: number;
+    @IsString()
+    userId?: string;
 
 }

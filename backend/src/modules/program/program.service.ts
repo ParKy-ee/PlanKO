@@ -5,14 +5,32 @@ import { Repository } from 'typeorm';
 import { ProgramDto } from './dto/program';
 import { ProgramQueryDto } from 'src/commons/dtos/program-qurey.dtos';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { PostureByProgram } from '../posture-by-program/entities/posture-by-program.entity';
 
 @Injectable()
 export class ProgramService {
 
-  constructor(@InjectRepository(Program) private readonly programRepository: Repository<Program>) { }
+  constructor(@InjectRepository(Program) private readonly programRepository: Repository<Program>,
+    @InjectRepository(PostureByProgram) private readonly postureByProgramRepository: Repository<PostureByProgram>) { }
 
-  create(createProgramDto: ProgramDto) {
-    return this.programRepository.save(createProgramDto);
+  async create(createProgramDto: ProgramDto): Promise<Program> {
+    const program = await this.programRepository.create({
+      programName: createProgramDto.programName,
+      programType: createProgramDto.programType,
+      period: createProgramDto.period,
+      frequency: createProgramDto.frequency,
+      workDays: createProgramDto.workDays,
+      restDays: createProgramDto.restDays,
+      status: createProgramDto.status,
+      rest: createProgramDto.rest,
+    });
+    await this.programRepository.save(program);
+    const postureByProgram = await this.postureByProgramRepository.create({
+      postureId: createProgramDto.postureId,
+      programId: program.id,
+    });
+    await this.postureByProgramRepository.save(postureByProgram);
+    return program;
   }
 
   async findAll(query: ProgramQueryDto): Promise<{ data: Program[], meta: any }> {
@@ -29,7 +47,7 @@ export class ProgramService {
 
 
   update(id: number, updateProgramDto: ProgramDto) {
-    return this.programRepository.update(id, updateProgramDto);
+    return this.programRepository.update(id, { ...updateProgramDto, status: true });
   }
 
   remove(id: number) {

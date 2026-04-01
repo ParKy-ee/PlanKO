@@ -1,0 +1,15 @@
+meta {
+  name: Get-posture
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{api}}/posture
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

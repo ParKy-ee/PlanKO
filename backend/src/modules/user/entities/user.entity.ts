@@ -56,6 +56,19 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+
+  @Column({ nullable: true })
+  weight: number;
+
+  @Column({ nullable: true })
+  height: number;
+
+  @Column({ nullable: true })
+  age: number;
+
+  @Column({ nullable: true })
+  gender: string;
 }
 
 

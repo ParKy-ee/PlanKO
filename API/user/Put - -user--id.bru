@@ -5,15 +5,19 @@ meta {
 }
 
 put {
-  url: {{api}}/user/15
+  url: {{api}}/user/8
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "email" : "pppp@gmail.com"
+    "role" : "admin"
   }
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
 }
 
 settings {

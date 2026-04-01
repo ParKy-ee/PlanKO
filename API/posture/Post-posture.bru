@@ -1,0 +1,27 @@
+meta {
+  name: Post-posture
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{api}}/posture
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "postureName": "Push Up",
+    "postureType": "Chest",
+    "postureDescription": "Basic push up for chest and triceps",
+    "set": 3,
+    "second": 60,
+    "status": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

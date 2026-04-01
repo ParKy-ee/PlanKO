@@ -12,6 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(private userService: UserService, private configService: ConfigService) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
+                ExtractJwt.fromAuthHeaderAsBearerToken(),
                 (req: Request) => req?.cookies?.access_token,
             ]),
             ignoreExpiration: false,
@@ -20,6 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any): Promise<any> {
+
         const user = await this.userService.findUserByEmail(payload.email);
         if (!user) {
             throw new UnauthorizedException();
