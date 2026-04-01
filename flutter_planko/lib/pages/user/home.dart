@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/components/navbar.dart';
+import 'package:flutter_planko/components/posture-card.dart';
 import 'package:flutter_planko/database/db_helper.dart';
 import 'package:flutter_planko/pages/user/activity.dart';
 import 'package:flutter_planko/pages/user/calendar.dart';
@@ -70,6 +73,25 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final Client client = Client();
+  List<dynamic> postureRaw = [];
+  List<Map<String, dynamic>> postureList = [];
+
+  initState() {
+    super.initState();
+    _getPosture();
+  }
+
+  Future<void> _getPosture() async {
+    try {
+      final response = await client.getPosture();
+      setState(() {
+        postureRaw = response['data'];
+        postureList = postureRaw.cast<Map<String, dynamic>>();
+      });
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
 
   void logout() async {
     try {
@@ -91,12 +113,71 @@ class _HomeState extends State<Home> {
       body: Center(
         child: Column(
           children: [
-            Text('Home Page'),
+            SizedBox(
+              child: Container(
+                width: 500,
+                height: 200,
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'แคลอรี่ที่เผาผลาญได้ทั้งหมด',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 100),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            '1,240 แคลอรี่',
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
             ElevatedButton(onPressed: () => logout(), child: Text('Logout')),
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/mission'),
               child: Text('Mission'),
             ),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'ท่าแพลงก์',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            PostureCard(posture: postureList),
           ],
         ),
       ),

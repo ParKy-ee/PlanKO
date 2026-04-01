@@ -31,7 +31,6 @@ class Client {
   }
 
   Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
-    print(data);
     final response = await dio.put('/user/${data['id']}', data: data);
     if (response.statusCode != 200) {
       throw Exception('Failed to update profile');
@@ -137,6 +136,14 @@ class Client {
     final response = await dio.delete('/mission/$id');
     if (response.statusCode != 200) {
       throw Exception('Failed to delete mission');
+    }
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> getPostureById(int id) async {
+    final response = await dio.get('/posture?id=$id');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get posture');
     }
     return response.data;
   }
