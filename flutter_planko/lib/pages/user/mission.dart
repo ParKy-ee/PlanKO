@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/services/api/client.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MissionPage extends StatefulWidget {
   const MissionPage({super.key});

@@ -1,6 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_planko/services/auth/secure-storage.dart';
 import 'package:flutter_planko/services/api/interceptors/auth-interceptor.dart';
 

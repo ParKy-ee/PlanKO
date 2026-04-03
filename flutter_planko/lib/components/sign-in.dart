@@ -81,54 +81,107 @@ class _SignInState extends State<SignIn> {
 
     return Container(
       width: screenWidth * 0.85,
-      margin: EdgeInsets.only(top: 80),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.red),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Sign in',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            'ชื่อผู้ใช้งาน',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
-
-          SizedBox(height: 20),
-
+          SizedBox(height: 8),
           TextField(
             controller: emailController,
             decoration: InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
+              hintText: 'กรอกที่อยู่ผู้ใช้งาน',
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              filled: true,
+              fillColor: Color(0xFFEAF5FF),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.blue, width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.blue, width: 1.5),
+              ),
             ),
           ),
+          
+          SizedBox(height: 20),
 
-          SizedBox(height: 12),
-
+          Text(
+            'รหัสผ่าน',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          SizedBox(height: 8),
           TextField(
             controller: passwordController,
             obscureText: true,
             decoration: InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
+              hintText: 'กรอกรหัสผ่าน',
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              filled: true,
+              fillColor: Color(0xFFEAF5FF),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
 
-          SizedBox(height: 20),
+          SizedBox(height: 40),
 
-          ElevatedButton(onPressed: login, child: Text('Sign in')),
+          SizedBox(
+            height: 55,
+            child: ElevatedButton(
+              onPressed: login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF0084FF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                'ลงชื่อเข้าใช้',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
 
-          SizedBox(height: 12),
+          SizedBox(height: 24),
 
-          Center(child: Text("Don't have an account?")),
-
-          TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/register'),
-            child: Text('Sign up'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'ยังไม่มีบัญชีใช่ไหม? ',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/register'),
+                child: Text(
+                  'สมัครใช้งาน',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

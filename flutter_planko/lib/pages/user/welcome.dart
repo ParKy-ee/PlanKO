@@ -130,10 +130,12 @@ class _WelcomePageState extends State<WelcomePage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Required';
-                            if (int.tryParse(value) == null)
+                            }
+                            if (int.tryParse(value) == null) {
                               return 'Must be a number';
+                            }
                             return null;
                           },
                         ),
@@ -151,10 +153,12 @@ class _WelcomePageState extends State<WelcomePage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Required';
-                            if (int.tryParse(value) == null)
+                            }
+                            if (int.tryParse(value) == null) {
                               return 'Must be a number';
+                            }
                             return null;
                           },
                         ),
@@ -172,10 +176,12 @@ class _WelcomePageState extends State<WelcomePage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty)
+                            if (value == null || value.isEmpty) {
                               return 'Required';
-                            if (int.tryParse(value) == null)
+                            }
+                            if (int.tryParse(value) == null) {
                               return 'Must be a number';
+                            }
                             return null;
                           },
                         ),
@@ -183,7 +189,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
                         // Gender Dropdown
                         DropdownButtonFormField<String>(
-                          value: _selectedGender,
+                          initialValue: _selectedGender,
                           decoration: InputDecoration(
                             labelText: 'Gender',
                             prefixIcon: const Icon(Icons.person_outline),

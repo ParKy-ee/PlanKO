@@ -10,7 +10,7 @@ class AuthService {
     String password,
   ) async {
     final url = Uri.parse('$baseUrl/auth/login');
-    final _storage = SecureStorage();
+    final storage = SecureStorage();
 
     final response = await http.post(
       url,
@@ -23,7 +23,7 @@ class AuthService {
       final data = jsonDecode(decodedBody);
 
       if (data['success'] == true) {
-        await _storage.writeAccessToken(
+        await storage.writeAccessToken(
           accessToken: data['data']['access_token'],
         );
         return data['data'];
