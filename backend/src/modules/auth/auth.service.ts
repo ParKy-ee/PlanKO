@@ -16,8 +16,8 @@ export class AuthService {
     private readonly missionRepository: Repository<Mission>,
   ) { }
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findUserByEmail(email);
+  async validateUser(name: string, password: string): Promise<any> {
+    const user = await this.userService.findUserByName(name);
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const result = user;
