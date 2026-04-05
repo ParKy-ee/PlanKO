@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { PostureService } from './posture.service';
 import { PostureDto } from './dto/posture.dto';
 import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
+import { PostureQueryDto } from 'src/commons/dtos/posture.dto';
 
 @Controller({
   path: 'posture',
@@ -16,7 +17,7 @@ export class PostureController {
   }
 
   @Get()
-  findAll(@Query() query: UserQueryDto) {
+  findAll(@Query() query: PostureQueryDto) {
     return this.postureService.findAll(query);
   }
 

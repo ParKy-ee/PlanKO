@@ -16,7 +16,8 @@ export class Mission {
 
     @OneToMany(
         () => MissionByProgram,
-        (missionByProgram) => missionByProgram.mission
+        (missionByProgram) => missionByProgram.mission,
+        { cascade: true, onDelete: 'CASCADE' }
     )
     missionByPrograms: MissionByProgram[];
 

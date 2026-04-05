@@ -10,9 +10,14 @@ import { QueryHelper } from '../../commons/helpers/query.helper';
 export class UserService {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) { }
 
-  async create(userDto: UserDto): Promise<User> {
+  async create(userDto: UserDto) {
     const user = this.userRepository.create(userDto);
-    return this.userRepository.save(user);
+    try {
+      await this.userRepository.save(user);
+      return { message: 'User created successfully', data: user };
+    } catch (error) {
+      return { error: true, message: 'Invalid data provided (e.g. Unique constraint violation on email)', data: null };
+    }
   }
 
   async findAll(query: UserQueryDto): Promise<{ data: User[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
@@ -29,23 +34,49 @@ export class UserService {
   }
 
   async findUserByName(name: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { name } });
+    return this.userRepository.findOne({ where: [{ name }, { email: name }], });
   }
 
   async findOne(id: number): Promise<User | null> {
+    if (isNaN(id)) {
+      return null;
+    }
     return this.userRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, userDto: UserDto): Promise<User> {
-    await this.userRepository.update(id, userDto);
+  async update(id: number, userDto: UserDto) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+
     const user = await this.findOne(id);
     if (!user) {
-      throw new Error('User not found');
+      return { error: true, message: 'User not found', data: null };
     }
-    return user;
+
+    try {
+      await this.userRepository.update(id, userDto);
+      return { message: 'User updated successfully', data: { id } };
+    } catch (error) {
+      return { error: true, message: 'Invalid data provided for update', data: null };
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+  async remove(id: number) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+
+    const user = await this.findOne(id);
+    if (!user) {
+      return { error: true, message: 'User not found', data: null };
+    }
+
+    try {
+      await this.userRepository.delete(id);
+      return { message: 'User deleted successfully', data: null };
+    } catch (error) {
+      return { error: true, message: 'Failed to delete user (Reference error)', data: null };
+    }
   }
 }

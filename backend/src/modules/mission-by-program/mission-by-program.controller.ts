@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { MissionByProgramService } from './mission-by-program.service';
-import { MissionByProgramDto } from './dto/mission-by-program.dto';
+import { MissionByProgramUpdateDto } from './dto/mission-by-program-update.dto';
 
 @Controller({
   path: 'mission-by-program',
@@ -15,7 +15,7 @@ export class MissionByProgramController {
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateMissionByProgramDto: MissionByProgramDto) {
+  update(@Param('id') id: number, @Body() updateMissionByProgramDto: MissionByProgramUpdateDto) {
     return this.missionByProgramService.update(id, updateMissionByProgramDto);
   }
 }

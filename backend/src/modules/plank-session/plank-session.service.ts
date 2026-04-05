@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PlankSessionDto } from './dto/update-plank-session.dto';
+import { Injectable } from '@nestjs/common';
+import { PlankSessionDto } from './dto/plank-session.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlankSession } from './entities/plank-session.entity';
 import { Repository } from 'typeorm';
-import { BasePlankSessionQueryDto } from 'src/commons/dtos/base-plank-session-query.dto';
+import { PlankSessionQueryDto } from 'src/commons/dtos/plank-session-query.dto';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { PlankSessionUpdateDto } from './dto/plank-session-update.dto';
 
 @Injectable()
 export class PlankSessionService {
@@ -14,10 +15,10 @@ export class PlankSessionService {
     private readonly plankSessionRepository: Repository<PlankSession>,
   ) { }
 
-  create(createPlankSessionDto: PlankSessionDto) {
+  async create(createPlankSessionDto: PlankSessionDto) {
 
     if (createPlankSessionDto.end_time <= createPlankSessionDto.start_time) {
-      throw new BadRequestException("End time must be greater than start time");
+      return { error: true, message: "End time must be greater than start time", data: null };
     }
 
     const plankSession = this.plankSessionRepository.create({
@@ -31,15 +32,17 @@ export class PlankSessionService {
       user: {
         id: createPlankSessionDto.user_id
       },
-
-
-
     });
 
-    return this.plankSessionRepository.save(plankSession);
+    try {
+      await this.plankSessionRepository.save(plankSession);
+      return { message: 'Plank session created successfully', data: plankSession };
+    } catch (error) {
+      return { error: true, message: 'Invalid userId provided', data: null };
+    }
   }
 
-  async findAll(query: BasePlankSessionQueryDto) {
+  async findAll(query: PlankSessionQueryDto) {
     const { data, meta } = await QueryHelper.paginate(this.plankSessionRepository, query, {
       sortField: 'created_at',
       searchableFields: ['mode', 'completed', 'total_score', 'duration', 'start_time', 'end_time', 'user', 'status'],
@@ -50,15 +53,21 @@ export class PlankSessionService {
     return { data, meta };
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    if (isNaN(id)) {
+      return null;
+    }
     return this.plankSessionRepository.findOne({ where: { id } });
   }
 
   async update(id: number, dto: PlankSessionDto) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
 
     const session = await this.findOne(id);
     if (!session) {
-      throw new BadRequestException('Plank session not found');
+      return { error: true, message: 'Plank session not found', data: null };
     }
 
     const payload: any = {};
@@ -96,11 +105,29 @@ export class PlankSessionService {
     if (dto.status !== undefined)
       payload.status = dto.status;
 
-    return await this.plankSessionRepository.update(id, payload);
+    try {
+      await this.plankSessionRepository.update(id, payload);
+      return { message: 'Plank session updated successfully', data: { id } };
+    } catch (error) {
+      return { error: true, message: 'Invalid data provided (e.g. invalid user_id)', data: null };
+    }
   }
 
 
-  remove(id: number) {
-    return this.plankSessionRepository.delete(id);
+  async remove(id: number) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+    const session = await this.findOne(id);
+    if (!session) {
+      return { error: true, message: 'Plank session not found', data: null };
+    }
+
+    try {
+      await this.plankSessionRepository.delete(id);
+      return { message: 'Plank session deleted successfully', data: null };
+    } catch (error) {
+      return { error: true, message: 'Failed to delete plank session (Reference error)', data: null };
+    }
   }
 }

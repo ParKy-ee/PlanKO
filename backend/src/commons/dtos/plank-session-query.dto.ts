@@ -1,7 +1,7 @@
 import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 import { BaseQueryDto } from "./base-query.dto";
 
-export class BasePlankSessionQueryDto extends BaseQueryDto {
+export class PlankSessionQueryDto extends BaseQueryDto {
     @IsOptional()
     @IsNumber()
     user_id: number;
