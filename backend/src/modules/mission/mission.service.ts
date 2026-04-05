@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { MissionDto } from './dto/mission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mission } from '../../modules/mission/entities/mission.entity';
 import { Repository } from 'typeorm';
 import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { MissionByProgram } from '../../modules/mission-by-program/entities/mission-by-program.entity';
+import { MissionCreateDto } from './dto/mission-create.dto';
+import { MissionUpdateDto } from './dto/misson-update.dto';
 
 @Injectable()
 export class MissionService {
@@ -16,7 +17,7 @@ export class MissionService {
     private missionByProgramRepository: Repository<MissionByProgram>,
   ) { }
 
-  async create(missionDto: MissionDto) {
+  async create(missionDto: MissionCreateDto) {
     const { userId, ...rest } = missionDto;
 
     const mission = this.missionRepository.create({
@@ -73,7 +74,7 @@ export class MissionService {
     return this.missionRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, missionDto: MissionDto) {
+  async update(id: number, missionDto: MissionUpdateDto) {
     const {
       userId,
       missionByProgramId,
@@ -85,7 +86,6 @@ export class MissionService {
       throw new Error('Mission not found');
     }
 
-    // 1. update mission
     await this.missionRepository.update(id, {
       ...missionData,
       user: { id: userId },

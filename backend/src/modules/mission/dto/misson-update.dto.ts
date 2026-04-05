@@ -1,7 +1,7 @@
-import { IsDate, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { Status } from "../../../commons/enums/status.enum";
 
-export class MissionDto {
+export class MissionUpdateDto {
 
     @IsOptional()
     @IsString()

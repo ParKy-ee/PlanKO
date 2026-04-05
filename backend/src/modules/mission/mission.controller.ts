@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { MissionService } from './mission.service';
-import { MissionDto } from './dto/mission.dto';
 import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
+import { MissionUpdateDto } from './dto/misson-update.dto';
+import { MissionCreateDto } from './dto/mission-create.dto';
+import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
 
 
 @Controller({
@@ -12,19 +14,20 @@ export class MissionController {
   constructor(private readonly missionService: MissionService) { }
 
   @Post()
-  create(@Body() missionDto: MissionDto) {
+  create(@Body() missionDto: MissionCreateDto) {
+    console.log(missionDto);
     return this.missionService.create(missionDto);
   }
 
   @Get()
-  findAll(@Query() query: UserQueryDto) {
+  findAll(@Query() query: MissionQueryDto) {
     return this.missionService.findAll(query);
   }
 
 
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() missionDto: MissionDto) {
+  update(@Param('id') id: string, @Body() missionDto: MissionUpdateDto) {
     return this.missionService.update(+id, missionDto);
   }
 
