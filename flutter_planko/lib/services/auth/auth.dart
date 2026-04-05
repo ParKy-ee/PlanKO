@@ -6,7 +6,7 @@ class AuthService {
   static const String baseUrl = 'http://localhost:3001/api/v1';
 
   static Future<Map<String, dynamic>?> login(
-    String email,
+    String name,
     String password,
   ) async {
     final url = Uri.parse('$baseUrl/auth/login');
@@ -15,7 +15,7 @@ class AuthService {
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      body: jsonEncode({'name': name, 'password': password}),
     );
 
     if (response.statusCode == 201) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/components/sign-in.dart';
+import 'package:flutter_planko/pages/user/regiseter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,12 +26,12 @@ class _LoginPageState extends State<LoginPage> {
           },
         ),
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
-              Center(
+              const SizedBox(height: 20),
+              const Center(
                 child: Text(
                   'PlankO : Smart Plank',
                   style: TextStyle(
@@ -40,8 +41,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              Center(
+              const SizedBox(height: 10),
+              const Center(
                 child: Text(
                   'ลงชื่อเข้าใช้',
                   style: TextStyle(
@@ -51,8 +52,36 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 40),
-              SignIn(),
+              const SizedBox(height: 40),
+              const SignIn(),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'คุณยังไม่มีบัญชีใช่ไหม? ',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'สร้างบัญชีผู้ใช้',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

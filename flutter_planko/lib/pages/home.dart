@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/components/navbar.dart';
 import 'package:flutter_planko/database/db_helper.dart';
-import 'package:flutter_planko/pages/user/activity.dart';
-import 'package:flutter_planko/pages/user/calendar.dart';
+import 'package:flutter_planko/pages/activity.dart';
+import 'package:flutter_planko/pages/calendar.dart';
 import 'package:flutter_planko/services/auth/secure-storage.dart';
-import 'package:flutter_planko/pages/user/profile.dart';
+import 'package:flutter_planko/pages/profile.dart';
 import 'package:flutter_planko/services/api/client.dart';
 
 class HomePage extends StatefulWidget {

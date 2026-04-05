@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/pages/user/home.dart';
-import 'package:flutter_planko/pages/user/welcome.dart';
-
-import 'package:flutter_planko/services/api/client.dart';
+import 'package:flutter_planko/pages/welcome.dart';
 import 'package:flutter_planko/services/auth/auth.dart';
 
 class SignIn extends StatefulWidget {
@@ -15,6 +12,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -24,10 +22,10 @@ class _SignInState extends State<SignIn> {
   }
 
   Future<void> login() async {
-    String email = emailController.text.trim();
+    String name = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบ')));
@@ -41,25 +39,15 @@ class _SignInState extends State<SignIn> {
     );
 
     try {
-      final token = await AuthService.login(email, password);
-
-      final user = await Client().getProfile();
+      final token = await AuthService.login(name, password);
 
       if (!mounted) return;
       Navigator.pop(context);
-
       if (token != null) {
-        if (user['data']['user']['weight'] == null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => WelcomePage()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => HomePage()),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => WelcomePage()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Email หรือ Password ไม่ถูกต้อง')),
@@ -81,76 +69,111 @@ class _SignInState extends State<SignIn> {
 
     return Container(
       width: screenWidth * 0.85,
-      padding: EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'ชื่อผู้ใช้งาน',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          const Text(
+            'ชื่อผู้ใช้งาน หรือ อีเมล',
+            style: TextStyle(fontSize: 14, color: Colors.black87),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           TextField(
             controller: emailController,
             decoration: InputDecoration(
-              hintText: 'กรอกที่อยู่ผู้ใช้งาน',
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              hintText: 'กรอกที่อยู่ชื่อผู้ใช้งาน หรือ อีเมล',
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
               filled: true,
-              fillColor: Color(0xFFEAF5FF),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              fillColor: const Color(0xFFEAF5FF),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.blue, width: 1),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 1),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.blue, width: 1.5),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 1.5),
               ),
             ),
           ),
-          
-          SizedBox(height: 20),
 
-          Text(
+          const SizedBox(height: 20),
+
+          const Text(
             'รหัสผ่าน',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 14, color: Colors.black87),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           TextField(
             controller: passwordController,
-            obscureText: true,
+            obscureText: _obscurePassword,
             decoration: InputDecoration(
               hintText: 'กรอกรหัสผ่าน',
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
               filled: true,
-              fillColor: Color(0xFFEAF5FF),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              fillColor: const Color(0xFFEAF5FF),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.black87,
+                  size: 20,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
               ),
             ),
           ),
 
-          SizedBox(height: 40),
+          const SizedBox(height: 8),
+
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'ลืมรหัสผ่าน?',
+              style: TextStyle(color: Colors.black54, fontSize: 13),
+            ),
+          ),
+
+          const SizedBox(height: 40),
 
           SizedBox(
-            height: 55,
+            height: 50,
             child: ElevatedButton(
               onPressed: login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0084FF),
+                backgroundColor: const Color(0xFF0084FF),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 0,
               ),
-              child: Text(
+              child: const Text(
                 'ลงชื่อเข้าใช้',
                 style: TextStyle(
                   fontSize: 18,
@@ -159,29 +182,6 @@ class _SignInState extends State<SignIn> {
                 ),
               ),
             ),
-          ),
-
-          SizedBox(height: 24),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'ยังไม่มีบัญชีใช่ไหม? ',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/register'),
-                child: Text(
-                  'สมัครใช้งาน',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
