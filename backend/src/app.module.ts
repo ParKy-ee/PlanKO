@@ -6,6 +6,9 @@ import * as Joi from 'Joi';
 import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
+import { QuestCategoryModule } from './modules/quest-category/quest-category.module';
+import { QuestModule } from './modules/quest/quest.module';
+import { QuestByUesrModule } from './modules/quest-by-uesr/quest-by-uesr.module';
 
 
 
@@ -35,6 +38,9 @@ import { AppModules } from './modules';
       },
     ]),
     ...AppModules,
+    QuestCategoryModule,
+    QuestModule,
+    QuestByUesrModule,
 
 
 

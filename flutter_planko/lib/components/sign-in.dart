@@ -67,7 +67,7 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
+    return SizedBox(
       width: screenWidth * 0.85,
       child: Column(
         mainAxisSize: MainAxisSize.min,

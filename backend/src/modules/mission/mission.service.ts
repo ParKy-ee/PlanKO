@@ -19,7 +19,6 @@ export class MissionService {
 
   async create(missionDto: MissionDto) {
 
-
     const { userId, ...rest } = missionDto;
 
     const mission = this.missionRepository.create({

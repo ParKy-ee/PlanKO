@@ -14,6 +14,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { PlankSession } from '../../../modules/plank-session/entities/plank-session.entity';
+import { QuestByUser } from '../../../modules/quest-by-uesr/entities/quest-by-uesr.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -25,6 +26,9 @@ export class User {
 
   @OneToMany(() => PlankSession, (plankSession) => plankSession.user)
   plankSessions: PlankSession[];
+
+  @OneToMany(() => QuestByUser, (questByUser) => questByUser.user)
+  quests: QuestByUser[];
 
 
   @Column({ length: 100 })

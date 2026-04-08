@@ -5,18 +5,50 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserQueryDto } from '../../commons/dtos/user-query.dto';
 import { QueryHelper } from '../../commons/helpers/query.helper';
+import { QuestByUser } from '../quest-by-uesr/entities/quest-by-uesr.entity';
+import { Quest } from '../quest/entities/quest.entity';
+import { Status } from '../../commons/enums/status.enum';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) { }
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(QuestByUser) private readonly questByUserRepository: Repository<QuestByUser>,
+    @InjectRepository(Quest) private readonly questRepository: Repository<Quest>
+  ) { }
 
   async create(userDto: UserDto) {
-    const user = this.userRepository.create(userDto);
     try {
+      const user = this.userRepository.create(userDto);
       await this.userRepository.save(user);
-      return { message: 'User created successfully', data: user };
+
+      const quests = await this.questRepository.find();
+
+      const questByUsers = quests.map((quest) =>
+        this.questByUserRepository.create({
+          user: user,
+          quest: quest,
+          current_value: 0,
+          target_value: quest.goal_value,
+          status: Status.PENDING,
+          completed_at: null,
+        })
+      );
+
+      // 4. save ทีเดียว
+      await this.questByUserRepository.save(questByUsers);
+
+      return {
+        message: 'User created and quests assigned',
+        data: user,
+      };
+
     } catch (error) {
-      return { error: true, message: 'Invalid data provided (e.g. Unique constraint violation on email)', data: null };
+      return {
+        error: true,
+        message: 'Create user failed',
+        data: null,
+      };
     }
   }
 
