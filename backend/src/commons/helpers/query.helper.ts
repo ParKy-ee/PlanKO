@@ -7,8 +7,8 @@ export class QueryHelper {
         query: BaseQueryDto,
         options: {
             sortField: keyof T,
-            relations?: (keyof T)[],
-            searchableFields?: (keyof T)[],
+            relations?: (keyof T | string)[],
+            searchableFields?: (keyof T | string)[],
             where?: any
         }
     ) {
@@ -32,7 +32,17 @@ export class QueryHelper {
             }
 
             if (options.searchableFields?.includes(key)) {
-                where[key] = query[key];
+                if (key.includes('.')) {
+                    const keys = key.split('.');
+                    let current = where;
+                    for (let i = 0; i < keys.length - 1; i++) {
+                        if (!current[keys[i]]) current[keys[i]] = {};
+                        current = current[keys[i]];
+                    }
+                    current[keys[keys.length - 1]] = query[key];
+                } else {
+                    where[key] = query[key];
+                }
             }
 
             if (options.relations?.includes(key)) {

@@ -22,6 +22,22 @@ export class UserDto {
     @IsOptional()
     readonly password?: string;
 
+    @IsNumber()
+    @IsOptional()
+    readonly weight?: number;
+
+    @IsNumber()
+    @IsOptional()
+    readonly height?: number;
+
+    @IsNumber()
+    @IsOptional()
+    readonly age?: number;
+
+    @IsString()
+    @IsOptional()
+    readonly gender?: string;
+
 
 
 }

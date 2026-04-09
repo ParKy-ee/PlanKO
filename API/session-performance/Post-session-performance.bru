@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-    "plank_session_id": 2,
+    "plank_session_id": 4,
     "score": 850,
     "duration": 600,
     "accuracy_avg": 92,
@@ -22,6 +22,10 @@ body:json {
     "missed_count": 5,
     "figure_count": 165
   }
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
 }
 
 settings {

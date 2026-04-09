@@ -1,30 +1,26 @@
 import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { Status } from "../../../commons/enums/status.enum";
+import { BaseQueryDto } from "src/commons/dtos/base-query.dto";
 
 export class MissionUpdateDto {
 
-    @IsOptional()
+
     @IsString()
-    target?: string;
+    target: string;
 
-    @IsOptional()
     @IsNumber()
-    missionByProgramId?: number;
+    missionByProgramId: number;
 
-    @IsOptional()
     @IsEnum(Status)
-    status?: Status;
+    status: Status;
 
-    @IsOptional()
     @IsDateString()
-    startAt?: string;
+    startAt: string;
 
-    @IsOptional()
     @IsDateString()
-    endAt?: string;
+    endAt: string;
 
-    @IsOptional()
-    @IsNumber()
-    userId?: number;
+    @IsString()
+    userId: string;
 
 }

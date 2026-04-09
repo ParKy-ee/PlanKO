@@ -7,9 +7,6 @@ import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
 import { SeesionPerfomanceModule } from './modules/seesion-perfomance/seesion-perfomance.module';
-import { QuestsModule } from './modules/quests/quests.module';
-import { QuestsCategortyModule } from './modules/quests-categorty/quests-categorty.module';
-import { UserQuestsModule } from './modules/user-quests/user-quests.module';
 
 
 
@@ -39,9 +36,6 @@ import { UserQuestsModule } from './modules/user-quests/user-quests.module';
     ]),
     ...AppModules,
     SeesionPerfomanceModule,
-    QuestsModule,
-    QuestsCategortyModule,
-    UserQuestsModule,
 
 
 

@@ -1,0 +1,22 @@
+meta {
+  name: Put-posture/:id
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{api}}/posture/11
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "postureCategory": 5
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

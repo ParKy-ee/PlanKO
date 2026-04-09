@@ -1,0 +1,16 @@
+meta {
+  name: Remove-quest-category/:id
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{api}}/quest-category/100
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

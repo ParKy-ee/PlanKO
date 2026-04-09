@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PerfomanceDto } from './dto/session-performance';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,31 +10,39 @@ export class SeesionPerfomanceService {
 
   constructor(@InjectRepository(SessionPerfomance) private readonly sessionPerfomanceRepository: Repository<SessionPerfomance>) { }
 
-  create(perfomanceDto: PerfomanceDto) {
-
-
-    return this.sessionPerfomanceRepository.save({
-      plankSession: {
-        id: perfomanceDto.plank_session_id
-      },
-      ...perfomanceDto
-    });
+  async create(perfomanceDto: PerfomanceDto) {
+    try {
+      const performance = await this.sessionPerfomanceRepository.save({
+        plankSession: {
+          id: perfomanceDto.plank_session_id
+        },
+        ...perfomanceDto
+      });
+      return { message: 'Session performance created successfully', data: performance };
+    } catch (error) {
+      return { error: true, message: 'Invalid data provided (e.g. invalid plank_session_id)', data: null };
+    }
   }
 
-  findAll() {
+  async findAll() {
     return this.sessionPerfomanceRepository.find();
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    if (isNaN(id)) {
+      return null;
+    }
     return this.sessionPerfomanceRepository.findOne({ where: { id } });
   }
 
   async update(id: number, perfomanceDto: PerfomanceDto) {
-
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
 
     const sessionPerfomance = await this.findOne(id);
     if (!sessionPerfomance) {
-      throw new BadRequestException('Session performance not found');
+      return { error: true, message: 'Session performance not found', data: null };
     }
 
     const payload: any = {};
@@ -54,10 +62,28 @@ export class SeesionPerfomanceService {
     if (perfomanceDto.missed_count !== undefined) payload.missed_count = perfomanceDto.missed_count;
     if (perfomanceDto.figure_count !== undefined) payload.figure_count = perfomanceDto.figure_count;
 
-    return this.sessionPerfomanceRepository.update(id, payload);
+    try {
+      await this.sessionPerfomanceRepository.update(id, payload);
+      return { message: 'Session performance updated successfully', data: { id } };
+    } catch (error) {
+       return { error: true, message: 'Invalid data provided for update', data: null };
+    }
   }
 
-  remove(id: number) {
-    return this.sessionPerfomanceRepository.delete(id);
+  async remove(id: number) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+    const sessionPerfomance = await this.findOne(id);
+    if (!sessionPerfomance) {
+      return { error: true, message: 'Session performance not found', data: null };
+    }
+
+    try {
+      await this.sessionPerfomanceRepository.delete(id);
+      return { message: 'Session performance deleted successfully', data: null };
+    } catch (error) {
+      return { error: true, message: 'Failed to delete session performance (Reference error)', data: null };
+    }
   }
 }

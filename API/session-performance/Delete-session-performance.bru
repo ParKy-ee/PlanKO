@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: {{api}}/session-performance
+  url: {{api}}/session-performance/9
   body: none
   auth: inherit
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
 }
 
 settings {

@@ -7,7 +7,15 @@ meta {
 get {
   url: {{api}}/mission
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQsImVtYWlsIjoiUEBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTM3NTcwNSwiZXhwIjoxNzc1NDYyMTA1fQ.sqkc7yC4zWpZmzpPYiPpKcSZlPJjrPOOMOGCa9lJnx8
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
 }
 
 settings {

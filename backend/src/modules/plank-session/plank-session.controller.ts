@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
 import { PlankSessionService } from './plank-session.service';
-import { PlankSessionDto } from './dto/update-plank-session.dto';
-import { BasePlankSessionQueryDto } from 'src/commons/dtos/base-plank-session-query.dto';
+import { PlankSessionDto } from './dto/plank-session.dto';
+import { PlankSessionQueryDto } from 'src/commons/dtos/plank-session-query.dto';
+import { PlankSessionUpdateDto } from './dto/plank-session-update.dto';
 
 @Controller({
   path: 'plank-session',
@@ -16,13 +17,13 @@ export class PlankSessionController {
   }
 
   @Get()
-  findAll(@Query() query: BasePlankSessionQueryDto) {
+  findAll(@Query() query: PlankSessionQueryDto) {
     return this.plankSessionService.findAll(query);
   }
 
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePlankSessionDto: PlankSessionDto) {
+  update(@Param('id') id: string, @Body() updatePlankSessionDto: PlankSessionUpdateDto) {
     return this.plankSessionService.update(+id, updatePlankSessionDto);
   }
 

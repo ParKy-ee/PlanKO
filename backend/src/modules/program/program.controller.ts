@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { ProgramService } from './program.service';
-import { ProgramQueryDto } from 'src/commons/dtos/program-qurey.dtos';
 import { ProgramDto } from './dto/program';
+import { ProgramQueryDto } from 'src/commons/dtos/program-qurey.dtos';
 
 @Controller('program')
 export class ProgramController {
@@ -9,6 +9,7 @@ export class ProgramController {
 
   @Post()
   create(@Body() ProgramDto: ProgramDto) {
+    console.log(ProgramDto);
     return this.programService.create(ProgramDto);
   }
 

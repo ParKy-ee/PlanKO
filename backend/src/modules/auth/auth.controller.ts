@@ -22,8 +22,8 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     });
     return {
-      user: req.use,
-      access_token
+      user: req.user,
+      access_token,
     };
   }
 
@@ -31,7 +31,8 @@ export class AuthController {
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req) {
-    return req.user;
+
+    return this.authService.getProfile(req.user);
   }
 
   @Post('/logout')
@@ -46,4 +47,8 @@ export class AuthController {
       message: 'Logged out successfully',
     };
   }
+
+
+  
+
 }

@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mission } from '../../modules/mission/entities/mission.entity';
 import { Repository } from 'typeorm';
-import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { MissionByProgram } from '../../modules/mission-by-program/entities/mission-by-program.entity';
+<<<<<<< HEAD
 import { MissionCreateDto } from './dto/mission-create.dto';
 import { MissionUpdateDto } from './dto/misson-update.dto';
+=======
+import { MissionUpdatesDto } from './dto/mission-update.dto';
+import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
+>>>>>>> feat/quest
 
 @Injectable()
 export class MissionService {
@@ -17,33 +22,64 @@ export class MissionService {
     private missionByProgramRepository: Repository<MissionByProgram>,
   ) { }
 
+<<<<<<< HEAD
   async create(missionDto: MissionCreateDto) {
+=======
+  async create(missionDto: MissionDto) {
+
+>>>>>>> feat/quest
     const { userId, ...rest } = missionDto;
 
     const mission = this.missionRepository.create({
       ...rest,
-      user: { id: userId },
+      user: { id: Number(userId) },
     });
 
-    await this.missionRepository.save(mission);
+    try {
+      await this.missionRepository.save(mission);
+    } catch (error) {
+      return ResponseHelper.error("Invalid userId provided");
+    }
 
     const missionByProgram = this.missionByProgramRepository.create({
       program: { id: missionDto.missionByProgramId },
       mission: { id: mission.id },
-    })
-    await this.missionByProgramRepository.save(missionByProgram);
+    });
+
+    try {
+      await this.missionByProgramRepository.save(missionByProgram);
+    } catch (error) {
+      return ResponseHelper.error("Invalid missionByProgramId provided");
+    }
 
 
-    return {
-      message: 'Mission created successfully',
-      data: mission,
-    };
+    return ResponseHelper.success("Mission created successfully");
   }
-  async findAll(query: UserQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
-    const { data: missions, meta } = await QueryHelper.paginate(this.missionRepository, query, {
+  async findAll(query: MissionQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
+
+    const where: any = {};
+    const queryObj: any = { ...query };
+
+    if (queryObj.userId && !isNaN(Number(queryObj.userId))) {
+      where.user = { id: Number(queryObj.userId) };
+    }
+
+    // Map the new MissionQueryDto fields to match the database entity fields
+    if (queryObj.title !== undefined) {
+      queryObj.target = queryObj.title;
+    }
+    if (queryObj.start_date !== undefined) {
+      queryObj.startAt = queryObj.start_date;
+    }
+    if (queryObj.end_date !== undefined) {
+      queryObj.endAt = queryObj.end_date;
+    }
+
+    const { data: missions, meta } = await QueryHelper.paginate(this.missionRepository, queryObj, {
       sortField: 'id',
-      searchableFields: ['target', 'status', 'startAt', 'endAt', 'user'],
-      relations: ['user', 'missionByPrograms'],
+      searchableFields: ['target', 'status', 'startAt', 'endAt', 'user', 'missionByPrograms.program'],
+      relations: ['user', 'missionByPrograms', 'missionByPrograms.program'],
+      where: where,
     });
 
     return {
@@ -71,10 +107,17 @@ export class MissionService {
 
 
   async findOne(id: number): Promise<Mission | null> {
+    if (isNaN(id)) {
+      return null;
+    }
     return this.missionRepository.findOne({ where: { id } });
   }
 
+<<<<<<< HEAD
   async update(id: number, missionDto: MissionUpdateDto) {
+=======
+  async update(id: number, missionDto: MissionUpdatesDto) {
+>>>>>>> feat/quest
     const {
       userId,
       missionByProgramId,
@@ -83,25 +126,56 @@ export class MissionService {
 
     const mission = await this.findOne(id);
     if (!mission) {
-      throw new Error('Mission not found');
+      return {
+        error: true,
+        message: 'Mission not found',
+        data: null,
+      };
     }
 
+<<<<<<< HEAD
     await this.missionRepository.update(id, {
       ...missionData,
       user: { id: userId },
     });
+=======
+    // 1. update mission
+    const updatePayload: any = { ...missionData };
+    if (userId !== undefined) {
+      updatePayload.user = { id: Number(userId) };
+    }
+>>>>>>> feat/quest
 
-    await this.missionByProgramRepository.delete({
-      mission: { id },
-    });
+    try {
+      await this.missionRepository.update(id, updatePayload);
+    } catch (error) {
+      return {
+        error: true,
+        message: 'Invalid userId provided',
+        data: null,
+      };
+    }
 
+    if (missionByProgramId !== undefined) {
+      try {
+        await this.missionByProgramRepository.delete({
+          mission: { id },
+        });
 
-    const missionByProgram = this.missionByProgramRepository.create({
-      mission: { id },
-      program: { id: missionByProgramId },
-    });
+        const missionByProgram = this.missionByProgramRepository.create({
+          mission: { id },
+          program: { id: missionByProgramId },
+        });
 
-    await this.missionByProgramRepository.save(missionByProgram);
+        await this.missionByProgramRepository.save(missionByProgram);
+      } catch (error) {
+        return {
+          error: true,
+          message: 'Invalid missionByProgramId provided',
+          data: null,
+        };
+      }
+    }
 
     return {
       message: 'Mission updated successfully',
@@ -111,7 +185,27 @@ export class MissionService {
     };
   }
 
-  remove(id: number) {
-    return this.missionRepository.delete(id);
+  async remove(id: number) {
+    const mission = await this.findOne(id);
+    if (!mission) {
+      return {
+        error: true,
+        message: 'Mission not found',
+        data: null,
+      };
+    }
+    try {
+      await this.missionRepository.delete(id);
+    } catch (error) {
+      return {
+        error: true,
+        message: 'Failed to delete mission (Reference error)',
+        data: null,
+      };
+    }
+    return {
+      message: 'Mission deleted successfully',
+      data: null,
+    };
   }
 }
