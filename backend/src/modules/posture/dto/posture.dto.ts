@@ -4,20 +4,20 @@ export class PostureDto {
 
     @IsString()
     @IsOptional()
-    postureName?: string;
-    @IsString()
-    @IsOptional()
-    postureType?: string;
-    @IsString()
-    @IsOptional()
-    postureDescription?: string;
+    name?: string;
 
     @IsNumber()
     @IsOptional()
-    set?: number
+    postureCategory?: number;
+
     @IsNumber()
     @IsOptional()
-    second?: number
+    postureByPrograms?: number;
+
+    @IsString()
+    @IsOptional()
+    description?: string;
+
     @IsBoolean()
     @IsOptional()
     status?: boolean;

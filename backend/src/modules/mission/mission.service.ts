@@ -7,6 +7,7 @@ import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { MissionByProgram } from '../../modules/mission-by-program/entities/mission-by-program.entity';
 import { MissionUpdatesDto } from './dto/mission-update.dto';
 import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
 
 @Injectable()
 export class MissionService {
@@ -29,11 +30,7 @@ export class MissionService {
     try {
       await this.missionRepository.save(mission);
     } catch (error) {
-      return {
-        error: true,
-        message: 'Invalid userId provided',
-        data: null,
-      };
+      return ResponseHelper.error("Invalid userId provided");
     }
 
     const missionByProgram = this.missionByProgramRepository.create({
@@ -44,18 +41,11 @@ export class MissionService {
     try {
       await this.missionByProgramRepository.save(missionByProgram);
     } catch (error) {
-      return {
-        error: true,
-        message: 'Invalid missionByProgramId provided',
-        data: null,
-      };
+      return ResponseHelper.error("Invalid missionByProgramId provided");
     }
 
 
-    return {
-      message: 'Mission created successfully',
-      data: mission,
-    };
+    return ResponseHelper.success("Mission created successfully");
   }
   async findAll(query: MissionQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
 

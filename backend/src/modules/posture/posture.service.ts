@@ -13,7 +13,17 @@ export class PostureService {
   constructor(@InjectRepository(Posture) private readonly postureRepository: Repository<Posture>) { }
 
   async create(createPostureDto: PostureDto) {
-    const posture = this.postureRepository.create(createPostureDto);
+    const { postureCategory, postureByPrograms, status, ...rest } = createPostureDto;
+
+    const createData: any = { ...rest };
+    if (postureCategory !== undefined) {
+      createData.postureCategory = { id: postureCategory };
+    }
+    if (status !== undefined) {
+      createData.is_active = status;
+    }
+
+    const posture = this.postureRepository.create(createData);
 
     try {
       await this.postureRepository.save(posture);
@@ -26,7 +36,7 @@ export class PostureService {
   async findAll(query: PostureQueryDto) {
     const { data: postures, meta } = await QueryHelper.paginate(this.postureRepository, query, {
       sortField: 'id',
-      searchableFields: ['postureName', 'postureType', 'postureDescription', 'status'],
+      searchableFields: ['name', 'description', 'status'],
     });
 
     return {
@@ -52,8 +62,18 @@ export class PostureService {
       return { error: true, message: 'Posture not found', data: null };
     }
 
+    const { postureCategory, postureByPrograms, status, ...rest } = updatePostureDto;
+
+    const updateData: any = { ...rest };
+    if (postureCategory !== undefined) {
+      updateData.postureCategory = { id: postureCategory };
+    }
+    if (status !== undefined) {
+      updateData.is_active = status;
+    }
+
     try {
-      await this.postureRepository.update(id, updatePostureDto);
+      await this.postureRepository.update(id, updateData);
       return { message: 'Posture updated successfully', data: { id } };
     } catch (error) {
       return { error: true, message: 'Invalid data provided for update', data: null };
