@@ -6,6 +6,7 @@ import * as Joi from 'Joi';
 import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
+import { PlankBySessionModule } from './modules/plank-by-session/plank-by-session.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { AppModules } from './modules';
         limit: 10,
       },
     ]),
-    ...AppModules,],
+    ...AppModules,
+    PlankBySessionModule,],
   controllers: [AppController],
   providers: [AppService],
 })

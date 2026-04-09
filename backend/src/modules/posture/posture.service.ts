@@ -3,9 +3,10 @@ import { PostureDto } from './dto/posture.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Posture } from './entities/posture.entity';
 import { Repository } from 'typeorm';
-import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { PostureQueryDto } from 'src/commons/dtos/posture.dto';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { PostureUpdateDto } from './dto/posture-update.dto';
 
 @Injectable()
 export class PostureService {
@@ -13,30 +14,26 @@ export class PostureService {
   constructor(@InjectRepository(Posture) private readonly postureRepository: Repository<Posture>) { }
 
   async create(createPostureDto: PostureDto) {
-    const { postureCategory, postureByPrograms, status, ...rest } = createPostureDto;
+    const { postureCategory, ...rest } = createPostureDto;
 
-    const createData: any = { ...rest };
-    if (postureCategory !== undefined) {
-      createData.postureCategory = { id: postureCategory };
-    }
-    if (status !== undefined) {
-      createData.is_active = status;
-    }
-
-    const posture = this.postureRepository.create(createData);
+    const posture = this.postureRepository.create({
+      ...rest,
+      postureCategory: { id: postureCategory } as any
+    });
 
     try {
       await this.postureRepository.save(posture);
-      return { message: 'Posture created successfully', data: posture };
+      return ResponseHelper.success(posture, 'Posture created successfully');
     } catch (error) {
-      return { error: true, message: 'Invalid data provided (e.g. Unique constraint violation)', data: null };
+      return ResponseHelper.error('Invalid data provided (e.g. Unique constraint violation or missing required fields)');
     }
   }
 
   async findAll(query: PostureQueryDto) {
     const { data: postures, meta } = await QueryHelper.paginate(this.postureRepository, query, {
       sortField: 'id',
-      searchableFields: ['name', 'description', 'status'],
+      searchableFields: ['name', 'description'],
+      relations: ['postureCategory'],
     });
 
     return {
@@ -49,52 +46,49 @@ export class PostureService {
     if (isNaN(id)) {
       return null;
     }
-    return await this.postureRepository.findOne({ where: { id } });
+    return await this.postureRepository.findOne({ where: { id }, relations: ['postureCategory'] });
   }
 
-  async update(id: number, updatePostureDto: PostureDto) {
+  async update(id: number, updatePostureDto: PostureUpdateDto) {
     if (isNaN(id)) {
-      return { error: true, message: 'Invalid id provided', data: null };
+      return ResponseHelper.error('Invalid id provided');
     }
 
     const posture = await this.findOne(id);
     if (!posture) {
-      return { error: true, message: 'Posture not found', data: null };
+      return ResponseHelper.error('Posture not found');
     }
 
-    const { postureCategory, postureByPrograms, status, ...rest } = updatePostureDto;
+    const { postureCategory, ...rest } = updatePostureDto;
 
     const updateData: any = { ...rest };
     if (postureCategory !== undefined) {
       updateData.postureCategory = { id: postureCategory };
     }
-    if (status !== undefined) {
-      updateData.is_active = status;
-    }
 
     try {
       await this.postureRepository.update(id, updateData);
-      return { message: 'Posture updated successfully', data: { id } };
+      return ResponseHelper.success({ id }, 'Posture updated successfully');
     } catch (error) {
-      return { error: true, message: 'Invalid data provided for update', data: null };
+      return ResponseHelper.error('Invalid data provided for update');
     }
   }
 
   async remove(id: number) {
     if (isNaN(id)) {
-      return { error: true, message: 'Invalid id provided', data: null };
+      return ResponseHelper.error('Invalid id provided');
     }
 
     const posture = await this.findOne(id);
     if (!posture) {
-      return { error: true, message: 'Posture not found', data: null };
+      return ResponseHelper.error('Posture not found');
     }
 
     try {
       await this.postureRepository.delete(id);
-      return { message: 'Posture deleted successfully', data: null };
+      return ResponseHelper.success(null, 'Posture deleted successfully');
     } catch (error) {
-      return { error: true, message: 'Failed to delete posture (Reference error)', data: null };
+      return ResponseHelper.error('Failed to delete posture (Reference error)');
     }
   }
 }

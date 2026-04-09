@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { PostureService } from './posture.service';
 import { PostureDto } from './dto/posture.dto';
 import { UserQueryDto } from 'src/commons/dtos/user-query.dto';
 import { PostureQueryDto } from 'src/commons/dtos/posture.dto';
+import { PostureUpdateDto } from './dto/posture-update.dto';
 
 @Controller({
   path: 'posture',
@@ -21,9 +22,9 @@ export class PostureController {
     return this.postureService.findAll(query);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostureDto: PostureDto) {
-    return this.postureService.update(+id, updatePostureDto);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updatePostureDto: PostureUpdateDto) {
+    return this.postureService.update(+id, updatePostureDto as any);
   }
 
   @Delete(':id')

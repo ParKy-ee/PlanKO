@@ -23,7 +23,7 @@ export class PlankSessionController {
 
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePlankSessionDto: PlankSessionDto) {
+  update(@Param('id') id: string, @Body() updatePlankSessionDto: PlankSessionUpdateDto) {
     return this.plankSessionService.update(+id, updatePlankSessionDto);
   }
 

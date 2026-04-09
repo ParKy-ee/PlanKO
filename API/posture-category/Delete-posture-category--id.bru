@@ -1,0 +1,16 @@
+meta {
+  name: Delete-posture-category/:id
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{api}}/posture-category/100
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

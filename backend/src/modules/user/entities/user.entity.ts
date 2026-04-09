@@ -12,9 +12,10 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
-import { PlankSession } from '../../../modules/plank-session/entities/plank-session.entity';
 import { QuestByUser } from '../../../modules/quest-by-uesr/entities/quest-by-uesr.entity';
+import { SessionPerfomance } from '../../../modules/seesion-perfomance/entities/seesion-perfomance.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -24,11 +25,11 @@ export class User {
   @OneToMany(() => Mission, (mission) => mission.user)
   missions: Mission[];
 
-  @OneToMany(() => PlankSession, (plankSession) => plankSession.user)
-  plankSessions: PlankSession[];
-
   @OneToMany(() => QuestByUser, (questByUser) => questByUser.user)
   quests: QuestByUser[];
+
+  @OneToMany(() => SessionPerfomance, (sessionPerfomance) => sessionPerfomance.user, { onDelete: "CASCADE", nullable: true })
+  sessionPerfomances: SessionPerfomance[];
 
 
   @Column({ length: 100 })

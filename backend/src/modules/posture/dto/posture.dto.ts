@@ -1,24 +1,19 @@
-import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Difficulty } from "../../../commons/enums/difficulty.enum";
 
 export class PostureDto {
-
     @IsString()
-    @IsOptional()
-    name?: string;
+    @IsNotEmpty()
+    name: string;
 
     @IsNumber()
-    @IsOptional()
-    postureCategory?: number;
+    @IsNotEmpty()
+    postureCategory: number;
 
-    @IsNumber()
-    @IsOptional()
-    postureByPrograms?: number;
+    @IsEnum(Difficulty)
+    difficulty: Difficulty;
 
     @IsString()
-    @IsOptional()
-    description?: string;
+    description: string;
 
-    @IsBoolean()
-    @IsOptional()
-    status?: boolean;
 }
