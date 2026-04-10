@@ -1,10 +1,8 @@
 
 import { SessionPerfomance } from "../../../modules/seesion-perfomance/entities/seesion-perfomance.entity";
-import { User } from "../../../modules/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { DateStatus } from "../../../commons/enums/date-status.enum";
-import { Posture } from "../../../modules/posture/entities/posture.entity";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { PlankBySession } from "../../../modules/plank-by-session/entities/plank-by-session.entity";
+import { ProgramPlan } from "../../program-plan/entities/program-plan.entity";
 
 
 @Entity({ name: "plank_session" })
@@ -17,6 +15,10 @@ export class PlankSession {
 
     @OneToMany(() => SessionPerfomance, (sessionPerfomance) => sessionPerfomance.plankSession)
     sessionPerfomances: SessionPerfomance[];
+
+    @OneToMany(() => ProgramPlan, (programPlan) => programPlan.plankSession)
+    programPlans: ProgramPlan[];
+
 
     @Column()
     name: string;

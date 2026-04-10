@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
 import { SeesionPerfomanceModule } from './modules/seesion-perfomance/seesion-perfomance.module';
+import { ProgramPlanModule } from './modules/program-plan/program-plan.module';
 
 
 
@@ -36,6 +37,7 @@ import { SeesionPerfomanceModule } from './modules/seesion-perfomance/seesion-pe
     ]),
     ...AppModules,
     SeesionPerfomanceModule,
+    ProgramPlanModule,
 
 
 

@@ -21,8 +21,6 @@ export class ProgramService {
       frequency: createProgramDto.frequency,
       workDays: createProgramDto.workDays,
       restDays: createProgramDto.restDays,
-      status: createProgramDto.status,
-      rest: createProgramDto.rest,
     });
 
     try {
@@ -30,18 +28,6 @@ export class ProgramService {
     } catch (error) {
       return { error: true, message: 'Invalid data provided for program', data: null };
     }
-
-    const postureByProgram = await this.postureByProgramRepository.create({
-      postureId: createProgramDto.postureId,
-      programId: program.id,
-    });
-
-    try {
-      await this.postureByProgramRepository.save(postureByProgram);
-    } catch (error) {
-      return { error: true, message: 'Invalid postureId provided', data: null };
-    }
-
     return { message: 'Program created successfully', data: program };
   }
 
@@ -75,7 +61,7 @@ export class ProgramService {
     }
 
     try {
-      await this.programRepository.update(id, { ...updateProgramDto, status: true });
+      await this.programRepository.update(id, { ...updateProgramDto });
       return { message: 'Program updated successfully', data: { id } };
     } catch (error) {
       return { error: true, message: 'Invalid data provided for update', data: null };

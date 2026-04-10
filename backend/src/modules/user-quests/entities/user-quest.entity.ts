@@ -1,5 +1,5 @@
-import { IsActive } from "src/commons/enums/is-Active.enum";
-import { Quest } from "src/modules/quests/entities/quest.entity";
+
+import { Quest } from "../../../modules/quest/entities/quest.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "user_quests" })
@@ -18,8 +18,8 @@ export class UserQuest {
     current_value: number;
 
 
-    @Column({ enum: IsActive, default: IsActive.ACTIVE })
-    is_active: IsActive;
+    @Column({ default: true })
+    is_active: boolean;
 
     @Column({ default: new Date() })
     createdAt: Date;

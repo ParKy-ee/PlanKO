@@ -6,8 +6,19 @@ meta {
 
 get {
   url: {{api}}/program
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "programName": "30 Day Plank Challenge",
+    "programType": "BEGINNER",
+    "period": 30,
+    "frequency": 5,
+    "workDays": [1, 2, 3, 4, 5],
+    "restDays": [6, 7]
+  }
 }
 
 vars:pre-request {

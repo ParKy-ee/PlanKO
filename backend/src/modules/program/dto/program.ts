@@ -24,15 +24,5 @@ export class ProgramDto {
     @IsOptional()
     @IsNumber({}, { each: true })
     restDays?: number[];
-    @IsOptional()
-    @IsBoolean()
-    status?: boolean;
 
-    @IsOptional()
-    @IsNumber()
-    rest?: number;
-
-    @IsOptional()
-    @IsNumber()
-    postureId?: number;
 }

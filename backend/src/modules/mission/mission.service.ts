@@ -4,14 +4,10 @@ import { Mission } from '../../modules/mission/entities/mission.entity';
 import { Repository } from 'typeorm';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { MissionByProgram } from '../../modules/mission-by-program/entities/mission-by-program.entity';
-<<<<<<< HEAD
 import { MissionCreateDto } from './dto/mission-create.dto';
-import { MissionUpdateDto } from './dto/misson-update.dto';
-=======
-import { MissionUpdatesDto } from './dto/mission-update.dto';
+import { MissionUpdateDto } from './dto/mission-update.dto';
 import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
 import { ResponseHelper } from 'src/commons/helpers/response.helper';
->>>>>>> feat/quest
 
 @Injectable()
 export class MissionService {
@@ -22,12 +18,7 @@ export class MissionService {
     private missionByProgramRepository: Repository<MissionByProgram>,
   ) { }
 
-<<<<<<< HEAD
   async create(missionDto: MissionCreateDto) {
-=======
-  async create(missionDto: MissionDto) {
-
->>>>>>> feat/quest
     const { userId, ...rest } = missionDto;
 
     const mission = this.missionRepository.create({
@@ -55,6 +46,7 @@ export class MissionService {
 
     return ResponseHelper.success("Mission created successfully");
   }
+
   async findAll(query: MissionQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
 
     const where: any = {};
@@ -113,11 +105,7 @@ export class MissionService {
     return this.missionRepository.findOne({ where: { id } });
   }
 
-<<<<<<< HEAD
   async update(id: number, missionDto: MissionUpdateDto) {
-=======
-  async update(id: number, missionDto: MissionUpdatesDto) {
->>>>>>> feat/quest
     const {
       userId,
       missionByProgramId,
@@ -133,18 +121,11 @@ export class MissionService {
       };
     }
 
-<<<<<<< HEAD
-    await this.missionRepository.update(id, {
-      ...missionData,
-      user: { id: userId },
-    });
-=======
     // 1. update mission
     const updatePayload: any = { ...missionData };
     if (userId !== undefined) {
       updatePayload.user = { id: Number(userId) };
     }
->>>>>>> feat/quest
 
     try {
       await this.missionRepository.update(id, updatePayload);
