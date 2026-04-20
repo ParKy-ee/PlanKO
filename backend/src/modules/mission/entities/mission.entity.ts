@@ -21,6 +21,13 @@ export class Mission {
     )
     missionByPrograms: MissionByProgram[]
 
+    @Column()
+    target: number;
+
+    @Column()
+    current: number;
+
+
     @Column({ type: 'timestamp' })
     startAt: Date;
 

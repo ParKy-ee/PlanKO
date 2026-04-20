@@ -37,4 +37,5 @@ export class SessionPerformanceQueryDto extends BaseQueryDto {
     @IsOptional()
     @IsNumber()
     figure_count: number;
+
 }
