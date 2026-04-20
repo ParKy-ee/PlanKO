@@ -37,6 +37,8 @@ export class PostureService {
     });
 
     return {
+      success: true,
+      message: 'สำเร็จ',
       data: postures,
       meta,
     };

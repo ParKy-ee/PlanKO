@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
 import { SeesionPerfomanceService } from './seesion-perfomance.service';
 import { PerfomanceDto } from './dto/session-performance';
+import { SessionPerformanceQueryDto } from 'src/commons/dtos/session-performance-qurey.dto';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
 
 @Controller({
   path: 'session-performance',
@@ -15,11 +17,18 @@ export class SeesionPerfomanceController {
   }
 
   @Get()
-  findAll() {
-    return this.seesionPerfomanceService.findAll();
+  findAll(@Query() query: SessionPerformanceQueryDto) {
+    return this.seesionPerfomanceService.findAll(query);
   }
 
-
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const performance = await this.seesionPerfomanceService.findOne(+id);
+    if (!performance) {
+      return ResponseHelper.error('Session performance not found');
+    }
+    return ResponseHelper.success(performance);
+  }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() perfomanceDto: PerfomanceDto) {

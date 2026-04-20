@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-
 import { PerfomanceDto } from './dto/session-performance';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SessionPerfomance } from './entities/seesion-perfomance.entity';
 import { Repository } from 'typeorm';
+import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { SessionPerformanceQueryDto } from 'src/commons/dtos/session-performance-qurey.dto';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
 
 @Injectable()
 export class SeesionPerfomanceService {
@@ -12,23 +14,51 @@ export class SeesionPerfomanceService {
 
   async create(perfomanceDto: PerfomanceDto) {
     try {
-      const performance = await this.sessionPerfomanceRepository.save({
-        plankSession: {
-          id: perfomanceDto.plank_session_id
-        },
-        ...perfomanceDto
+      const { plank_session_id, total_score, ...rest } = perfomanceDto;
+
+      const payload = this.sessionPerfomanceRepository.create({
+        ...rest,
+        score: total_score,
+        completed: true,
+        plankSession: plank_session_id ? { id: plank_session_id } : undefined,
+        user: perfomanceDto.userId ? { id: perfomanceDto.userId } : undefined,
       });
-      return { message: 'Session performance created successfully', data: performance };
+
+      const performance = await this.sessionPerfomanceRepository.save(payload);
+
+      return ResponseHelper.success(performance, 'Session performance created successfully');
     } catch (error) {
-      return { error: true, message: 'Invalid data provided (e.g. invalid plank_session_id)', data: null };
+      return ResponseHelper.error('Invalid data provided (e.g. invalid plank_session_id)');
     }
   }
 
-  async findAll() {
-    return this.sessionPerfomanceRepository.find();
+  async findAll(query: SessionPerformanceQueryDto) {
+    try {
+      const { data: performances, meta } = await QueryHelper.paginate(this.sessionPerfomanceRepository, query, {
+        sortField: 'id',
+        relations: ['plankSession', 'user'],
+        searchableFields: ['plankSession.id', 'user.id'],
+      });
+
+      const mappedData = performances.map(perf => {
+        const { plankSession, user, ...rest } = perf;
+        return {
+          ...rest,
+          plankSession: plankSession ? { id: plankSession.id } : null,
+          user: user ? { id: user.id } : null,
+        };
+      });
+
+      return {
+        data: mappedData,
+        meta
+      }
+    } catch (error) {
+      return ResponseHelper.error('Failed to fetch session performances');
+    }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<SessionPerfomance | null> {
     if (isNaN(id)) {
       return null;
     }
@@ -37,12 +67,12 @@ export class SeesionPerfomanceService {
 
   async update(id: number, perfomanceDto: PerfomanceDto) {
     if (isNaN(id)) {
-      return { error: true, message: 'Invalid id provided', data: null };
+      return ResponseHelper.error('Invalid id provided');
     }
 
     const sessionPerfomance = await this.findOne(id);
     if (!sessionPerfomance) {
-      return { error: true, message: 'Session performance not found', data: null };
+      return ResponseHelper.error('Session performance not found');
     }
 
     const payload: any = {};
@@ -53,37 +83,38 @@ export class SeesionPerfomanceService {
     }
 
     // other fields
-    if (perfomanceDto.total_score !== undefined) payload.total_score = perfomanceDto.total_score;
+    if (perfomanceDto.total_score !== undefined) payload.score = perfomanceDto.total_score;
     if (perfomanceDto.duration !== undefined) payload.duration = perfomanceDto.duration;
     if (perfomanceDto.accuracy_avg !== undefined) payload.accuracy_avg = perfomanceDto.accuracy_avg;
     if (perfomanceDto.perfect_count !== undefined) payload.perfect_count = perfomanceDto.perfect_count;
     if (perfomanceDto.good_count !== undefined) payload.good_count = perfomanceDto.good_count;
     if (perfomanceDto.bad_count !== undefined) payload.bad_count = perfomanceDto.bad_count;
     if (perfomanceDto.missed_count !== undefined) payload.missed_count = perfomanceDto.missed_count;
-    if (perfomanceDto.figure_count !== undefined) payload.figure_count = perfomanceDto.figure_count;
+    if (perfomanceDto.kcal !== undefined) payload.kcal = perfomanceDto.kcal;
+
 
     try {
       await this.sessionPerfomanceRepository.update(id, payload);
-      return { message: 'Session performance updated successfully', data: { id } };
+      return ResponseHelper.success({ id }, 'Session performance updated successfully');
     } catch (error) {
-       return { error: true, message: 'Invalid data provided for update', data: null };
+      return ResponseHelper.error('Invalid data provided for update');
     }
   }
 
   async remove(id: number) {
     if (isNaN(id)) {
-      return { error: true, message: 'Invalid id provided', data: null };
+      return ResponseHelper.error('Invalid id provided');
     }
     const sessionPerfomance = await this.findOne(id);
     if (!sessionPerfomance) {
-      return { error: true, message: 'Session performance not found', data: null };
+      return ResponseHelper.error('Session performance not found');
     }
 
     try {
       await this.sessionPerfomanceRepository.delete(id);
-      return { message: 'Session performance deleted successfully', data: null };
+      return ResponseHelper.success(null, 'Session performance deleted successfully');
     } catch (error) {
-      return { error: true, message: 'Failed to delete session performance (Reference error)', data: null };
+      return ResponseHelper.error('Failed to delete session performance (Reference error)');
     }
   }
 }

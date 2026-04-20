@@ -24,6 +24,7 @@ export class ResponseHelper {
 
   static error(message: string, data: any = null) {
     return {
+      success: false,
       error: true,
       message,
       data,

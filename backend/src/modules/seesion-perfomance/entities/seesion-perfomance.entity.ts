@@ -11,7 +11,6 @@ export class SessionPerfomance {
     @JoinColumn({ name: "plank_session_id" })
     plankSession: PlankSession;
 
-
     @ManyToOne(() => User, (user) => user.sessionPerfomances, { onDelete: "CASCADE", nullable: true })
     @JoinColumn({ name: "user_id" })
     user: User;
@@ -38,10 +37,10 @@ export class SessionPerfomance {
     completed: boolean;
 
     @Column()
-    start_time: string;
+    kcal: number;
 
     @Column()
-    end_time: string;
+    duration: number;
 
     @CreateDateColumn()
     created_at: Date;

@@ -4,6 +4,7 @@ import { UpdateQuestByUesrDto } from './dto/update-quest-by-uesr.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { QuestByUser } from './entities/quest-by-uesr.entity';
+import { ResponseHelper } from 'src/commons/helpers/response.helper';
 
 @Injectable()
 export class QuestByUesrService {
@@ -29,11 +30,11 @@ export class QuestByUesrService {
   async findAll() {
     try {
       const result = await this.questByUserRepository.find({
-        relations: ['user']
+        relations: ['user', 'quest']
       });
-      return { data: result };
+      return ResponseHelper.success(result);
     } catch (error) {
-      return { error: true, message: 'Failed to retrieve', data: null };
+      return ResponseHelper.error('Failed to retrieve');
     }
   }
 

@@ -22,10 +22,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => Mission, (mission) => mission.user)
+  @OneToMany(() => Mission, (mission) => mission.user, { onDelete: "CASCADE", nullable: true })
   missions: Mission[];
 
-  @OneToMany(() => QuestByUser, (questByUser) => questByUser.user)
+  @OneToMany(() => QuestByUser, (questByUser) => questByUser.user, { onDelete: "CASCADE", nullable: true })
   quests: QuestByUser[];
 
   @OneToMany(() => SessionPerfomance, (sessionPerfomance) => sessionPerfomance.user, { onDelete: "CASCADE", nullable: true })
@@ -33,6 +33,7 @@ export class User {
 
 
   @Column({ length: 100 })
+  @Index({ unique: true })
   name: string;
 
   @Index({ unique: true })

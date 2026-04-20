@@ -44,7 +44,7 @@ export class MissionService {
     }
 
 
-    return ResponseHelper.success("Mission created successfully");
+    return ResponseHelper.success(mission, "Mission created successfully");
   }
 
   async findAll(query: MissionQueryDto): Promise<{ data: Mission[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number; }; }> {
@@ -84,11 +84,11 @@ export class MissionService {
 
         return {
           ...mission,
-          user: rest,
+          user: rest.id,
           missionByPrograms: mission.missionByPrograms.map((missionByProgram) => {
             return {
-              ...missionByProgram,
-              program: missionByProgram.program,
+              id: missionByProgram.id,
+              program: missionByProgram.program.id,
             };
           }),
         };

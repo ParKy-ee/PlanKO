@@ -3,9 +3,6 @@ import { Status } from "../../../commons/enums/status.enum";
 
 export class MissionCreateDto {
 
-    @IsString()
-    @IsNotEmpty()
-    target: string;
 
     @IsNumber()
     @IsNotEmpty()

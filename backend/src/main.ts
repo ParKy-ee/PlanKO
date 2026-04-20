@@ -10,10 +10,11 @@ import cors from 'cors';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cors({
-    origin: true,
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-  }));
+  });
   app.use(cookieParser());
   app.setGlobalPrefix('api');
 

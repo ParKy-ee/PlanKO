@@ -6,8 +6,8 @@ import { BaseQueryDto } from "./base-query.dto";
 export class MissionQueryDto extends BaseQueryDto {
 
     @IsOptional()
-    @IsNumber()
-    userId?: number;
+    @IsString()
+    userId?: string;
     @IsOptional()
     @IsString()
     title?: string;

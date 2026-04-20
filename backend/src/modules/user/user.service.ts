@@ -18,35 +18,65 @@ export class UserService {
   ) { }
 
   async create(userDto: UserDto) {
+    const name = userDto.name?.trim();
+    const email = userDto.email?.trim();
+
     try {
-      const user = this.userRepository.create(userDto);
+      // 1. ตรวจสอบข้อมูลซ้ำแบบเน้นๆ
+      const existingName = await this.userRepository.findOne({ where: { name } });
+      if (existingName) {
+        return {
+          success: false,
+          message: 'ชื่อผู้ใช้นี้ถูกใช้งานไปแล้ว (Name already exists)',
+          data: null,
+        };
+      }
+
+      const existingEmail = await this.userRepository.findOne({ where: { email } });
+      if (existingEmail) {
+        return {
+          success: false,
+          message: 'อีเมลนี้ถูกใช้งานไปแล้ว (Email already exists)',
+          data: null,
+        };
+      }
+
+      // 2. สร้าง User ใหม่
+      const user = this.userRepository.create({
+        ...userDto,
+        name,
+        email,
+      });
       await this.userRepository.save(user);
 
+      // 3. ผูก Quest เริ่มต้นให้ User ใหม่
       const quests = await this.questRepository.find();
-
-      const questByUsers = quests.map((quest) =>
-        this.questByUserRepository.create({
-          user: user,
-          quest: quest,
-          current_value: 0,
-          target_value: quest.goal_value,
-          status: Status.PENDING,
-          completed_at: null,
-        })
-      );
-
-      // 4. save ทีเดียว
-      await this.questByUserRepository.save(questByUsers);
+      if (quests.length > 0) {
+        const questByUsers = quests.map((quest) =>
+          this.questByUserRepository.create({
+            user: user,
+            quest: quest,
+            current_value: 0,
+            target_value: quest.goal_value,
+            status: Status.PENDING,
+            completed_at: null,
+          })
+        );
+        await this.questByUserRepository.save(questByUsers);
+      }
 
       return {
-        message: 'User created and quests assigned',
+        success: true,
+        message: 'สร้างบัญชีและเพิ่มภารกิจเริ่มต้นเรียบร้อยแล้ว',
         data: user,
       };
 
     } catch (error) {
+      console.error('❌ [UserService.create] Error:', error); // ช่วยให้คุณดู Error ใน Terminal ได้ง่ายขึ้น
       return {
-        error: true,
-        message: 'Create user failed',
+        success: false,
+        message: 'ไม่สามารถสร้างบัญชีได้ (Create user failed)',
+        error: error.message,
         data: null,
       };
     }
@@ -56,7 +86,7 @@ export class UserService {
     const { data: users, meta } = await QueryHelper.paginate(this.userRepository, query, {
       sortField: 'id',
       searchableFields: ['name', 'email', 'role', 'missions.missionByPrograms.program.programName', 'missions.missionByPrograms.program.programType'],
-      relations: ['missions', 'missions.missionByPrograms', 'missions.missionByPrograms.program'],
+      relations: [],
     });
 
     return {

@@ -8,6 +8,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
 import { SeesionPerfomanceModule } from './modules/seesion-perfomance/seesion-perfomance.module';
 import { ProgramPlanModule } from './modules/program-plan/program-plan.module';
+import { HomeDashboardModule } from './modules/home-dashboard/home-dashboard.module';
 
 
 
@@ -38,6 +39,7 @@ import { ProgramPlanModule } from './modules/program-plan/program-plan.module';
     ...AppModules,
     SeesionPerfomanceModule,
     ProgramPlanModule,
+    HomeDashboardModule,
 
 
 

@@ -24,5 +24,8 @@ export class ProgramDto {
     @IsOptional()
     @IsNumber({}, { each: true })
     restDays?: number[];
+    @IsOptional()
+    @IsNumber()
+    total_kcal?: number;
 
 }

@@ -1,78 +1,50 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_planko/pages/admin/dashboard.dart';
-import 'package:flutter_planko/pages/admin/program-manage.dart';
-import 'package:flutter_planko/pages/admin/user-manage.dart';
-import 'package:flutter_planko/pages/user/mission.dart';
-import 'package:flutter_planko/pages/user/regiseter.dart';
-import 'package:flutter_planko/services/api/client.dart';
-import 'pages/welcome.dart';
-import 'pages/login.dart';
-import 'pages/home.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+
+import 'package:flutter_planko/routes.dart';
+
+import 'package:flutter_planko/UI/pages/admin/dashboard.dart';
+import 'package:flutter_planko/UI/pages/admin/program-manage.dart';
+import 'package:flutter_planko/UI/pages/admin/user-manage.dart';
+import 'package:flutter_planko/UI/pages/user/mission.dart';
+import 'package:flutter_planko/UI/pages/user/register.dart';
+import 'package:flutter_planko/UI/pages/user/user-detail.dart';
+import 'package:flutter_planko/UI/pages/user/login.dart';
+import 'package:flutter_planko/UI/pages/user/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (kIsWeb) {
-    databaseFactory = databaseFactoryFfiWeb;
-  } else if (Platform.isWindows || Platform.isLinux) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
-
-  runApp(PlanKO());
+  runApp(const ProviderScope(child: PlanKO()));
 }
 
-class PlanKO extends StatefulWidget {
+class PlanKO extends ConsumerWidget {
   const PlanKO({super.key});
 
   @override
-  State<PlanKO> createState() => _PlanKOState();
-}
-
-class _PlanKOState extends State<PlanKO> {
-  final client = Client();
-
-  Future<String> checkToken() async {
-    try {
-      final user = await client.getProfile();
-      if (user.isNotEmpty) {
-        final role = user['data']['role'];
-        if (role == 'admin') {
-          return '/admin/dashboard';
-        }
-      }
-      return '/home';
-    } catch (e) {
-      return '/login';
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    // ปรับให้เปิดหน้า Login เป็นหน้าแรกทันทีเพื่อทดสอบรันแค่หน้า Login ก่อร
+    return _buildApp(AppRoutes.login);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: checkToken(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            initialRoute: snapshot.data!,
-            routes: {
-              '/user': (context) => const WelcomePage(),
-              '/login': (context) => const LoginPage(),
-              '/home': (context) => const HomePage(),
-              '/register': (context) => const RegisterPage(),
-              '/admin/dashboard': (context) => const DashboardPage(),
-              '/admin/user-manage': (context) => const UserManagePage(),
-              '/admin/program-manage': (context) => const ProgramManagePage(),
-              '/mission': (context) => const MissionPage(),
-            },
-          );
-        }
-        return const Center(child: CircularProgressIndicator());
+  Widget _buildApp(String initialRoute) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'PlanKO',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      initialRoute: initialRoute,
+      routes: {
+        AppRoutes.userDetail: (context) => const UserDetailPage(),
+        AppRoutes.login: (context) => const UserLoginPage(),
+        AppRoutes.register: (context) => const RegisterPage(),
+        AppRoutes.home: (context) => const HomePage(),
+        AppRoutes.mission: (context) => const MissionPage(),
+
+        // Admin Routes
+        // '/admin/dashboard': (context) => const DashboardPage(),
+        // '/admin/user-manage': (context) => const UserManagePage(),
+        // '/admin/program-manage': (context) => const ProgramManagePage(),
       },
     );
   }
