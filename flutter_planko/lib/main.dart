@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_planko/UI/pages/user/activity.dart';
+import 'package:flutter_planko/UI/pages/user/calendar.dart';
+import 'package:flutter_planko/UI/pages/user/profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 
@@ -40,6 +43,9 @@ class PlanKO extends ConsumerWidget {
         AppRoutes.register: (context) => const RegisterPage(),
         AppRoutes.home: (context) => const HomePage(),
         AppRoutes.mission: (context) => const MissionPage(),
+        AppRoutes.activity: (context) => const ActivityPage(),
+        AppRoutes.calendar: (context) => const CalendarPage(),
+        AppRoutes.profile: (context) => const ProfilePage(),
 
         // Admin Routes
         // '/admin/dashboard': (context) => const DashboardPage(),

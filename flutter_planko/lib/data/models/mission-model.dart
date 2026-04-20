@@ -5,6 +5,8 @@ class MissionModel {
   final String startAt;
   final String endAt;
   final List<dynamic> missionByPrograms;
+  final int target;
+  final int current;
   final String createdAt;
   final String updatedAt;
 
@@ -15,6 +17,8 @@ class MissionModel {
     required this.endAt,
     required this.user,
     required this.missionByPrograms,
+    required this.target,
+    required this.current,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -29,6 +33,8 @@ class MissionModel {
       missionByPrograms: json['missionByPrograms'] != null 
           ? List<dynamic>.from(json['missionByPrograms']) 
           : [],
+      target: json['target'] ?? 0,
+      current: json['current'] ?? 0,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
     );
@@ -42,6 +48,8 @@ class MissionModel {
       'endAt': endAt,
       'user': user,
       'missionByPrograms': missionByPrograms.map((x) => x).toList(),
+      'target': target,
+      'current': current,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
