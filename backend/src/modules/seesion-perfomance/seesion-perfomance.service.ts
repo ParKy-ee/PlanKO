@@ -40,6 +40,8 @@ export class SeesionPerfomanceService {
         searchableFields: ['plankSession.id', 'user.id'],
       });
 
+
+
       const mappedData = performances.map(perf => {
         const { plankSession, user, ...rest } = perf;
         return {

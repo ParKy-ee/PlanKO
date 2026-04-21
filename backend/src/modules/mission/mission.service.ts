@@ -4,6 +4,8 @@ import { Mission } from '../../modules/mission/entities/mission.entity';
 import { Repository } from 'typeorm';
 import { QueryHelper } from 'src/commons/helpers/query.helper';
 import { MissionByProgram } from '../../modules/mission-by-program/entities/mission-by-program.entity';
+import { ProgramPlan } from '../../modules/program-plan/entities/program-plan.entity';
+import { Program } from '../../modules/program/entities/program.entity';
 import { MissionCreateDto } from './dto/mission-create.dto';
 import { MissionUpdateDto } from './dto/mission-update.dto';
 import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
@@ -16,13 +18,24 @@ export class MissionService {
     private missionRepository: Repository<Mission>,
     @InjectRepository(MissionByProgram)
     private missionByProgramRepository: Repository<MissionByProgram>,
+    @InjectRepository(ProgramPlan)
+    private programPlanRepository: Repository<ProgramPlan>,
   ) { }
 
   async create(missionDto: MissionCreateDto) {
     const { userId, ...rest } = missionDto;
 
+    // Fetch the program to calculate total plank sessions using period * frequency
+    const program = await this.missionRepository.manager.findOne(Program, {
+      where: { id: missionDto.missionByProgramId },
+    });
+
+    const targetSessionCount = program ? (program.period * program.frequency) : 0;
+
     const mission = this.missionRepository.create({
       ...rest,
+      target: targetSessionCount,
+      current: 0,
       user: { id: Number(userId) },
     });
 

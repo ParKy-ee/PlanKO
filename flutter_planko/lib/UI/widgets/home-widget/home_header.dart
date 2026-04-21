@@ -1,10 +1,32 @@
+import 'package:flutter_planko/UI/providers/session_performance_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_planko/UI/providers/mission_provider.dart';
 import 'package:flutter/material.dart';
 
-class HomeHeaderWidget extends StatelessWidget {
+class HomeHeaderWidget extends ConsumerWidget {
   const HomeHeaderWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final missions = ref.watch(missionProvider);
+
+    int totalTarget = 0;
+    int totalCurrent = 0;
+    for (var mission in missions) {
+      totalCurrent += mission.current;
+      totalTarget += mission.target;
+    }
+
+    final double progress = totalTarget > 0
+        ? (totalCurrent / totalTarget)
+        : 0.0;
+    final int percentage = (progress * 100).round();
+    final sessionPerformances = ref.watch(sessionPerformanceProvider);
+    final totalKcal = sessionPerformances.fold<num>(
+      0,
+      (prev, element) => prev + (element.kcal ?? 0),
+    );
+
     return Container(
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -15,20 +37,35 @@ class HomeHeaderWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'จำนวน\nแคลอรี่\nที่เผาผลาญ\nรวม',
-                style: TextStyle(color: Colors.white, fontSize: 16, height: 1.2),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  height: 1.2,
+                ),
               ),
               SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('1247', style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold, height: 1)),
+                  Text(
+                    totalKcal.toStringAsFixed(0),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                    ),
+                  ),
                   SizedBox(width: 4),
-                  Text('แคล', style: TextStyle(color: Colors.white, fontSize: 16)),
+                  Text(
+                    'แคล',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ],
               ),
             ],
@@ -40,17 +77,24 @@ class HomeHeaderWidget extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 CircularProgressIndicator(
-                  value: 0.68,
+                  value: progress,
                   strokeWidth: 8,
                   backgroundColor: Colors.white.withOpacity(0.3),
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
-                const Center(
-                  child: Text('68 %', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                Center(
+                  child: Text(
+                    '$percentage %',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

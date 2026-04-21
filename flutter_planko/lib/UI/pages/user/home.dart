@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_planko/UI/providers/quest_by_user_provider.dart';
+import 'package:flutter_planko/UI/providers/mission_provider.dart';
 import 'package:flutter_planko/UI/providers/posture_provider.dart';
 import 'package:flutter_planko/UI/providers/quest_category_provider.dart';
+import 'package:flutter_planko/UI/providers/session_performance_provider.dart';
+import 'package:flutter_planko/UI/providers/user_provider.dart';
 import 'package:flutter_planko/UI/widgets/home-widget/home_header.dart';
 import 'package:flutter_planko/UI/widgets/home-widget/home_progress.dart';
 import 'package:flutter_planko/UI/widgets/home-widget/home_posture.dart';
+import 'package:flutter_planko/UI/widgets/navebar.dart';
+import 'package:flutter_planko/routes.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -18,8 +23,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
+      final user = await ref.read(userDataProvider.future);
+      ref
+          .read(sessionPerformanceProvider.notifier)
+          .fetchSessionPerformances(user.id);
+
       ref.read(questByUserProvider.notifier).fetchQuestsByUser();
+      ref.read(missionProvider.notifier).fetchMissions(user.id.toString());
       ref.read(postureProvider.notifier).fetchPostures();
       ref.read(questCategoryProvider.notifier).fetchQuestCategories();
     });
@@ -29,89 +40,57 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'PlankO',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, size: 28),
-            onPressed: () {},
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: true,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            title: const Text(
+              'PlankO',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 28,
+                letterSpacing: -0.5,
+                color: Colors.black87,
+              ),
+            ),
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade100,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.notifications_none_rounded,
+                    size: 26,
+                    color: Colors.black87,
+                  ),
+                  onPressed: () {},
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
+          SliverPadding(
+            padding: const EdgeInsets.only(top: 8, bottom: 40),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(const [
+                HomeHeaderWidget(),
+                SizedBox(height: 24),
+                HomeProgressWidget(),
+                SizedBox(height: 24),
+                HomePostureWidget(),
+              ]),
+            ),
+          ),
         ],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        centerTitle: false,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: const [
-            HomeHeaderWidget(),
-            SizedBox(height: 16),
-            HomeProgressWidget(),
-            SizedBox(height: 16),
-            HomePostureWidget(),
-            SizedBox(height: 32),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.blue.shade500, // Solid blue background
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.blue.shade500,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(fontSize: 12),
-          currentIndex: 0,
-          onTap: (index) {
-            if (index == 3) {
-              Navigator.pushNamed(context, '/profile');
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.home),
-              ),
-              label: 'โฮม',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.show_chart),
-              ),
-              label: 'กิจกรรม',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.calendar_today_outlined),
-              ),
-              label: 'ปฏิทิน',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: EdgeInsets.only(bottom: 4.0),
-                child: Icon(Icons.person_outline),
-              ),
-              label: 'โปรไฟล์',
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: const SharedBottomNavBar(currentIndex: 0),
     );
   }
 }

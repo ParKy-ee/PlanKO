@@ -91,10 +91,7 @@ class ProfilePage extends ConsumerWidget {
               ),
               Text(
                 user.email,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -162,7 +159,9 @@ class ProfilePage extends ConsumerWidget {
                             value: 0.68,
                             strokeWidth: 5,
                             backgroundColor: Colors.white.withOpacity(0.2),
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -184,15 +183,28 @@ class ProfilePage extends ConsumerWidget {
         children: [
           Row(
             children: [
-              _buildStatItem('ส่วนสูง : ${user.height} cm', Icons.person_add_alt_1_outlined),
-              _buildStatItem('น้ำหนัก : ${user.weight} Kg', Icons.monitor_weight_outlined, showEdit: true),
+              _buildStatItem(
+                'ส่วนสูง : ${user.height} cm',
+                Icons.person_add_alt_1_outlined,
+              ),
+              _buildStatItem(
+                'น้ำหนัก : ${user.weight} Kg',
+                Icons.monitor_weight_outlined,
+                showEdit: true,
+              ),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             children: [
-              _buildStatItem('อายุ : ${user.age}', Icons.hourglass_bottom_outlined),
-              _buildStatItem('เพศ : ${user.gender == 'male' ? 'ชาย' : 'หญิง'}', Icons.transgender_outlined),
+              _buildStatItem(
+                'อายุ : ${user.age}',
+                Icons.hourglass_bottom_outlined,
+              ),
+              _buildStatItem(
+                'เพศ : ${user.gender == 'male' ? 'ชาย' : 'หญิง'}',
+                Icons.transgender_outlined,
+              ),
             ],
           ),
         ],
@@ -223,7 +235,10 @@ class ProfilePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 )
               else
                 Text(
@@ -259,10 +274,7 @@ class ProfilePage extends ConsumerWidget {
       children: [
         const Text(
           'ประวัติ',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         GestureDetector(
           onTap: () {},
@@ -308,7 +320,8 @@ class ProfilePage extends ConsumerWidget {
               child: Image.network(
                 'https://via.placeholder.com/70x45?text=Exercise',
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.fitness_center),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.fitness_center),
               ),
             ),
           ),
@@ -335,10 +348,7 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 Text(
                   date,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.black54,
-                  ),
+                  style: const TextStyle(fontSize: 10, color: Colors.black54),
                 ),
               ],
             ),
@@ -366,7 +376,10 @@ class ProfilePage extends ConsumerWidget {
       currentIndex: 3,
       showSelectedLabels: true,
       showUnselectedLabels: true,
-      selectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+      selectedLabelStyle: const TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.bold,
+      ),
       unselectedLabelStyle: const TextStyle(fontSize: 10),
       onTap: (index) {
         if (index == 0) Navigator.pushReplacementNamed(context, '/home');
@@ -374,7 +387,10 @@ class ProfilePage extends ConsumerWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'โฮม'),
         BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'กิจกรรม'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), label: 'ปฏิทิน'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_today_outlined),
+          label: 'ปฏิทิน',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'โปรไฟล์'),
       ],
     );
