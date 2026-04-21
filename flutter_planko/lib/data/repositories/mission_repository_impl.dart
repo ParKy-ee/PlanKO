@@ -19,4 +19,16 @@ class MissionRepositoryImpl {
       rethrow;
     }
   }
+
+  Future<List<MissionModel>> getMissionByUserId(String userId) async {
+    try {
+      final missions = await api.getMissionByUserId(userId);
+      await local.saveMission(missions);
+      return missions;
+    } catch (e) {
+      final cachedMissions = await local.getMissions();
+      if (cachedMissions != null) return cachedMissions;
+      rethrow;
+    }
+  }
 }

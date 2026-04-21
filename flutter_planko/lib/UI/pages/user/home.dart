@@ -76,7 +76,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           currentIndex: 0,
           onTap: (index) {
-            // Handle navigation when user clicks other tabs
+            if (index == 3) {
+              Navigator.pushNamed(context, '/profile');
+            }
           },
           items: const [
             BottomNavigationBarItem(

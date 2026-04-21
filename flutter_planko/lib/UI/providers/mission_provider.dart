@@ -28,9 +28,9 @@ class MissionNotifier extends StateNotifier<List<MissionModel>> {
 
   MissionNotifier({required this.repository}) : super([]);
 
-  Future<void> fetchMissions() async {
+  Future<void> fetchMissions(String userId) async {
     try {
-      final missions = await repository.getMissions();
+      final missions = await repository.getMissionByUserId(userId);
       state = missions;
     } catch (e) {
       debugPrint("Error fetching missions: $e");

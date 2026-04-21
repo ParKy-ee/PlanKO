@@ -4,14 +4,12 @@ import 'package:flutter/foundation.dart';
 
 import 'package:flutter_planko/routes.dart';
 
-import 'package:flutter_planko/UI/pages/admin/dashboard.dart';
-import 'package:flutter_planko/UI/pages/admin/program-manage.dart';
-import 'package:flutter_planko/UI/pages/admin/user-manage.dart';
 import 'package:flutter_planko/UI/pages/user/mission.dart';
 import 'package:flutter_planko/UI/pages/user/register.dart';
 import 'package:flutter_planko/UI/pages/user/user-detail.dart';
 import 'package:flutter_planko/UI/pages/user/login.dart';
 import 'package:flutter_planko/UI/pages/user/home.dart';
+import 'package:flutter_planko/UI/pages/user/profile.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +37,7 @@ class PlanKO extends ConsumerWidget {
         AppRoutes.login: (context) => const UserLoginPage(),
         AppRoutes.register: (context) => const RegisterPage(),
         AppRoutes.home: (context) => const HomePage(),
+        AppRoutes.profile: (context) => const ProfilePage(),
         AppRoutes.mission: (context) => const MissionPage(),
 
         // Admin Routes

@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{api}}/session-performance
+  url: {{api}}/session-performance?userId=21
   body: none
   auth: inherit
+}
+
+params:query {
+  userId: 21
 }
 
 vars:pre-request {
