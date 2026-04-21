@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 import { BaseQueryDto } from "./base-query.dto";
 
 export class SessionPerformanceQueryDto extends BaseQueryDto {
@@ -37,5 +37,9 @@ export class SessionPerformanceQueryDto extends BaseQueryDto {
     @IsOptional()
     @IsNumber()
     figure_count: number;
+
+    @IsOptional()
+    @IsString()
+    userId: string;
 
 }

@@ -36,11 +36,11 @@ export class ProgramPlanService {
     const where: any = {};
     const queryObj: any = { ...query };
 
-    if (queryObj.program_id) {
-      where.program = { id: queryObj.program_id };
+    if (queryObj.programId) {
+      where.program = { id: queryObj.programId };
     }
-    if (queryObj.plank_session_id) {
-      where.plankSession = { id: queryObj.plank_session_id };
+    if (queryObj.plankSessionId) {
+      where.plankSession = { id: queryObj.plankSessionId };
     }
 
     const { data: programPlans, meta } = await QueryHelper.paginate(this.programPlanRepository, queryObj, {

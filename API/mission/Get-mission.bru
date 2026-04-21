@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{api}}/mission
+  url: {{api}}/mission?userId=21
   body: none
   auth: bearer
+}
+
+params:query {
+  userId: 21
 }
 
 auth:bearer {

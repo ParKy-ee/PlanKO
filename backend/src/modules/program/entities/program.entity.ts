@@ -44,9 +44,6 @@ export class Program {
     @Column({ type: 'boolean', default: true })
     is_active: boolean;
 
-    @Column()
-    total_kcal: number;
-
     @CreateDateColumn()
     createdAt: Date;
 

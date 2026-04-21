@@ -38,6 +38,7 @@ export class SeesionPerfomanceService {
         sortField: 'id',
         relations: ['plankSession', 'user'],
         searchableFields: ['plankSession.id', 'user.id'],
+        where: query.userId ? { user: { id: +query.userId } } : {},
       });
 
 

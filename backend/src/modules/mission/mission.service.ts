@@ -101,7 +101,7 @@ export class MissionService {
           missionByPrograms: mission.missionByPrograms.map((missionByProgram) => {
             return {
               id: missionByProgram.id,
-              program: missionByProgram.program.id,
+              program: missionByProgram.program,
             };
           }),
         };

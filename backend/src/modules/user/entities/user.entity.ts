@@ -1,4 +1,4 @@
-import { Role } from '../../../commons/enums/role.enum';
+
 import * as bcrypt from 'bcrypt';
 import { Mission } from '../../../modules/mission/entities/mission.entity';
 
@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { QuestByUser } from '../../../modules/quest-by-uesr/entities/quest-by-uesr.entity';
 import { SessionPerfomance } from '../../../modules/seesion-perfomance/entities/seesion-perfomance.entity';
+import { Role } from '../../../commons/enums/role.enum';
 
 @Entity({ name: 'users' })
 export class User {

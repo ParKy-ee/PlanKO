@@ -44,3 +44,11 @@ final sessionPerformanceProvider =
       final repository = ref.watch(sessionPerformanceRepositoryProvider);
       return SessionPerformanceNotifier(repository: repository);
     });
+
+final fetchSessionPerformances = FutureProvider<List<PlankPerformanceModel>>((
+  ref,
+) async {
+  final user = await ref.watch(userDataProvider.future);
+  final repository = ref.watch(sessionPerformanceRepositoryProvider);
+  return repository.getSessionPerformances(user.id);
+});
