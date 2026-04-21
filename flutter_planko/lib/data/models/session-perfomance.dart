@@ -49,4 +49,23 @@ class PlankPerformanceModel {
       userId: json['user']?['id'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'accuracy_avg': accuracyAvg,
+      'perfect_count': perfectCount,
+      'good_count': goodCount,
+      'bad_count': badCount,
+      'missed_count': missedCount,
+      'score': score,
+      'completed': completed,
+      'kcal': kcal,
+      'duration': duration,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'plankSession': {'id': plankSessionId},
+      'user': userId != null ? {'id': userId} : null,
+    };
+  }
 }
