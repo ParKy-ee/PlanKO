@@ -30,8 +30,8 @@ import { HomeDashboardModule } from './modules/home-dashboard/home-dashboard.mod
         POSTGRES_PASSWORD: Joi.string(),
         POSTGRES_DB: Joi.string(),
 
-        REDIS_HOST: Joi.string().required(),
-        REDIS_PORT: Joi.number().default(6379),
+        // REDIS_HOST: Joi.string().required(),
+        // REDIS_PORT: Joi.number().default(6379),
 
         PORT: Joi.number().default(3001),
         NODE_ENV: Joi.string()
