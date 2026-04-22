@@ -3,9 +3,12 @@ import { UserQuestsService } from './user-quests.service';
 import { CreateUserQuestDto } from './dto/create-user-quest.dto';
 import { UpdateUserQuestDto } from './dto/update-user-quest.dto';
 
-@Controller('user-quests')
+@Controller({
+  path: 'user-quests',
+  version: '1',
+})
 export class UserQuestsController {
-  constructor(private readonly userQuestsService: UserQuestsService) {}
+  constructor(private readonly userQuestsService: UserQuestsService) { }
 
   @Post()
   create(@Body() createUserQuestDto: CreateUserQuestDto) {
