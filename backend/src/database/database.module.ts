@@ -7,32 +7,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: (configService: ConfigService) => {
-                const isProd = configService.get('NODE_ENV') === 'production';
-                const dbUrl = configService.get<string>('DATABASE_URL');
-
-                return {
-                    type: 'postgres',
-
-                    // 👇 รองรับทั้ง 2 แบบ
-                    ...(dbUrl
-                        ? { url: dbUrl }
-                        : {
-                            host: configService.get<string>('POSTGRES_HOST'),
-                            port: configService.get<number>('POSTGRES_PORT'),
-                            username: configService.get<string>('POSTGRES_USER'),
-                            password: configService.get<string>('POSTGRES_PASSWORD'),
-                            database: configService.get<string>('POSTGRES_DB'),
-                        }),
-
-                    autoLoadEntities: true,
-
-                    // 👇 สำคัญมากบน Render
-                    ssl: isProd ? { rejectUnauthorized: false } : false,
-
-                    synchronize: false,
-                };
-            },
+            useFactory: (configService: ConfigService) => ({
+                type: 'postgres',
+                url: configService.get<string>('DATABASE_URL'), // ✅ ใช้ตัวเดียวพอ
+                autoLoadEntities: true,
+                ssl: {
+                    rejectUnauthorized: false,
+                },
+                synchronize: false,
+            }),
         }),
     ],
 })
