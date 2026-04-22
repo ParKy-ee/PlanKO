@@ -1,7 +1,7 @@
 import { IsString, IsNumber, IsEnum, IsOptional, IsBoolean } from 'class-validator';
-import { QuestType } from 'src/commons/enums/quest-type.enum';
-import { Difficulty } from 'src/commons/enums/difficulty.enum';
-import { Unit } from 'src/commons/enums/unit.enum';
+import { QuestType } from '../../commons/enums/quest-type.enum';
+import { Difficulty } from '../../commons/enums/difficulty.enum';
+import { Unit } from '../../commons/enums/unit.enum';
 import { BaseQueryDto } from './base-query.dto';
 
 export class QuestDto extends BaseQueryDto {

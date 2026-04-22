@@ -4,9 +4,9 @@ import { UpdateQuestCategoryDto } from './dto/update-quest-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuestCategory } from './entities/quest-category.entity';
 import { Repository } from 'typeorm';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { QuestCategoryDto } from 'src/commons/dtos/quest-category.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { QuestCategoryDto } from '../../commons/dtos/quest-category.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class QuestCategoryService {

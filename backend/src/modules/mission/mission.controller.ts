@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@
 import { MissionService } from './mission.service';
 import { MissionCreateDto } from './dto/mission-create.dto';
 import { MissionUpdateDto } from './dto/mission-update.dto';
-import { MissionQueryDto } from 'src/commons/dtos/mission-query.dto';
+import { MissionQueryDto } from '../../commons/dtos/mission-query.dto';
 
 
 @Controller({

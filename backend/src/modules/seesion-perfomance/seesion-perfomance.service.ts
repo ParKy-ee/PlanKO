@@ -3,9 +3,9 @@ import { PerfomanceDto } from './dto/session-performance';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SessionPerfomance } from './entities/seesion-perfomance.entity';
 import { Repository } from 'typeorm';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { SessionPerformanceQueryDto } from 'src/commons/dtos/session-performance-qurey.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { SessionPerformanceQueryDto } from '../../commons/dtos/session-performance-qurey.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class SeesionPerfomanceService {

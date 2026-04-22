@@ -4,9 +4,9 @@ import { UpdatePostureCategoryDto } from './dto/update-posture-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostureCategory } from './entities/posture-category.entity';
 import { Repository } from 'typeorm';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { BaseQueryDto } from 'src/commons/dtos/base-query.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { BaseQueryDto } from '../../commons/dtos/base-query.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class PostureCategoryService {

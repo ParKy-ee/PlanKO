@@ -1,13 +1,13 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { HomeDashboardService } from './home-dashboard.service';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Controller({
   path: 'home-dashboard',
   version: '1',
 })
 export class HomeDashboardController {
-  constructor(private readonly homeDashboardService: HomeDashboardService) {}
+  constructor(private readonly homeDashboardService: HomeDashboardService) { }
 
   @Get()
   async getDashboard(@Query('userId') userId: string) {

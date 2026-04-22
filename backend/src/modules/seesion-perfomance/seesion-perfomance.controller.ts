@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
 import { SeesionPerfomanceService } from './seesion-perfomance.service';
 import { PerfomanceDto } from './dto/session-performance';
-import { SessionPerformanceQueryDto } from 'src/commons/dtos/session-performance-qurey.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { SessionPerformanceQueryDto } from '../../commons/dtos/session-performance-qurey.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Controller({
   path: 'session-performance',

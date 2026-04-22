@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@
 import { PlankBySessionService } from './plank-by-session.service';
 import { CreatePlankBySessionDto } from './dto/create-plank-by-session.dto';
 import { UpdatePlankBySessionDto } from './dto/update-plank-by-session.dto';
-import { PlankBySessionQueryDto } from 'src/commons/dtos/plank-by-session-query.dto';
+import { PlankBySessionQueryDto } from '../../commons/dtos/plank-by-session-query.dto';
 
 @Controller({
   path: 'plank-by-session',

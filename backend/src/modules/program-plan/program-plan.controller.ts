@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@
 import { ProgramPlanService } from './program-plan.service';
 import { CreateProgramPlanDto } from './dto/create-program-plan.dto';
 import { UpdateProgramPlanDto } from './dto/update-program-plan.dto';
-import { ProgramPlanQueryDto } from 'src/commons/dtos/program-plan-query.dto';
+import { ProgramPlanQueryDto } from '../../commons/dtos/program-plan-query.dto';
 
 @Controller({
   path: 'program-plan',

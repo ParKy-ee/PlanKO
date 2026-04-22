@@ -1,5 +1,5 @@
 import { IsNumber, IsOptional, IsEnum, IsDateString } from 'class-validator';
-import { Status } from 'src/commons/enums/status.enum';
+import { Status } from '../../../commons/enums/status.enum';
 
 export class CreateQuestByUesrDto {
   @IsNumber()

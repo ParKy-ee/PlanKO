@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/
 import { PostureCategoryService } from './posture-category.service';
 import { CreatePostureCategoryDto } from './dto/create-posture-category.dto';
 import { UpdatePostureCategoryDto } from './dto/update-posture-category.dto';
-import { BaseQueryDto } from 'src/commons/dtos/base-query.dto';
+import { BaseQueryDto } from '../../commons/dtos/base-query.dto';
 
 
 @Controller({
@@ -10,7 +10,7 @@ import { BaseQueryDto } from 'src/commons/dtos/base-query.dto';
   version: '1',
 })
 export class PostureCategoryController {
-  constructor(private readonly postureCategoryService: PostureCategoryService) {}
+  constructor(private readonly postureCategoryService: PostureCategoryService) { }
 
   @Post()
   create(@Body() createPostureCategoryDto: CreatePostureCategoryDto) {

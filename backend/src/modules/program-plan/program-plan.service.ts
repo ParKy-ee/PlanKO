@@ -4,9 +4,9 @@ import { UpdateProgramPlanDto } from './dto/update-program-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProgramPlan } from './entities/program-plan.entity';
 import { Repository } from 'typeorm';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { ProgramPlanQueryDto } from 'src/commons/dtos/program-plan-query.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { ProgramPlanQueryDto } from '../../commons/dtos/program-plan-query.dto';
 
 @Injectable()
 export class ProgramPlanService {

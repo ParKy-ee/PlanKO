@@ -3,9 +3,9 @@ import { PostureDto } from './dto/posture.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Posture } from './entities/posture.entity';
 import { Repository } from 'typeorm';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { PostureQueryDto } from 'src/commons/dtos/posture.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { PostureQueryDto } from '../../commons/dtos/posture.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 import { PostureUpdateDto } from './dto/posture-update.dto';
 
 @Injectable()

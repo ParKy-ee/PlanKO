@@ -4,10 +4,10 @@ import { UpdateQuestDto } from './dto/update-quest.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Quest } from './entities/quest.entity';
 import { Repository } from 'typeorm';
-import { BaseQueryDto } from 'src/commons/dtos/base-query.dto';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
-import { QuestDto } from 'src/commons/dtos/quest.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { BaseQueryDto } from '../../commons/dtos/base-query.dto';
+import { QueryHelper } from '../../commons/helpers/query.helper';
+import { QuestDto } from '../../commons/dtos/quest.dto';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class QuestService {

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
 import { PlankSessionService } from './plank-session.service';
 import { PlankSessionDto } from './dto/plank-session.dto';
-import { PlankSessionQueryDto } from 'src/commons/dtos/plank-session-query.dto';
+import { PlankSessionQueryDto } from '../../commons/dtos/plank-session-query.dto';
 import { PlankSessionUpdateDto } from './dto/plank-session-update.dto';
 
 @Controller({

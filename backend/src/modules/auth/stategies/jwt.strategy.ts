@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthService } from "../auth.service";
 import { ConfigService } from "@nestjs/config";
 import { Request } from "express";
-import { UserService } from "src/modules/user/user.service";
+import { UserService } from "../../../modules/user/user.service";
 
 
 @Injectable()

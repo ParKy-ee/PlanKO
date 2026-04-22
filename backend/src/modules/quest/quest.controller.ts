@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@
 import { QuestService } from './quest.service';
 import { CreateQuestDto } from './dto/create-quest.dto';
 import { UpdateQuestDto } from './dto/update-quest.dto';
-import { QuestDto } from 'src/commons/dtos/quest.dto';
+import { QuestDto } from '../../commons/dtos/quest.dto';
 
 @Controller('quest')
 export class QuestController {

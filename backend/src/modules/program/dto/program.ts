@@ -1,5 +1,5 @@
 import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
-import { ProgramType } from "src/commons/enums/prtogram-type.enum";
+import { ProgramType } from "../../../commons/enums/prtogram-type.enum";
 
 export class ProgramDto {
 

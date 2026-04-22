@@ -4,7 +4,7 @@ import { UpdateQuestByUesrDto } from './dto/update-quest-by-uesr.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { QuestByUser } from './entities/quest-by-uesr.entity';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class QuestByUesrService {

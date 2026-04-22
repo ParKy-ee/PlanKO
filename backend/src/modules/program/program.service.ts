@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Program } from './entities/program.entity';
 import { Repository } from 'typeorm';
 import { ProgramDto } from './dto/program';
-import { ProgramQueryDto } from 'src/commons/dtos/program-qurey.dtos';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { ProgramQueryDto } from '../../commons/dtos/program-qurey.dtos';
+import { QueryHelper } from '../../commons/helpers/query.helper';
 import { PostureByProgram } from '../posture-by-program/entities/posture-by-program.entity';
 
 @Injectable()

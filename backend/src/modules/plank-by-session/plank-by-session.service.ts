@@ -4,9 +4,9 @@ import { UpdatePlankBySessionDto } from './dto/update-plank-by-session.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlankBySession } from './entities/plank-by-session.entity';
 import { Repository } from 'typeorm';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
-import { PlankBySessionQueryDto } from 'src/commons/dtos/plank-by-session-query.dto';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
+import { PlankBySessionQueryDto } from '../../commons/dtos/plank-by-session-query.dto';
+import { QueryHelper } from '../../commons/helpers/query.helper';
 
 @Injectable()
 export class PlankBySessionService {

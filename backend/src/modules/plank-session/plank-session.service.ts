@@ -3,10 +3,10 @@ import { PlankSessionDto } from './dto/plank-session.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlankSession } from './entities/plank-session.entity';
 import { Repository } from 'typeorm';
-import { PlankSessionQueryDto } from 'src/commons/dtos/plank-session-query.dto';
-import { QueryHelper } from 'src/commons/helpers/query.helper';
+import { PlankSessionQueryDto } from '../../commons/dtos/plank-session-query.dto';
+import { QueryHelper } from '../../commons/helpers/query.helper';
 import { PlankSessionUpdateDto } from './dto/plank-session-update.dto';
-import { ResponseHelper } from 'src/commons/helpers/response.helper';
+import { ResponseHelper } from '../../commons/helpers/response.helper';
 
 @Injectable()
 export class PlankSessionService {
