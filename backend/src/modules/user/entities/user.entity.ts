@@ -12,7 +12,6 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
-  JoinColumn,
 } from 'typeorm';
 import { QuestByUser } from '../../../modules/quest-by-uesr/entities/quest-by-uesr.entity';
 import { SessionPerfomance } from '../../../modules/seesion-perfomance/entities/seesion-perfomance.entity';
