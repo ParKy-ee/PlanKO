@@ -30,6 +30,13 @@ export class Posture {
     @Column({ type: 'varchar', length: 255 })
     description: string;
 
+    @Column({ type: 'varchar', length: 255 })
+    benefit: string;
+
+    @Column({ type: 'varchar', length: 255 })
+    posture_position: string;
+
+
     @Column({ type: 'boolean', default: true })
     is_active: boolean;
 

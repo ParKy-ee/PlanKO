@@ -33,6 +33,8 @@ class PostureModel {
   final String difficulty;
   final String name;
   final String description;
+  final String benefit;
+  final String posturePosition;
   final bool isActive;
   final String createdAt;
   final String updatedAt;
@@ -43,6 +45,8 @@ class PostureModel {
     required this.difficulty,
     required this.name,
     required this.description,
+    required this.benefit,
+    required this.posturePosition,
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
@@ -57,6 +61,8 @@ class PostureModel {
       difficulty: json['difficulty'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
+      benefit: json['benefit'] ?? '',
+      posturePosition: json['posture_position'] ?? '',
       isActive: json['is_active'] ?? true,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',

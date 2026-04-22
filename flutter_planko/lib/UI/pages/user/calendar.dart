@@ -148,7 +148,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
   Widget _buildDropdown(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE0E0E0)),
         borderRadius: BorderRadius.circular(12),
@@ -156,9 +156,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(text, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 4),
-          const Icon(Icons.keyboard_arrow_down, size: 20),
+          Text(text, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 2),
+          const Icon(Icons.keyboard_arrow_down, size: 18),
         ],
       ),
     );

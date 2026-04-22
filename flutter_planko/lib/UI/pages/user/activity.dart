@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_planko/UI/widgets/navebar.dart';
+import 'package:flutter_planko/routes.dart';
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({super.key});
@@ -49,7 +50,7 @@ class _ActivityPageState extends State<ActivityPage> {
                       title: 'กำหนดเอง',
                       icon: Icons.settings,
                       onTap: () {
-                        // Action for custom activity
+                        Navigator.pushNamed(context, AppRoutes.custom);
                       },
                     ),
                   ],

@@ -3,7 +3,6 @@ import 'package:flutter_planko/UI/pages/user/activity.dart';
 import 'package:flutter_planko/UI/pages/user/calendar.dart';
 import 'package:flutter_planko/UI/pages/user/profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:flutter_planko/routes.dart';
 
@@ -12,7 +11,8 @@ import 'package:flutter_planko/UI/pages/user/register.dart';
 import 'package:flutter_planko/UI/pages/user/user-detail.dart';
 import 'package:flutter_planko/UI/pages/user/login.dart';
 import 'package:flutter_planko/UI/pages/user/home.dart';
-import 'package:flutter_planko/UI/pages/user/profile.dart';
+import 'package:flutter_planko/UI/pages/user/posture.dart';
+import 'package:flutter_planko/UI/pages/user/custom.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +44,8 @@ class PlanKO extends ConsumerWidget {
         AppRoutes.mission: (context) => const MissionPage(),
         AppRoutes.activity: (context) => const ActivityPage(),
         AppRoutes.calendar: (context) => const CalendarPage(),
-        AppRoutes.profile: (context) => const ProfilePage(),
+        AppRoutes.posture: (context) => const PosturePage(),
+        AppRoutes.custom: (context) => const CustomPage(),
 
         // Admin Routes
         // '/admin/dashboard': (context) => const DashboardPage(),
