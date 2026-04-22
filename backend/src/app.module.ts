@@ -6,9 +6,6 @@ import * as Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppModules } from './modules';
-import { SeesionPerfomanceModule } from './modules/seesion-perfomance/seesion-perfomance.module';
-import { ProgramPlanModule } from './modules/program-plan/program-plan.module';
-import { HomeDashboardModule } from './modules/home-dashboard/home-dashboard.module';
 
 
 
@@ -47,12 +44,6 @@ import { HomeDashboardModule } from './modules/home-dashboard/home-dashboard.mod
       },
     ]),
     ...AppModules,
-    SeesionPerfomanceModule,
-    ProgramPlanModule,
-    HomeDashboardModule,
-
-
-
   ],
   controllers: [AppController],
   providers: [AppService],

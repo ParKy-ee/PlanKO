@@ -11,6 +11,10 @@ import { QuestCategoryModule } from "./quest-category/quest-category.module";
 import { QuestModule } from "./quest/quest.module";
 import { QuestByUesrModule } from "./quest-by-uesr/quest-by-uesr.module";
 import { PostureCategoryModule } from "./posture-category/posture-category.module";
+import { PlankBySessionModule } from "./plank-by-session/plank-by-session.module";
+import { UserQuestsModule } from "./user-quests/user-quests.module";
+import { HomeDashboardModule } from "./home-dashboard/home-dashboard.module";
+import { ProgramPlanModule } from "./program-plan/program-plan.module";
 
 
 export const AppModules = [
@@ -27,5 +31,9 @@ export const AppModules = [
     QuestModule,
     QuestByUesrModule,
     PostureCategoryModule,
+    PlankBySessionModule,
+    UserQuestsModule,
+    HomeDashboardModule,
+    ProgramPlanModule,
 ]
 
