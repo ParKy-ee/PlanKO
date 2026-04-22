@@ -284,7 +284,7 @@ async function seed() {
             const existing = await programRepo.findOne({ where: { programName: prog.programName } });
             if (!existing) {
                 // Fix period if it was changed
-                const pToSave = { ...prog, period: 30 }; 
+                const pToSave = { ...prog, period: 30 };
                 await programRepo.save(pToSave);
             }
         }
