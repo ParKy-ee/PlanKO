@@ -11,6 +11,7 @@ import { QuestCategoryModule } from "./quest-category/quest-category.module";
 import { QuestModule } from "./quest/quest.module";
 import { QuestByUesrModule } from "./quest-by-uesr/quest-by-uesr.module";
 import { PostureCategoryModule } from "./posture-category/posture-category.module";
+import { SensorSocketModule } from "./sensor-socket/sensor-socket.module";
 
 
 export const AppModules = [
@@ -27,5 +28,6 @@ export const AppModules = [
     QuestModule,
     QuestByUesrModule,
     PostureCategoryModule,
+    SensorSocketModule,
 ]
 
