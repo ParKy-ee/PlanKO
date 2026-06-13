@@ -11,6 +11,7 @@ import {
 import { Server } from 'socket.io';
 import { SensorSocketService } from './sensor-socket.service';
 import { SensorPayloadDto } from './dto/sensor-payload.dto';
+import { BodySensorPayloadDto } from './dto/body-sensor-payload.dto';
 
 @WebSocketGateway({
   cors: {
@@ -50,6 +51,25 @@ export class SensorSocketGateway
       data: {
         clientId: client.id,
         receivedAt: normalized.receivedAt,
+      },
+    };
+  }
+
+  @SubscribeMessage('data:body-sensor')
+  async handleBodySensorData(
+    @ConnectedSocket() client: any,
+    @MessageBody() payload: BodySensorPayloadDto,
+  ) {
+    this.logger.log(`Received body-sensor data from ${client.id}: ${JSON.stringify(payload)}`);
+    const savedData = await this.sensorSocketService.saveBodySensorData(payload);
+
+    this.server.emit('body-sensor:updated', savedData);
+
+    return {
+      event: 'body-sensor:ack',
+      data: {
+        clientId: client.id,
+        savedId: savedData.id,
       },
     };
   }
