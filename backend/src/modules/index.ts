@@ -12,7 +12,10 @@ import { QuestModule } from "./quest/quest.module";
 import { QuestByUesrModule } from "./quest-by-uesr/quest-by-uesr.module";
 import { PostureCategoryModule } from "./posture-category/posture-category.module";
 import { SensorSocketModule } from "./sensor-socket/sensor-socket.module";
-
+import { PlankBySessionModule } from "./plank-by-session/plank-by-session.module";
+import { ProgramPlanModule } from "./program-plan/program-plan.module";
+import { HomeDashboardModule } from "./home-dashboard/home-dashboard.module";
+import { UserQuestsModule } from "./user-quests/user-quests.module";
 
 export const AppModules = [
     AuthModule,
@@ -29,5 +32,8 @@ export const AppModules = [
     QuestByUesrModule,
     PostureCategoryModule,
     SensorSocketModule,
+    PlankBySessionModule,
+    ProgramPlanModule,
+    HomeDashboardModule,
+    UserQuestsModule,
 ]
-
