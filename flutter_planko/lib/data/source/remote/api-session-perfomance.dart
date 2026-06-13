@@ -1,6 +1,5 @@
 import 'package:flutter_planko/core/services/api-service.dart';
 import 'package:flutter_planko/data/models/session-perfomance.dart';
-import 'package:flutter_planko/core/constants/API-constant.dart';
 
 class ApiSessionPerformanceRemote {
   final ApiService apiService;
@@ -16,7 +15,9 @@ class ApiSessionPerformanceRemote {
     throw Exception('Failed to load session performances');
   }
 
-  Future<PlankPerformanceModel> getSessionPerformanceByUserId(int userId) async {
+  Future<PlankPerformanceModel> getSessionPerformanceByUserId(
+    int userId,
+  ) async {
     final response = await apiService.get('session-performance?userId=$userId');
     if (response.data != null) {
       final List data = response.data['data'] ?? [];

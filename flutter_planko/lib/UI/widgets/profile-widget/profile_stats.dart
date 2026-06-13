@@ -66,7 +66,7 @@ class ProfileStatsWidget extends ConsumerWidget {
               if (showEdit)
                 Text.rich(
                   TextSpan(
-                    text: label.split(':')[0] + ' : ',
+                    text: '${label.split(':')[0]} : ',
                     children: [
                       TextSpan(
                         text: label.split(':')[1].trim(),

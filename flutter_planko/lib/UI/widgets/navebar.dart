@@ -26,8 +26,9 @@ class SharedBottomNavBar extends StatelessWidget {
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         currentIndex: currentIndex,
         onTap: (index) {
-          if (index == currentIndex)
+          if (index == currentIndex) {
             return; // Do nothing if already on this page
+          }
 
           switch (index) {
             case 0:

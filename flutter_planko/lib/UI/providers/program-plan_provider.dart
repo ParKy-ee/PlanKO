@@ -4,7 +4,6 @@ import 'package:flutter_planko/data/repositories/program_plan_impl.dart';
 import 'package:flutter_planko/data/source/local/local-program-plan.dart';
 import 'package:flutter_planko/data/source/remote/api-program-plan.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_planko/core/services/api-service.dart';
 
 // --- Service & Repository Providers ---
 
@@ -40,12 +39,13 @@ class ProgramPlanNotifier extends StateNotifier<List<ProgramPlanModel>> {
 
 final programPlanProvider =
     StateNotifierProvider<ProgramPlanNotifier, List<ProgramPlanModel>>((ref) {
-  final repository = ref.watch(programPlanRepositoryProvider);
-  return ProgramPlanNotifier(repository: repository);
-});
+      final repository = ref.watch(programPlanRepositoryProvider);
+      return ProgramPlanNotifier(repository: repository);
+    });
 
 // Future provider for easy fetching in builders
-final fetchProgramPlansProvider = FutureProvider.family<List<ProgramPlanModel>, int>((ref, programId) async {
-  final repository = ref.watch(programPlanRepositoryProvider);
-  return repository.getProgramPlans(programId);
-});
+final fetchProgramPlansProvider =
+    FutureProvider.family<List<ProgramPlanModel>, int>((ref, programId) async {
+      final repository = ref.watch(programPlanRepositoryProvider);
+      return repository.getProgramPlans(programId);
+    });

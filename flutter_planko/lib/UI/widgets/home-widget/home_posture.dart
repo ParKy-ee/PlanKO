@@ -61,9 +61,9 @@ class _HomePostureWidgetState extends ConsumerState<HomePostureWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             children: [
               _buildPill(0, 'ทั้งหมด'),
-              ...uniqueCategories.entries
-                  .map((e) => _buildPill(e.key, e.value))
-                  .toList(),
+              ...uniqueCategories.entries.map(
+                (e) => _buildPill(e.key, e.value),
+              ),
             ],
           ),
         ),

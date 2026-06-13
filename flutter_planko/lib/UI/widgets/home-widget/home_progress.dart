@@ -93,7 +93,7 @@ class HomeProgressWidget extends ConsumerWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            '${quest.questName ?? "ไม่มีชื่อ"}',
+                            quest.questName ?? "ไม่มีชื่อ",
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

@@ -10,7 +10,6 @@ import 'package:flutter_planko/UI/widgets/home-widget/home_header.dart';
 import 'package:flutter_planko/UI/widgets/home-widget/home_progress.dart';
 import 'package:flutter_planko/UI/widgets/home-widget/home_posture.dart';
 import 'package:flutter_planko/UI/widgets/navebar.dart';
-import 'package:flutter_planko/routes.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

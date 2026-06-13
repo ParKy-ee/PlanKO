@@ -51,10 +51,7 @@ class LoginUtils {
             : userData['id'].toString();
         final user = await userApi.getUserById(userId);
 
-        if (user.weight == 0 ||
-            user.height == 0 ||
-            user.age == 0 ||
-            user.gender == null) {
+        if (user.weight == 0 || user.height == 0 || user.age == 0) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const UserDetailPage()),

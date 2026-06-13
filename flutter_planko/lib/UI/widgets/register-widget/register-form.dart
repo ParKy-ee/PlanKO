@@ -123,14 +123,18 @@ class _RegisterFormState extends State<RegisterForm> {
                 setState(() {
                   final lowerError = errorMsg.toLowerCase();
                   if (lowerError.contains('ครบ')) {
-                    if (emailController.text.isEmpty)
+                    if (emailController.text.isEmpty) {
                       _emailError = 'กรุณากรอกข้อมูล';
-                    if (nameController.text.isEmpty)
+                    }
+                    if (nameController.text.isEmpty) {
                       _nameError = 'กรุณากรอกข้อมูล';
-                    if (passwordController.text.isEmpty)
+                    }
+                    if (passwordController.text.isEmpty) {
                       _passwordError = 'กรุณากรอกข้อมูล';
-                    if (confirmController.text.isEmpty)
+                    }
+                    if (confirmController.text.isEmpty) {
                       _confirmError = 'กรุณากรอกข้อมูล';
+                    }
                   } else if (lowerError.contains('รหัสผ่านไม่ตรงกัน') ||
                       lowerError.contains('password')) {
                     _passwordError = errorMsg;

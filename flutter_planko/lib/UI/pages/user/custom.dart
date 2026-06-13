@@ -9,9 +9,9 @@ class CustomPage extends StatefulWidget {
 }
 
 class _CustomPageState extends State<CustomPage> {
-  int _levelIndex = 2; // ทั่วไป
-  int _timePerPosture = 30;
-  int _restTime = 15;
+  final int _levelIndex = 2; // ทั่วไป
+  final int _timePerPosture = 30;
+  final int _restTime = 15;
   bool _showPreview = true;
 
   @override
@@ -136,16 +136,20 @@ class _CustomPageState extends State<CustomPage> {
                       Text(
                         value,
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       if (subValue != null) ...[
                         const Spacer(),
                         Text(
                           subValue,
-                          style:
-                              const TextStyle(fontSize: 10, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ]
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -163,7 +167,7 @@ class _CustomPageState extends State<CustomPage> {
                         ),
                       );
                     }),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -207,7 +211,8 @@ class _CustomPageState extends State<CustomPage> {
                       decoration: BoxDecoration(
                         color: isOn ? const Color(0xFF007AFF) : Colors.white,
                         borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(8)),
+                          left: Radius.circular(8),
+                        ),
                       ),
                       child: Center(
                         child: Text(
@@ -229,7 +234,8 @@ class _CustomPageState extends State<CustomPage> {
                       decoration: BoxDecoration(
                         color: !isOn ? const Color(0xFF007AFF) : Colors.white,
                         borderRadius: const BorderRadius.horizontal(
-                            right: Radius.circular(8)),
+                          right: Radius.circular(8),
+                        ),
                       ),
                       child: Center(
                         child: Text(
@@ -245,7 +251,7 @@ class _CustomPageState extends State<CustomPage> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
