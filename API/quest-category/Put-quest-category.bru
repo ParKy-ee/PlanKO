@@ -1,0 +1,28 @@
+meta {
+  name: Put-quest-category/:id
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{api}}/quest-category/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Updated Category",
+    "description": "Updated description",
+    "is_active": false
+  }
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

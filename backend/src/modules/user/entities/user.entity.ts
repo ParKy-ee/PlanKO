@@ -1,4 +1,4 @@
-import { Role } from '../../../commons/enums/role.enum';
+
 import * as bcrypt from 'bcrypt';
 import { Mission } from '../../../modules/mission/entities/mission.entity';
 
@@ -13,21 +13,27 @@ import {
   BeforeUpdate,
   OneToMany,
 } from 'typeorm';
-import { PlankSession } from '../../../modules/plank-session/entities/plank-session.entity';
+import { QuestByUser } from '../../../modules/quest-by-uesr/entities/quest-by-uesr.entity';
+import { SessionPerfomance } from '../../../modules/seesion-perfomance/entities/seesion-perfomance.entity';
+import { Role } from '../../../commons/enums/role.enum';
 
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => Mission, (mission) => mission.user)
+  @OneToMany(() => Mission, (mission) => mission.user, { onDelete: "CASCADE", nullable: true })
   missions: Mission[];
 
-  @OneToMany(() => PlankSession, (plankSession) => plankSession.user)
-  plankSessions: PlankSession[];
+  @OneToMany(() => QuestByUser, (questByUser) => questByUser.user, { onDelete: "CASCADE", nullable: true })
+  quests: QuestByUser[];
+
+  @OneToMany(() => SessionPerfomance, (sessionPerfomance) => sessionPerfomance.user, { onDelete: "CASCADE", nullable: true })
+  sessionPerfomances: SessionPerfomance[];
 
 
   @Column({ length: 100 })
+  @Index({ unique: true })
   name: string;
 
   @Index({ unique: true })

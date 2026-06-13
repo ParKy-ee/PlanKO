@@ -5,13 +5,17 @@ meta {
 }
 
 get {
-  url: {{api}}/session-performance
+  url: {{api}}/session-performance?userId=21
   body: none
   auth: inherit
 }
 
+params:query {
+  userId: 21
+}
+
 vars:pre-request {
-  api: http://10.0.2.2:3001/api/v1
+  api: http://localhost:3001/api/v1
 }
 
 settings {

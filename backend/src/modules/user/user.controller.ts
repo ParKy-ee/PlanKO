@@ -3,7 +3,10 @@ import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
 import { UserQueryDto } from '../../commons/dtos/user-query.dto';
 
-@Controller('user')
+@Controller({
+  path: 'user',
+  version: '1',
+})
 export class UserController {
   constructor(private readonly userService: UserService) { }
 

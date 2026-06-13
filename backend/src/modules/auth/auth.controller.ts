@@ -22,7 +22,7 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     });
     return {
-      user: req.use,
+      user: req.user,
       access_token,
     };
   }

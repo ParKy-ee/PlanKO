@@ -5,9 +5,15 @@ meta {
 }
 
 put {
-  url: {{api}}/posture
-  body: none
+  url: {{api}}/posture/11
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "postureCategory": 5
+  }
 }
 
 settings {

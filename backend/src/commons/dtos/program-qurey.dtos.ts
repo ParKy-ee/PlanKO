@@ -1,5 +1,6 @@
 import { BaseQueryDto } from "./base-query.dto";
 
+
 export class ProgramQueryDto extends BaseQueryDto {
 
     missionByProgramId?: number;

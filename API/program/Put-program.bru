@@ -5,13 +5,13 @@ meta {
 }
 
 delete {
-  url: {{api}}/program/5
-  body: none
+  url: {{api}}/program/100
+  body: json
   auth: inherit
 }
 
 vars:pre-request {
-  api: http://10.0.2.2:3001/api/v1
+  api: http://localhost:3001/api/v1
 }
 
 settings {

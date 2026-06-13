@@ -1,0 +1,16 @@
+meta {
+  name: Get-plank-by-session
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{api}}/plank-by-session
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

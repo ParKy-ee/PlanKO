@@ -20,10 +20,6 @@ export class PostureByProgram {
     @Column({ type: 'int' })
     postureId: number;
 
-    @ManyToOne(() => Posture, (posture) => posture.postureByPrograms, {
-        nullable: false,
-        onDelete: 'CASCADE',
-    })
     @JoinColumn({ name: 'postureId' })
     posture: Posture;
 

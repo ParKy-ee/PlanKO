@@ -1,0 +1,15 @@
+meta {
+  name: Get-posture-category
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{api}}/posture-category
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Put-plank-by-session/:id
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{api}}/plank-by-session/2
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+     "plankSessionId" : 12,
+    "postureId" :  15,
+    "order":3,
+    "duration":2,
+    "rest":2
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

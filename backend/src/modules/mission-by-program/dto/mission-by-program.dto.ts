@@ -1,10 +1,10 @@
-import { IsOptional } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 
 export class MissionByProgramDto {
 
-    @IsOptional()
+    @IsNotEmpty()
     missionId: number;
 
-    @IsOptional()
+    @IsNotEmpty()
     programId: number;
 }

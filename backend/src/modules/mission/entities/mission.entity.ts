@@ -10,18 +10,23 @@ export class Mission {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User, (user) => user.missions)
+    @ManyToOne(() => User, (user) => user.missions, { onDelete: "CASCADE", nullable: true })
     @JoinColumn({ name: 'userId' })
     user: User;
 
     @OneToMany(
         () => MissionByProgram,
-        (missionByProgram) => missionByProgram.mission
+        (missionByProgram) => missionByProgram.mission,
+        { cascade: true, onDelete: 'CASCADE' }
     )
-    missionByPrograms: MissionByProgram[];
+    missionByPrograms: MissionByProgram[]
 
-    @Column({ type: 'varchar', length: 255 })
-    target: string;
+    @Column()
+    target: number;
+
+    @Column()
+    current: number;
+
 
     @Column({ type: 'timestamp' })
     startAt: Date;

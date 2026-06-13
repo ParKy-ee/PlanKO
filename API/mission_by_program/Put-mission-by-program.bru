@@ -5,20 +5,20 @@ meta {
 }
 
 put {
-  url: {{api}}/mission-by-program/2
+  url: {{api}}/mission-by-program/4
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "missionId" : 4,
-    "programId" : 3
+    "missionId" : 6,
+    "programId" : 8
   }
 }
 
 vars:pre-request {
-  api: http://10.0.2.2:3001/api/v1
+  api: http://localhost:3001/api/v1
 }
 
 settings {

@@ -1,3 +1,4 @@
+import { User } from "../../../modules/user/entities/user.entity";
 import { PlankSession } from "../../../modules/plank-session/entities/plank-session.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -6,9 +7,13 @@ export class SessionPerfomance {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => PlankSession, (plankSession) => plankSession.sessionPerfomances, { onDelete: "CASCADE" })
+    @ManyToOne(() => PlankSession, (plankSession) => plankSession.plankBySessions, { onDelete: "CASCADE", nullable: true })
     @JoinColumn({ name: "plank_session_id" })
     plankSession: PlankSession;
+
+    @ManyToOne(() => User, (user) => user.sessionPerfomances, { onDelete: "CASCADE", nullable: true })
+    @JoinColumn({ name: "user_id" })
+    user: User;
 
     @Column()
     accuracy_avg: number;
@@ -26,8 +31,16 @@ export class SessionPerfomance {
     missed_count: number;
 
     @Column()
-    figure_count: number;
+    score: number;
 
+    @Column()
+    completed: boolean;
+
+    @Column()
+    kcal: number;
+
+    @Column()
+    duration: number;
 
     @CreateDateColumn()
     created_at: Date;

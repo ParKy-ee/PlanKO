@@ -1,0 +1,31 @@
+meta {
+  name: Post-quest
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{api}}/quest
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Sample Quest",
+    "goal_value": 10,
+    "unit": "repeat",
+    "quest_type": "daily",
+    "xp_reward": 100,
+    "coin_reward": 50,
+    "difficulty": "easy",
+    "quest_category_id": 1,
+    "description": "A sample quest description",
+    "is_active": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
