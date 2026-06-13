@@ -11,9 +11,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 type: 'postgres',
                 url: configService.get<string>('DATABASE_URL'), // ✅ ใช้ตัวเดียวพอ
                 autoLoadEntities: true,
-                ssl: {
-                    rejectUnauthorized: false,
-                },
                 synchronize: false,
                 ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             }),
