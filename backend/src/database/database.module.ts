@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                     rejectUnauthorized: false,
                 },
                 synchronize: false,
+                ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             }),
         }),
     ],

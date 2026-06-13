@@ -9,6 +9,10 @@ import cors from 'cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Explicitly set WebSocket Adapter
+  const { IoAdapter } = await import('@nestjs/platform-socket.io');
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   app.enableCors({
     origin: '*',
