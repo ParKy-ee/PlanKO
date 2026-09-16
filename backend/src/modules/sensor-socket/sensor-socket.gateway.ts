@@ -60,17 +60,31 @@ export class SensorSocketGateway
     @ConnectedSocket() client: any,
     @MessageBody() payload: BodySensorPayloadDto,
   ) {
-    this.logger.log(`Received body-sensor data from ${client.id}: ${JSON.stringify(payload)}`);
-    const savedData = await this.sensorSocketService.saveBodySensorData(payload);
+    try {
+      this.logger.log(`Received body-sensor data from ${client.id}: ${JSON.stringify(payload)}`);
+      
+      const savedData = await this.sensorSocketService.saveBodySensorData(payload);
+      this.logger.log(`Successfully saved data with ID: ${savedData.id}`);
 
-    this.server.emit('body-sensor:updated', savedData);
+      this.server.emit('body-sensor:updated', savedData);
 
-    return {
-      event: 'body-sensor:ack',
-      data: {
-        clientId: client.id,
-        savedId: savedData.id,
-      },
-    };
+      return {
+        event: 'body-sensor:ack',
+        data: {
+          clientId: client.id,
+          savedId: savedData.id,
+          status: 'success'
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to save body-sensor data: ${error.message}`, error.stack);
+      return {
+        event: 'body-sensor:error',
+        data: {
+          clientId: client.id,
+          message: error.message
+        }
+      };
+    }
   }
 }

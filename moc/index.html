@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanKO - Plank DDR Rhythm Game Mockup</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #0d0f14;
+      --panel-bg: rgba(20, 24, 33, 0.75);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --neon-cyan: #00f2fe;
+      --neon-pink: #ff007f;
+      --neon-yellow: #fdbb2d;
+      --neon-green: #39ff14;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-game: 'Orbitron', sans-serif;
+      --font-ui: 'Prompt', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(20, 24, 33, 0.5) 0px, transparent 100%);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(13, 15, 20, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: var(--font-game);
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(90deg, rgba(0, 242, 254, 0.2), rgba(255, 0, 127, 0.2));
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Info Bar & Music Controls */
+    .control-panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .music-selector {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-grow: 1;
+      min-width: 280px;
+    }
+
+    .custom-file-upload {
+      background: linear-gradient(135deg, var(--neon-cyan), #0072ff);
+      color: #000;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .custom-file-upload:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
+    }
+
+    #audio-file {
+      display: none;
+    }
+
+    .song-title {
+      font-family: var(--font-game);
+      font-size: 14px;
+      color: var(--neon-cyan);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-circle {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 1px solid var(--panel-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-circle:hover {
+      background: var(--neon-pink);
+      color: #fff;
+      box-shadow: 0 0 15px var(--neon-pink);
+      border-color: var(--neon-pink);
+    }
+
+    .btn-circle.active {
+      background: var(--neon-green);
+      color: #000;
+      box-shadow: 0 0 15px var(--neon-green);
+      border-color: var(--neon-green);
+    }
+
+    /* Game Layout Container */
+    .game-viewport {
+      position: relative;
+      background: rgba(18, 22, 30, 0.9);
+      border: 2px solid var(--panel-border);
+      border-radius: 24px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
+      min-height: 480px;
+    }
+
+    /* Top HUD in Game Viewport */
+    .hud-top {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 15px;
+    }
+
+    .time-display {
+      font-family: var(--font-game);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .score-combo-display {
+      text-align: right;
+    }
+
+    .score-val {
+      font-family: var(--font-game);
+      font-size: 24px;
+      color: var(--neon-cyan);
+      font-weight: bold;
+    }
+
+    .combo-val {
+      font-family: var(--font-game);
+      font-size: 16px;
+      color: var(--neon-pink);
+      font-weight: bold;
+      animation: pulse-combo 0.2s ease-in-out;
+    }
+
+    @keyframes pulse-combo {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* Plank Board Layout Grid */
+    .plank-board {
+      display: grid;
+      grid-template-columns: repeat(6, 110px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 20px;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Grid layout mapping */
+    /* Row 1 */
+    .btn-l2 { grid-column: 1; grid-row: 1; }
+    .btn-l1 { grid-column: 2; grid-row: 1; }
+    .status-display-wrapper { grid-column: 3 / span 2; grid-row: 1; height: 90%; }
+    .btn-r1 { grid-column: 5; grid-row: 1; }
+    .btn-r2 { grid-column: 6; grid-row: 1; }
+
+    /* Row 2 */
+    .btn-l5 { grid-column: 1; grid-row: 2; }
+    .btn-l4 { grid-column: 2; grid-row: 2; }
+    .btn-l3 { grid-column: 3; grid-row: 2; }
+    .btn-r3 { grid-column: 4; grid-row: 2; }
+    .btn-r4 { grid-column: 5; grid-row: 2; }
+    .btn-r5 { grid-column: 6; grid-row: 2; }
+
+    /* Row 3 */
+    .btn-l8 { grid-column: 1; grid-row: 3; }
+    .btn-l7 { grid-column: 2; grid-row: 3; }
+    .btn-l6 { grid-column: 3; grid-row: 3; }
+    .btn-r6 { grid-column: 4; grid-row: 3; }
+    .btn-r7 { grid-column: 5; grid-row: 3; }
+    .btn-r8 { grid-column: 6; grid-row: 3; }
+
+    /* Board buttons */
+    .board-btn {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(20, 24, 33, 0.9);
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      margin: auto;
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .board-btn::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      right: -6px;
+      bottom: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      pointer-events: none;
+    }
+
+    .board-btn .num {
+      font-family: var(--font-game);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .board-btn .key-hint {
+      position: absolute;
+      bottom: 6px;
+      font-size: 10px;
+      font-family: var(--font-game);
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0px 4px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    /* Left vs Right vs Middle Styles */
+    .board-btn.left-side {
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+    .board-btn.right-side {
+      border-color: rgba(255, 255, 255, 0.7);
+    }
+    .board-btn.mid-side {
+      border-color: var(--neon-yellow);
+      box-shadow: 0 0 10px rgba(253, 187, 45, 0.2);
+    }
+
+    /* Active States */
+    .board-btn.pressed {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px var(--neon-cyan);
+    }
+
+    .board-btn.pressed-right {
+      border-color: var(--neon-pink);
+      box-shadow: 0 0 20px var(--neon-pink);
+    }
+
+    /* Center Status Display */
+    .status-display {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .status-row i {
+      font-size: 16px;
+    }
+
+    .status-row i.fa-heart {
+      color: #ff3e3e;
+      animation: heartbeat 1s infinite alternate;
+    }
+
+    .status-row i.fa-bullseye {
+      color: var(--neon-cyan);
+    }
+
+    .status-val {
+      font-family: var(--font-game);
+      font-weight: bold;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.25); }
+    }
+
+    /* Rhythm game node (falling/shrinking indicator) */
+    .note-indicator {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      border: 3px solid var(--neon-cyan);
+      pointer-events: none;
+      transform: scale(2.5);
+      opacity: 0;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+      transition: transform 0.1s linear, opacity 0.1s linear;
+    }
+
+    .note-indicator.right-side-note {
+      border-color: var(--neon-pink);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+    }
+
+    .note-indicator.mid-side-note {
+      border-color: var(--neon-yellow);
+      box-shadow: 0 0 15px rgba(253, 187, 45, 0.5);
+    }
+
+    /* Hit Rating floating text */
+    .hit-rating {
+      position: absolute;
+      font-family: var(--font-game);
+      font-size: 24px;
+      font-weight: 900;
+      text-shadow: 0 0 10px currentColor;
+      pointer-events: none;
+      animation: float-up-fade 0.5s ease-out forwards;
+      z-index: 10;
+    }
+
+    .rating-perfect { color: var(--neon-cyan); }
+    .rating-good { color: var(--neon-green); }
+    .rating-ok { color: var(--neon-yellow); }
+    .rating-miss { color: var(--neon-pink); }
+
+    @keyframes float-up-fade {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+      }
+      20% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-50px) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Beatmap Timeline and controls (Editor Mode) */
+    .editor-controls {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .timeline-container {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .timeline-track-wrapper {
+      position: relative;
+      height: 80px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .timeline-cursor {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .timeline-note {
+      position: absolute;
+      top: 10px;
+      width: 12px;
+      height: 60px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: bold;
+      color: #000;
+      transform: translateX(-50%);
+    }
+
+    .timeline-note.left-note {
+      background: var(--neon-cyan);
+      box-shadow: 0 0 5px var(--neon-cyan);
+    }
+
+    .timeline-note.right-note {
+      background: var(--neon-pink);
+      box-shadow: 0 0 5px var(--neon-pink);
+    }
+
+    .timeline-note.mid-note {
+      background: var(--neon-yellow);
+      box-shadow: 0 0 5px var(--neon-yellow);
+    }
+
+    .editor-sidebar {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    textarea.beatmap-json {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: var(--neon-green);
+      font-family: monospace;
+      font-size: 11px;
+      padding: 10px;
+      resize: none;
+      height: 120px;
+      width: 100%;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--neon-cyan), #0072ff);
+      border: none;
+      color: #000;
+      font-weight: 700;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-action.btn-accent {
+      background: linear-gradient(135deg, var(--neon-pink), #ff0055);
+      color: #fff;
+    }
+
+    .btn-action.btn-accent:hover {
+      box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
+    }
+
+    /* Simulator Panel */
+    .simulator-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .sim-btn {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .sim-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--neon-cyan);
+    }
+
+    /* Connection status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 0, 0, 0.1);
+      color: var(--neon-pink);
+      border: 1px solid rgba(255, 0, 0, 0.2);
+    }
+
+    .status-badge.connected {
+      background: rgba(57, 255, 20, 0.1);
+      color: var(--neon-green);
+      border: 1px solid rgba(57, 255, 20, 0.2);
+    }
+
+    /* Canvas Audio Visualizer style */
+    .visualizer-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.25;
+    }
+
+    /* Instructions Panel */
+    .instruction-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 10px;
+    }
+
+    .instruction-panel h3 {
+      font-family: var(--font-game);
+      font-size: 16px;
+      color: var(--neon-cyan);
+      margin-bottom: 12px;
+    }
+
+    .instruction-panel ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .instruction-panel li {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .instruction-panel li i {
+      color: var(--neon-pink);
+      margin-top: 4px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--panel-border);
+      margin-top: 40px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(13, 15, 20, 0.9);
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <i class="fa-solid fa-gamepad"></i> PlanKO
+    </div>
+    
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('game')">
+        <i class="fa-solid fa-play"></i> เล่นเกม (Play Mode)
+      </button>
+      <button class="tab-btn" onclick="switchTab('editor')">
+        <i class="fa-solid fa-sliders"></i> สร้างด่าน (Beatmap Editor)
+      </button>
+    </div>
+
+    <div class="status-badge" id="ws-status">
+      <i class="fa-solid fa-circle-dot"></i> Sensor Offline
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- Music and Main control panel -->
+    <div class="control-panel">
+      <div class="music-selector">
+        <label class="custom-file-upload">
+          <i class="fa-solid fa-file-audio"></i> เลือกไฟล์เพลงของคุณ
+          <input type="file" id="audio-file" accept="audio/*">
+        </label>
+        <div class="song-title-wrapper">
+          <div class="song-title" id="song-name">เพลงตัวอย่าง (Synthwave Beat)</div>
+          <span style="font-size:11px; color: var(--text-muted)">รองรับ MP3, WAV, M4A</span>
+        </div>
+      </div>
+
+      <div class="audio-controls">
+        <button class="btn-circle" id="btn-play-pause" title="Play/Pause">
+          <i class="fa-solid fa-play"></i>
+        </button>
+        <button class="btn-circle" id="btn-stop" title="Stop">
+          <i class="fa-solid fa-stop"></i>
+        </button>
+        <button class="btn-circle" id="btn-metronome" title="Toggle Metronome (BPM: 120)">
+          <i class="fa-solid fa-drum"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 1: GAME PLAY MODE -->
+    <div id="tab-game" class="tab-content active" style="margin-top: 20px;">
+      <div class="game-viewport">
+        <!-- Audio Visualizer Background -->
+        <canvas class="visualizer-canvas" id="canvas-visualizer"></canvas>
+
+        <div class="hud-top" style="z-index: 2;">
+          <div class="time-display">
+            <i class="fa-solid fa-stopwatch"></i>
+            <span id="game-time">0:00</span>
+          </div>
+          <div style="text-align: center;">
+            <div id="diff-badge" style="font-family: var(--font-game); font-size:12px; color: var(--neon-cyan); letter-spacing: 2px;">ปกติ</div>
+            <div style="color:var(--text-muted); font-size:11px; margin-top:2px;">
+              <i class="fa-solid fa-music"></i> <span id="song-duration">0:00</span>
+            </div>
+          </div>
+          <div class="score-combo-display">
+            <div class="score-val" id="score-display">00000 Point</div>
+            <div class="combo-val" id="combo-display" style="display:none;">Combo 0x</div>
+          </div>
+        </div>
+
+        <!-- PLANK BOARD GRID (Matches visual exactly) -->
+        <div class="plank-board" style="z-index: 2;" id="game-board">
+          
+          <!-- Row 1 -->
+          <div class="board-btn left-side btn-l2" data-id="L2">
+            <span class="num">2</span>
+            <span class="key-hint">Q</span>
+            <div class="note-indicator"></div>
+          </div>
+          
+          <div class="board-btn left-side btn-l1" data-id="L1">
+            <span class="num">1</span>
+            <span class="key-hint">W</span>
+            <div class="note-indicator"></div>
+          </div>
+
+          <div class="status-display-wrapper">
+            <div class="status-display">
+              <div class="status-row">
+                <i class="fa-solid fa-heart"></i>
+                <span class="status-val" id="live-hr">137%</span>
+              </div>
+              <div class="status-row">
+                <i class="fa-solid fa-bullseye"></i>
+                <span class="status-val" id="live-acc">100%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="board-btn right-side btn-r1" data-id="R1">
+            <span class="num">1</span>
+            <span class="key-hint">I</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+          <div class="board-btn right-side btn-r2" data-id="R2">
+            <span class="num">2</span>
+            <span class="key-hint">O</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="board-btn left-side btn-l5" data-id="L5">
+            <span class="num">5</span>
+            <span class="key-hint">A</span>
+            <div class="note-indicator"></div>
+          </div>
+
+          <div class="board-btn left-side btn-l4" data-id="L4">
+            <span class="num">4</span>
+            <span class="key-hint">S</span>
+            <div class="note-indicator"></div>
+          </div>
+
+          <div class="board-btn mid-side btn-l3" data-id="L3">
+            <span class="num">3</span>
+            <span class="key-hint">E</span>
+            <div class="note-indicator mid-side-note"></div>
+          </div>
+
+          <div class="board-btn mid-side btn-r3" data-id="R3">
+            <span class="num">3</span>
+            <span class="key-hint">U</span>
+            <div class="note-indicator mid-side-note"></div>
+          </div>
+
+          <div class="board-btn right-side btn-r4" data-id="R4">
+            <span class="num">4</span>
+            <span class="key-hint">K</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+          <div class="board-btn right-side btn-r5" data-id="R5">
+            <span class="num">5</span>
+            <span class="key-hint">L</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="board-btn left-side btn-l8" data-id="L8">
+            <span class="num">8</span>
+            <span class="key-hint">Z</span>
+            <div class="note-indicator"></div>
+          </div>
+
+          <div class="board-btn left-side btn-l7" data-id="L7">
+            <span class="num">7</span>
+            <span class="key-hint">X</span>
+            <div class="note-indicator"></div>
+          </div>
+
+          <div class="board-btn mid-side btn-l6" data-id="L6">
+            <span class="num">6</span>
+            <span class="key-hint">D</span>
+            <div class="note-indicator mid-side-note"></div>
+          </div>
+
+          <div class="board-btn mid-side btn-r6" data-id="R6">
+            <span class="num">6</span>
+            <span class="key-hint">J</span>
+            <div class="note-indicator mid-side-note"></div>
+          </div>
+
+          <div class="board-btn right-side btn-r7" data-id="R7">
+            <span class="num">7</span>
+            <span class="key-hint">M</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+          <div class="board-btn right-side btn-r8" data-id="R8">
+            <span class="num">8</span>
+            <span class="key-hint">.</span>
+            <div class="note-indicator right-side-note"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="simulator-card">
+        <h3 style="color:var(--neon-cyan); font-family: var(--font-game); font-size:15px; margin-bottom:5px;">
+          <i class="fa-solid fa-network-wired"></i> Sensor Integration & WebSocket Simulator
+        </h3>
+        <p style="font-size:12px; color: var(--text-muted); margin-bottom:10px;">
+          ใช้ในการจำลองสัญญาณ WebSocket ที่จะได้รับจากบอร์ดเซ็นเซอร์ของจริง (เช่น จากบอร์ด ESP32 หรือ Backend) เมื่อมีเซ็นเซอร์ถูกกดจะแสดงผลเหมือนผู้เล่นขยับมือจริงๆ
+        </p>
+        
+        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:10px;">
+          <div style="flex-grow:1; display:flex; gap:8px;">
+            <input type="text" id="ws-url" value="ws://localhost:3000" placeholder="WebSocket Server URL" style="flex-grow:1; background:rgba(0,0,0,0.5); border:1px solid var(--panel-border); border-radius:6px; color:#fff; padding:8px 12px; font-size:13px;">
+            <button class="btn-action" id="btn-ws-connect" style="padding:0 15px; font-size:13px;">เชื่อมต่อ WS</button>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <span style="font-size:13px; color: var(--text-muted)">โหมดทดสอบเซ็นเซอร์ (คลิกเพื่อส่งสัญญาณ):</span>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <button class="sim-btn" onclick="simulateSensorTrigger('L2')">ซ้าย 2 (L2)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L1')">ซ้าย 1 (L1)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L5')">ซ้าย 5 (L5)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L4')">ซ้าย 4 (L4)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L8')">ซ้าย 8 (L8)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L7')">ซ้าย 7 (L7)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L3')" style="border-color:var(--neon-yellow)">กลาง 3L (L3)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R3')" style="border-color:var(--neon-yellow)">กลาง 3R (R3)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('L6')" style="border-color:var(--neon-yellow)">กลาง 6L (L6)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R6')" style="border-color:var(--neon-yellow)">กลาง 6R (R6)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R1')">ขวา 1 (R1)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R2')">ขวา 2 (R2)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R4')">ขวา 4 (R4)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R5')">ขวา 5 (R5)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R7')">ขวา 7 (R7)</button>
+          <button class="sim-btn" onclick="simulateSensorTrigger('R8')">ขวา 8 (R8)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: BEATMAP EDITOR MODE -->
+    <div id="tab-editor" class="tab-content" style="margin-top: 20px;">
+      <div class="editor-controls">
+        
+        <div class="timeline-container">
+          <div class="timeline-header">
+            <div>
+              <i class="fa-solid fa-clock"></i> เวลาปัจจุบัน: <span id="editor-time">0.00</span> วินาที
+            </div>
+            <div>
+              จำนวนโน้ตทั้งหมด: <span id="editor-note-count" style="color:var(--neon-cyan)">0</span> โน้ต
+            </div>
+          </div>
+          
+          <!-- Visual Timeline Track -->
+          <div class="timeline-track-wrapper" id="timeline-track">
+            <div class="timeline-cursor" id="timeline-cursor"></div>
+            <!-- Dynamic notes will be rendered here -->
+          </div>
+
+          <div style="font-size:11px; color: var(--text-muted); display:flex; justify-content:space-between;">
+            <span>0.00s</span>
+            <span>ความกว้าง Timeline ครอบคลุมทั้งเพลง (สามารถคลิกบนแถบเพื่อเลื่อนเพลงได้)</span>
+            <span id="editor-duration-text">0.00s</span>
+          </div>
+        </div>
+
+        <div class="editor-sidebar">
+          <h4 style="font-family: var(--font-game); font-size:14px; color: var(--neon-cyan)">ตัวจัดการข้อมูล (Beatmap Data)</h4>
+          <p style="font-size:11px; color:var(--text-muted)">ข้อมูลโน้ตจะบันทึกเป็น JSON แบบเรียลไทม์เมื่อกดปุ่มบันทึกจังหวะ</p>
+          
+          <textarea class="beatmap-json" id="beatmap-json-output" readonly></textarea>
+          
+          <button class="btn-action" onclick="copyBeatmapJSON()">
+            <i class="fa-solid fa-copy"></i> คัดลอก JSON
+          </button>
+          
+          <button class="btn-action" onclick="deleteLastNote()" style="background: linear-gradient(135deg, var(--neon-yellow), #fdbb2d); color: #000;">
+            <i class="fa-solid fa-rotate-left"></i> ลบโน้ตล่าสุด (Undo)
+          </button>
+          
+          <button class="btn-action btn-accent" onclick="clearBeatmap()">
+            <i class="fa-solid fa-trash"></i> ล้างข้อมูลด่านนี้
+          </button>
+
+          <div style="border-top: 1px solid var(--panel-border); padding-top: 10px; display:flex; flex-direction:column; gap:8px;">
+            <span style="font-size:12px; color:var(--text-muted)">นำเข้าข้อมูลด่าน (Import JSON):</span>
+            <textarea class="beatmap-json" id="beatmap-json-input" placeholder="วาง JSON ที่นี่ แล้วกดโหลด..."></textarea>
+            <button class="btn-action" onclick="importBeatmapJSON()" style="background:#fff; color:#000;">
+              <i class="fa-solid fa-upload"></i> โหลดข้อมูลด่าน
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions / Tips -->
+    <div class="instruction-panel">
+      <h3><i class="fa-solid fa-circle-question"></i> คำแนะนำในการเล่นและทดสอบ</h3>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:10px;">
+        <div>
+          <h4 style="font-size:13px; color: var(--neon-cyan); margin-bottom: 5px;">วิธีการควบคุม (Keyboard Controls)</h4>
+          <ul style="font-size:12px;">
+            <li><i class="fa-solid fa-caret-right"></i> <strong>มือซ้าย:</strong> Q (2), W (1), A (5), S (4), Z (8), X (7)</li>
+            <li><i class="fa-solid fa-caret-right"></i> <strong>มือขวา:</strong> I (1), O (2), K (4), L (5), M (7), . (8)</li>
+            <li><i class="fa-solid fa-caret-right"></i> <strong>ปุ่มตรงกลาง:</strong> E/U (3), D/J (6)</li>
+            <li><i class="fa-solid fa-caret-right"></i> กดตามจังหวะที่วงแหวนสีฟ้า/ชมพู/เหลือง หดเล็กลงมาเท่ากับวงกลมปุ่มพอดี!</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size:13px; color: var(--neon-cyan); margin-bottom: 5px;">วิธีทดสอบการสร้างด่าน (Beatmap Editor)</h4>
+          <ul style="font-size:12px;">
+            <li><i class="fa-solid fa-caret-right"></i> กดแท็บ <strong>"สร้างด่าน"</strong> จากนั้นกดปุ่ม <strong>Play</strong></li>
+            <li><i class="fa-solid fa-caret-right"></i> กดปุ่มคีย์บอร์ดหรือคลิกปุ่มบนบอร์ดตามจังหวะเพลงที่อยากให้โน้ตเกิด</li>
+            <li><i class="fa-solid fa-caret-right"></i> ระบบจะบันทึกจังหวะ (วินาที) และปุ่มที่กดลงใน JSON ด้านขวาอัตโนมัติ</li>
+            <li><i class="fa-solid fa-caret-right"></i> เมื่อแต่งเสร็จ สามารถกลับไปแท็บ <strong>"เล่นเกม"</strong> เพื่อทดสอบเล่นด่านที่แต่งได้ทันที!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast-msg">คัดลอกข้อมูลเรียบร้อย!</div>
+
+  <footer>
+    <p>PlanKO Game Mockup &copy; 2026 - Standing Plank Training & Rhythm System. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
