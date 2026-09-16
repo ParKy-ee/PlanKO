@@ -9,14 +9,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 type: 'postgres',
-                host: configService.get<string>('POSTGRES_HOST'),
-                port: configService.get<number>('POSTGRES_PORT'),
-                username: configService.get<string>('POSTGRES_USER'),
-                password: configService.get<string>('POSTGRES_PASSWORD'),
-                database: configService.get<string>('POSTGRES_DB'),
-                entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+                url: configService.get<string>('DATABASE_URL'), // ✅ ใช้ตัวเดียวพอ
                 autoLoadEntities: true,
-                synchronize: false,
+                synchronize: true, // เปิดให้สร้างตารางอัตโนมัติบน Neon ตามที่คุณขอครับ
+                ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
             }),
         }),
     ],

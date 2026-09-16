@@ -1,0 +1,22 @@
+meta {
+  name: Put-posture-category/:id
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{api}}/posture-category/2000
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name" : "nnj"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PlanKO · Project Status</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --surface: #121a2e;
+      --surface-2: #18233b;
+      --line: #2b3a59;
+      --text: #edf4ff;
+      --muted: #9eacc5;
+      --cyan: #55e6ff;
+      --pink: #ff78bd;
+      --green: #76e3a7;
+      --yellow: #ffd166;
+      --red: #ff8c9e;
+      --mono: "Cascadia Code", "Consolas", monospace;
+      --sans: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 15px/1.6 var(--sans);
+    }
+    a { color: var(--cyan); }
+    code, pre { font-family: var(--mono); }
+    code { color: var(--cyan); }
+    .shell { max-width: 1240px; margin: 0 auto; padding: 28px 22px 70px; }
+    .topbar { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 22px; }
+    .eyebrow { color: var(--cyan); font: 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3 { line-height: 1.2; margin: 0; }
+    h1 { margin-top: 8px; font-size: clamp(28px, 5vw, 48px); letter-spacing: -.03em; }
+    h2 { font-size: 23px; margin-bottom: 16px; }
+    h3 { font-size: 17px; }
+    .subtitle { max-width: 720px; color: var(--muted); margin: 12px 0 0; }
+    .meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .badge, .status { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); font: 12px var(--mono); white-space: nowrap; }
+    .badge strong { color: var(--text); font-weight: 500; }
+    .status.done { color: var(--green); border-color: #326d54; }
+    .status.partial { color: var(--yellow); border-color: #75612b; }
+    .status.todo { color: var(--red); border-color: #75404c; }
+    .section { margin-top: 34px; }
+    .section-note { color: var(--muted); margin: -7px 0 16px; }
+    .grid { display: grid; gap: 14px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+    .card p { color: var(--muted); margin: 8px 0 0; }
+    .metric { min-height: 124px; }
+    .metric .value { display: block; color: var(--cyan); font-size: 31px; font-weight: 700; margin-top: 5px; }
+    .metric .label { color: var(--muted); }
+    .callout { border-left: 3px solid var(--pink); background: #171c35; padding: 15px 17px; border-radius: 0 10px 10px 0; }
+    .callout strong { color: var(--pink); }
+    .feature { min-height: 190px; }
+    .feature .status { margin-bottom: 12px; }
+    .feature ul, .next ul { color: var(--muted); margin: 10px 0 0; padding-left: 19px; }
+    .feature li + li, .next li + li { margin-top: 5px; }
+    .diagram { background: #0e1629; border: 1px solid var(--line); border-radius: 14px; padding: 20px; overflow-x: auto; }
+    .diagram-title { color: var(--muted); font: 12px var(--mono); margin-bottom: 16px; text-transform: uppercase; letter-spacing: .08em; }
+    .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: stretch; min-width: 760px; }
+    .flow-box { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 14px; min-height: 150px; }
+    .flow-box h3 { color: var(--cyan); margin-bottom: 8px; }
+    .flow-box p { color: var(--muted); margin: 0; font-size: 13px; }
+    .flow-arrow { align-self: center; color: var(--pink); font-size: 26px; }
+    .subflow { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .subflow-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+    .node { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; color: var(--text); }
+    .node small { display: block; color: var(--muted); font-size: 11px; }
+    .arrow { color: var(--pink); font-size: 20px; }
+    .sequence { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 0; min-width: 720px; }
+    .actor { text-align: center; color: var(--cyan); font-weight: 600; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .sequence-body { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); position: relative; min-height: 220px; }
+    .sequence-body::before, .sequence-body::after { content: ""; position: absolute; top: 0; bottom: 0; border-left: 1px dashed #446080; }
+    .sequence-body::before { left: 12.5%; box-shadow: 33.33vw 0 0 -1px #446080, 66.66vw 0 0 -1px #446080; }
+    .sequence-cell { position: relative; min-height: 220px; }
+    .message { position: absolute; left: 5%; right: 5%; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .message::after { content: "→"; color: var(--pink); font-size: 18px; }
+    .message.one { top: 28px; grid-column: 1 / 3; }
+    .message.two { top: 92px; grid-column: 2 / 4; }
+    .message.three { top: 156px; grid-column: 3 / 5; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font: 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+    td:first-child { color: var(--cyan); white-space: nowrap; }
+    .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before { content: ""; position: absolute; top: 5px; bottom: 8px; left: 8px; border-left: 1px solid var(--line); }
+    .commit { position: relative; padding: 0 0 18px; }
+    .commit::before { content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; left: -24px; top: 7px; background: var(--pink); }
+    .commit:last-child { padding-bottom: 0; }
+    .commit-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+    .hash { color: var(--cyan); font: 13px var(--mono); }
+    .date { color: var(--muted); font: 12px var(--mono); }
+    .commit p { color: var(--muted); margin: 2px 0 0; }
+    .commands { position: relative; }
+    pre { margin: 0; white-space: pre-wrap; color: #d9e4f4; background: #0a0f1d; border: 1px solid var(--line); border-radius: 10px; padding: 15px; }
+    .copy { position: absolute; top: 9px; right: 9px; border: 1px solid var(--line); background: var(--surface-2); color: var(--cyan); border-radius: 7px; padding: 5px 9px; cursor: pointer; }
+    .checklist label { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); padding: 7px 0; }
+    .checklist input { accent-color: var(--cyan); width: 17px; height: 17px; margin-top: 3px; }
+    .checklist label:has(input:checked) { color: var(--green); text-decoration: line-through; }
+    .footer { color: var(--muted); font-size: 12px; margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line); }
+    @media (max-width: 900px) {
+      .topbar { flex-direction: column; }
+      .meta { justify-content: flex-start; }
+      .grid-4, .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .shell { padding: 22px 14px 50px; }
+      .grid-4, .grid-3 { grid-template-columns: 1fr; }
+      th, td { min-width: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">PlanKO / continuation brief</div>
+        <h1>ตอนนี้ทำถึงไหนแล้ว?</h1>
+        <p class="subtitle">เอกสารสรุปสถานะสำหรับกลับมา run และพัฒนาต่อ โดยอ้างอิงจากโค้ด, API collection, working tree และ git log ล่าสุด</p>
+      </div>
+      <div class="meta" aria-label="Project metadata">
+        <span class="badge">branch <strong>test</strong></span>
+        <span class="badge">HEAD <strong>ab17fe1</strong></span>
+        <span class="badge">last commit <strong>2026-06-13</strong></span>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="callout"><strong>จุดที่ควรเริ่มต่อ:</strong> sensor-socket integration — backend รับข้อมูล sensor ได้แล้ว, body-sensor ถูกบันทึกลง `sensor_data` และมี broadcast แต่ควร run แล้วทดสอบ Socket.IO + database end-to-end ก่อนต่อ Flutter</div>
+    </section>
+
+    <section class="section" aria-labelledby="root-cause-title">
+      <h2 id="root-cause-title">Root cause จาก paper</h2>
+      <div class="grid grid-3">
+        <div class="card"><span class="status todo">ต้นเหตุหลัก</span><h3>ฝึกในสภาพแวดล้อมที่จำกัด</h3><p>คนวัยทำงานนั่งนานกว่า 6 ชั่วโมงต่อวัน และมีข้อจำกัดเรื่องพื้นที่ เวลา และค่าใช้จ่าย จึงต้องฝึกเองที่บ้านหรือคอนโด</p></div>
+        <div class="card"><span class="status todo">ปัญหาที่ตามมา</span><h3>ไม่มี feedback ที่เชื่อถือได้</h3><p>ผู้ใช้ไม่รู้ว่าหลังแอ่น สะโพกสูง ลำตัวเอียง หรือถ่ายน้ำหนักไม่สมดุลระหว่างกำลังฝึก ทำให้เกิด compensation และเสี่ยงบาดเจ็บ</p></div>
+        <div class="card"><span class="status todo">ผลกระทบ</span><h3>แรงจูงใจและหลักฐานความก้าวหน้าต่ำ</h3><p>การฝึกแพลงก์ซ้ำซากทำให้เลิกฝึกง่าย ขาดคะแนน/ภารกิจ/ประวัติที่เชื่อมกับคุณภาพท่า จึงไม่เกิดพฤติกรรมต่อเนื่อง</p></div>
+      </div>
+      <div class="callout" style="margin-top:14px"><strong>สรุปเป็น system root cause:</strong> ระบบปัจจุบันยังเป็น “แอป CRUD + mockup เกม + sensor gateway” แยกส่วนกัน ยังไม่ใช่ระบบฝึกแบบ closed-loop ที่รับรู้สรีระจริง → ประเมินความปลอดภัย → ให้ biofeedback → คำนวณคะแนน/พัฒนาการ</div>
+      <p class="section-note" style="margin-top:12px">อ้างอิงจาก PDF หน้า 11-17 (ปัญหา/วัตถุประสงค์/ขอบเขต) และหน้า 53-57 (ภาพรวมอุปกรณ์และ context ของระบบ)</p>
+    </section>
+
+    <section class="section" aria-labelledby="target-architecture-title">
+      <h2 id="target-architecture-title">Target architecture ตาม paper</h2>
+      <div class="diagram">
+        <div class="diagram-title">closed-loop training system</div>
+        <div class="flow">
+          <div class="flow-box"><h3>Wearable ×3</h3><p>IMU, heart rate, SpO₂, GSR/sweat<br>ส่งข้อมูลผ่าน BLE<br>มี timestamp และ device id</p></div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-box"><h3>Smart Yoga + ESP32</h3><p>FSR 16 จุด<br>คำนวณแรงกด, pad status และ Center of Pressure<br>รวมข้อมูล wearable</p></div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-box"><h3>Analysis + feedback</h3><p>posture/risk inference<br>hybrid score + session summary<br>ส่งผลกลับแอป, buzzer หรือ vibration</p></div>
+        </div>
+        <div class="subflow"><div class="subflow-row"><span class="node">raw sensor stream</span><span class="arrow">→</span><span class="node">calibration / windowing</span><span class="arrow">→</span><span class="node">posture + safety</span><span class="arrow">→</span><span class="node">game / biofeedback</span><span class="arrow">→</span><span class="node">history / progress</span></div></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="paper-gap-title">
+      <h2 id="paper-gap-title">สิ่งที่ต้องเพิ่มเมื่อเทียบกับ paper</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ลำดับ</th><th>สิ่งที่ paper ต้องการ</th><th>สถานะในโค้ดตอนนี้</th><th>สิ่งที่ต้องเพิ่ม</th></tr></thead>
+          <tbody>
+            <tr><td>P0</td><td>Smart Mat: FSR 16 จุดและ Center of Pressure</td><td>ยังไม่มี payload/entity ของ FSR 16 จุด; gateway รับ generic sensor ได้เท่านั้น</td><td>กำหนด schema array 16 จุด, calibration, threshold pad contact, pressure weight และคำนวณ CoP ต่อ time window</td></tr>
+            <tr><td>P0</td><td>Wearable 3 ชิ้น: IMU, HR, SpO₂, GSR/sweat</td><td>มี body payload แค่ <code>r/red/fingerDetected/bpm/avgBpm/spo2Approx</code>; ยังไม่มี IMU, GSR, device id และ BLE flow</td><td>เพิ่ม device registry, packet schema, timestamp/sequence, BLE-to-ESP32 protocol และการตรวจข้อมูลหาย/ซ้ำ</td></tr>
+            <tr><td>P0</td><td>วิเคราะห์ท่าทางและความเสี่ยงแบบ real-time</td><td>service ทำ normalize/save และ broadcast; ยังไม่มี posture inference หรือ risk rules</td><td>เริ่มจาก rule-based baseline: หลังแอ่น, สะโพกสูง, เอียง, น้ำหนักซ้าย/ขวาไม่สมดุล แล้วค่อยต่อ ML model พร้อม confidence</td></tr>
+            <tr><td>P0</td><td>Biofeedback เมื่อท่าผิดหรือเสี่ยง</td><td>มี event broadcast แต่ไม่มีคำสั่งกลับไป hardware, buzzer/vibration หรือ safety stop</td><td>สร้าง feedback event/command, cooldown, severity, threshold จาก HR/SpO₂ และหยุด session เมื่อเข้า unsafe zone</td></tr>
+            <tr><td>P1</td><td>Hybrid scoring: timing + posture/pressure multiplier</td><td>scoring อยู่ใน mockup เป็น timing score; Flutter ยังไม่มี game loop ที่ต่อ sensor จริง</td><td>ย้าย scoring contract กลางไป backend/shared spec และบันทึก hit, posture score, pressure balance, combo และ multiplier ต่อ session</td></tr>
+            <tr><td>P1</td><td>Session history, result และ line graph</td><td>มี session-performance CRUD และ dashboard aggregation บางส่วน; entity <code>plank_session</code> ยัง comment ฟิลด์สำคัญหลายตัว</td><td>เติม user/session relation, start/end/duration/mode/status, raw-vs-summary policy, time-series endpoint และกราฟรายสัปดาห์/เดือนใน Flutter</td></tr>
+            <tr><td>P1</td><td>Program/Custom mode ที่รันจริง</td><td>มี model/API/calendar/custom UI บางส่วน; game screen จริงยังอยู่ใน mockup</td><td>เชื่อม Program → Plan → Session → Game → Result ให้ครบ และ validate เวลา work/rest/difficulty ก่อนเริ่ม</td></tr>
+            <tr><td>P1</td><td>Push notification ตาม calendar</td><td>มี calendar UI แต่ยังไม่พบ notification service/dependency</td><td>เพิ่ม permission, scheduler, notification payload, timezone และสถานะส่งสำเร็จ/กดยกเลิก</td></tr>
+            <tr><td>P2</td><td>Admin จัดการ program/posture/user และ AI model</td><td>มี CRUD backend และหน้า admin บางส่วน แต่ route ใน Flutter ยัง comment และยังไม่เห็น role guard ครบ</td><td>เปิด admin routes, เพิ่ม role-based authorization, audit log และ model version/rollback</td></tr>
+            <tr><td>P2</td><td>การทดสอบ/ประเมินผลตามวัตถุประสงค์</td><td>มี unit specs บางส่วน แต่ยังไม่มี sensor calibration, posture accuracy, latency และ safety acceptance test</td><td>สร้าง test dataset, metrics, replay test และ end-to-end test จาก sensor → score → DB → UI</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="section-note" style="margin-top:12px">P0 = ต้องมีก่อนจึงจะเรียกว่า core system ตาม paper, P1 = ทำให้ user journey ครบ, P2 = ทำให้พร้อมใช้งานและประเมินผล</p>
+      <p class="section-note">อ้างอิงจาก PDF หน้า 60-68 (หน้าจอที่ระบบควรมี) และหน้า 69-78 (ERD/data dictionary) โดยเล่มนี้จบที่วิธีดำเนินการและการออกแบบ ยังไม่มีบทผลการทดสอบเชิงตัวเลข จึงควรเพิ่ม acceptance criteria และผลวัดจริงในรอบถัดไป</p>
+    </section>
+
+    <section class="section" aria-labelledby="snapshot-title">
+      <h2 id="snapshot-title">Snapshot</h2>
+      <div class="grid grid-4">
+        <div class="card metric"><span class="label">Backend feature modules</span><span class="value">18</span><span class="label">รวมใน `AppModules`</span></div>
+        <div class="card metric"><span class="label">Flutter user routes</span><span class="value">10</span><span class="label">เริ่มต้นที่ `/login`</span></div>
+        <div class="card metric"><span class="label">Latest focus</span><span class="value">WS</span><span class="label">generic + body sensor</span></div>
+        <div class="card metric"><span class="label">Backend build</span><span class="value">PASS</span><span class="label">`npm run build` ผ่าน</span></div>
+      </div>
+      <p class="section-note" style="margin-top:12px">ตรวจล่าสุด: backend build ผ่าน, port <code>3001</code> ยังไม่มี listener ตอนตรวจ และ <code>flutter analyze</code> ค้างโดยไม่มี output จึงหยุดการตรวจไว้ก่อน</p>
+    </section>
+
+    <section class="section" aria-labelledby="features-title">
+      <h2 id="features-title">Feature map</h2>
+      <p class="section-note">สถานะเป็นการอ่านจาก source ปัจจุบัน ไม่ใช่ product roadmap ที่ยืนยันแล้ว</p>
+      <div class="grid grid-3">
+        <article class="card feature"><span class="status done">implemented</span><h3>Auth & user</h3><p>JWT/local guard, login, profile, logout, user CRUD และ secure token storage ฝั่ง Flutter</p><ul><li>Backend: `auth`, `user`</li><li>Flutter: login/register/profile/user-detail</li></ul></article>
+        <article class="card feature"><span class="status done">implemented</span><h3>Training content</h3><p>โปรแกรม, program plan, posture, posture category, mission และความสัมพันธ์ตามโปรแกรม</p><ul><li>มี DTO/entity/service/controller/test</li><li>มี Bruno requests ใน `API/`</li></ul></article>
+        <article class="card feature"><span class="status done">implemented</span><h3>Quest & progress</h3><p>quest, quest category, quest-by-user, user-quests, plank session และ session performance</p><ul><li>Flutter providers/repositories/local sources มีหลาย feature แล้ว</li><li>ตรวจชื่อ module เดิมก่อน import ทุกครั้ง</li></ul></article>
+        <article class="card feature"><span class="status partial">in progress</span><h3>Sensor socket</h3><p>Socket.IO gateway รับข้อมูล generic และ body sensor, normalize, save และ broadcast</p><ul><li>`sensor:data` → `sensor:updated`</li><li>`data:body-sensor` → `body-sensor:updated`</li></ul></article>
+        <article class="card feature"><span class="status done">implemented</span><h3>DDR mockup</h3><p>หน้า static สำหรับเล่นเกม, keyboard mapping, scoring, combo, audio visualizer และ beatmap editor</p><ul><li>อยู่ใน `moc/index.html` + `moc/script.js`</li><li>ใช้เป็น prototype/reference แยกจาก Flutter</li></ul></article>
+        <article class="card feature"><span class="status partial">not wired</span><h3>Admin & Redis</h3><p>มีหน้า admin บางส่วนและ Redis ใน compose แต่ flow ยังไม่ถูกเปิดใช้ครบ</p><ul><li>admin routes ใน Flutter ยัง comment</li><li>อย่าสรุปว่า Redis เป็น runtime dependency แล้ว</li></ul></article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="architecture-title">
+      <h2 id="architecture-title">Architecture diagram</h2>
+      <div class="diagram">
+        <div class="diagram-title">system boundaries</div>
+        <div class="flow">
+          <div class="flow-box"><h3>Flutter client</h3><p><code>lib/UI</code> pages/widgets/providers<br><code>lib/data</code> models/repositories/sources<br><code>lib/core</code> API + token storage</p></div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-box"><h3>NestJS backend</h3><p><code>/api/v1</code> controllers → services → TypeORM entities<br>global validation, transform, exception filter<br>Socket.IO gateway สำหรับ sensor</p></div>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <div class="flow-box"><h3>Runtime services</h3><p>PostgreSQL: business + sensor data<br>Redis: compose provisioned, usage incomplete<br>Adminer: local database inspection</p></div>
+        </div>
+        <div class="subflow">
+          <div class="subflow-row" aria-label="Backend request flow">
+            <span class="node">HTTP request</span><span class="arrow">→</span><span class="node">ValidationPipe</span><span class="arrow">→</span><span class="node">Controller</span><span class="arrow">→</span><span class="node">Service / Repository</span><span class="arrow">→</span><span class="node">PostgreSQL</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="flow-title">
+      <h2 id="flow-title">Feature flows</h2>
+      <div class="grid grid-3">
+        <div class="diagram"><div class="diagram-title">user flow</div><div class="subflow-row"><span class="node">Login</span><span class="arrow">→</span><span class="node">Home</span><span class="arrow">→</span><span class="node">Mission / Activity</span><span class="arrow">→</span><span class="node">Profile</span></div></div>
+        <div class="diagram"><div class="diagram-title">content flow</div><div class="subflow-row"><span class="node">Program</span><span class="arrow">→</span><span class="node">Plan</span><span class="arrow">→</span><span class="node">Posture</span><span class="arrow">→</span><span class="node">Plank session</span></div></div>
+        <div class="diagram"><div class="diagram-title">game flow</div><div class="subflow-row"><span class="node">Beatmap</span><span class="arrow">→</span><span class="node">Input / sensor</span><span class="arrow">→</span><span class="node">Score + combo</span><span class="arrow">→</span><span class="node">Performance</span></div></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="sensor-title">
+      <h2 id="sensor-title">Sensor sequence diagram</h2>
+      <div class="diagram">
+        <div class="sequence" role="img" aria-label="ลำดับการส่งข้อมูลจากบอร์ด sensor ไปยัง backend และ client ที่ subscribe">
+          <div class="actor">Board / client</div><div class="actor">SensorSocketGateway</div><div class="actor">SensorSocketService</div><div class="actor">PostgreSQL + subscribers</div>
+          <div class="sequence-body">
+            <div class="message one">ส่ง `data:body-sensor` payload</div>
+            <div class="message two">เรียก `saveBodySensorData()` + สร้าง entity</div>
+            <div class="message three">save `sensor_data` → emit `body-sensor:updated`</div>
+          </div>
+        </div>
+        <p class="section-note" style="margin:16px 0 0">generic path: `sensor:data` จะ normalize payload แล้ว emit `sensor:updated` โดยยังไม่บันทึกฐานข้อมูล</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="api-title">
+      <h2 id="api-title">Backend surface</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>กลุ่ม</th><th>Route / module</th><th>บทบาท</th></tr></thead>
+          <tbody>
+            <tr><td>Auth</td><td><code>/api/v1/auth/login</code><br><code>/api/v1/auth/profile</code><br><code>/api/v1/auth/logout</code></td><td>login + JWT cookie/token, protected profile, logout</td></tr>
+            <tr><td>Content</td><td><code>program</code>, <code>program-plan</code>, <code>posture</code>, <code>posture-category</code>, <code>mission</code></td><td>CRUD และความสัมพันธ์ของ training content</td></tr>
+            <tr><td>Progress</td><td><code>plank-session</code>, <code>plank-by-session</code>, <code>session-performance</code>, <code>home-dashboard</code></td><td>session, performance และข้อมูลหน้า home</td></tr>
+            <tr><td>Quest</td><td><code>quest</code>, <code>quest-category</code>, <code>quest-by-uesr</code>, <code>user-quests</code></td><td>ภารกิจและสถานะภารกิจของ user</td></tr>
+            <tr><td>Realtime</td><td>Socket.IO: <code>sensor:data</code>, <code>data:body-sensor</code></td><td>รับ sensor และ broadcast ผลลัพธ์</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="git-title">
+      <h2 id="git-title">Git log ล่าสุด</h2>
+      <div class="timeline">
+        <div class="commit"><div class="commit-head"><span class="hash">ab17fe1</span><span class="date">2026-06-13 15:16</span><strong>test socket v6</strong></div><p>เปิด <code>synchronize: true</code> ใน database module เพื่อสร้างตารางอัตโนมัติ</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">a4ab1fb</span><span class="date">2026-06-13 15:00</span><strong>test socket v6</strong></div><p>เพิ่ม body-sensor DTO/entity/service/gateway และบันทึกลง <code>sensor_data</code></p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">5901307</span><span class="date">2026-06-13 13:23</span><strong>test socket v5</strong></div><p>ลงทะเบียน modules เพิ่ม: plank-by-session, program-plan, dashboard, user-quests</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">815bbdb</span><span class="date">2026-06-13 13:18</span><strong>test socket v4</strong></div><p>ปรับ database module ระหว่างทดสอบ socket</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">42b018c</span><span class="date">2026-06-13 13:16</span><strong>test socket v3</strong></div><p>ปรับ build configuration ของ backend</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">4ad35f8</span><span class="date">2026-06-13 13:13</span><strong>test socket v2</strong></div><p>ปรับต่อเนื่องในชุดทดลอง socket</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">1e65fe3</span><span class="date">2026-06-13 13:05</span><strong>socket io test</strong></div><p>เริ่มทดสอบ Socket.IO gateway</p></div>
+        <div class="commit"><div class="commit-head"><span class="hash">ef4326a</span><span class="date">2026-06-13 12:22</span><strong>add socket event</strong></div><p>เพิ่ม event สำหรับการรับส่งข้อมูล sensor</p></div>
+      </div>
+      <p class="section-note" style="margin-top:16px">Working tree ตอนตรวจ: แก้ค้างใน <code>backend/src/modules/sensor-socket/sensor-socket.gateway.ts</code> เพื่อเพิ่ม try/catch, success status และ error event; มี <code>agent.md</code> และไฟล์ mockup/media ที่ยัง untracked</p>
+    </section>
+
+    <section class="section" aria-labelledby="run-title">
+      <h2 id="run-title">Run ต่อจากตรงนี้</h2>
+      <div class="grid grid-3">
+        <div class="card"><h3>1 · Backend</h3><div class="commands"><button class="copy" type="button" data-copy="backend">copy</button><pre id="backend">cd backend
+npm install
+npm run start:dev</pre></div></div>
+        <div class="card"><h3>2 · Database</h3><div class="commands"><pre>docker compose up -d db
+# หรือใช้ DATABASE_URL ใน backend/.env
+# ตรวจ table sensor_data ก่อนยิง body sensor</pre></div></div>
+        <div class="card"><h3>3 · Flutter</h3><div class="commands"><pre>cd flutter_planko
+flutter pub get
+flutter run</pre></div></div>
+      </div>
+      <div class="card next" style="margin-top:14px">
+        <h3>Checklist สำหรับ session ถัดไป</h3>
+        <div class="checklist">
+          <label><input type="checkbox" data-check="backend"> Backend start ได้และต่อ PostgreSQL สำเร็จ</label>
+          <label><input type="checkbox" data-check="socket"> ยิง `data:body-sensor` แล้วได้ `body-sensor:ack`</label>
+          <label><input type="checkbox" data-check="db"> ยืนยันข้อมูลถูกบันทึกใน `sensor_data`</label>
+          <label><input type="checkbox" data-check="client"> client ที่ subscribe ได้รับ `body-sensor:updated`</label>
+          <label><input type="checkbox" data-check="paths"> แก้/ยืนยัน Flutter auth paths และ slash ของ API constants</label>
+          <label><input type="checkbox" data-check="commit"> ตัดสินใจว่าจะ commit error handling ใน gateway หรือปรับต่อ</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="risks-title">
+      <h2 id="risks-title">จุดที่ต้องระวัง</h2>
+      <div class="grid grid-3">
+        <div class="card"><h3>Database strategy</h3><p><code>database.module.ts</code> ใช้ <code>synchronize: true</code> แต่ <code>data-source.ts</code> ใช้ migrations และ <code>synchronize: false</code> อย่าสลับ strategy โดยไม่ดู environment</p></div>
+        <div class="card"><h3>API path mismatch</h3><p>Backend auth อยู่ใต้ <code>/auth/*</code> แต่ Flutter constants บางตัวใช้ <code>/register</code>/<code>/logout</code> ตรง root และบาง resource ต่อ slash ซ้ำ</p></div>
+        <div class="card"><h3>Localhost</h3><p>Flutter ตั้ง base URL เป็น <code>http://localhost:3001/api/v1/</code>; Android emulator/device อาจต้องเปลี่ยน host และตั้ง network permission</p></div>
+      </div>
+    </section>
+
+    <footer class="footer">Generated from repository state on 2026-09-15 · อ่าน source ก่อนแก้ทุกครั้ง และรักษา uncommitted changes ของผู้ใช้</footer>
+  </main>
+  <script>
+    const checks = document.querySelectorAll('[data-check]');
+    checks.forEach((input) => {
+      const key = `planko-status-${input.dataset.check}`;
+      input.checked = localStorage.getItem(key) === 'true';
+      input.addEventListener('change', () => localStorage.setItem(key, String(input.checked)));
+    });
+
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const target = document.getElementById(button.dataset.copy);
+        await navigator.clipboard.writeText(target.textContent);
+        const oldText = button.textContent;
+        button.textContent = 'copied';
+        setTimeout(() => { button.textContent = oldText; }, 1200);
+      });
+    });
+  </script>
+</body>
+</html>

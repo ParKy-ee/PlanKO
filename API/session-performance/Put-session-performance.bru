@@ -5,20 +5,20 @@ meta {
 }
 
 put {
-  url: {{api}}/session-performance/5
+  url: {{api}}/session-performance/100
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "plank_session_id": 3,
+    "plank_session_id": 6,
     "accuracy_avg": 95
   }
 }
 
 vars:pre-request {
-  api: http://10.0.2.2:3001/api/v1
+  api: http://localhost:3001/api/v1
 }
 
 settings {

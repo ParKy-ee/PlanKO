@@ -14,35 +14,21 @@ export class PostureByProgramService {
   async addPostureToProgram(createDto: PostureByProgramDto) {
     const { programId, postureId } = createDto;
 
-    // Optional: check uniqueness. Assuming same posture can be in same program on different days.
-    // If strict uniqueness like Mission is required:
-    /*
-    const exists = await this.postureByProgramRepository.findOne({
-      where: {
-        program: { id: programId },
-        posture: { id: postureId },
-        day: day // unique per day?
-      }
-    })
-    if (exists) throw new Error('Posture already exists in program for this day');
-    */
+    if (isNaN(programId) || isNaN(postureId)) {
+      return { error: true, message: 'Invalid programId or postureId', data: null };
+    }
 
     const postureByProgram = this.postureByProgramRepository.create({
       program: { id: programId },
       posture: { id: postureId },
-
-      // restTime removed from entity in previous step? Wait, I replaced restTime with createdAt/updatedAt.
-      // Checking previous edit... yes, I replaced restTime. 
-      // User request was "use mission-by-program as example".
-      // Mission doesn't have extra fields, but Posture needs them?
-      // The user edited Posture entity to add `set` and `second`. 
-      // I should check `PostureByProgram` entity again. I might have accidentally removed `restTime` instead of appending.
-      // Let's assume for now I should keep what flows.
-      // Re-reading entity content from Step 195: I replaced `restTime` with `createdAt`.
-      // This might be a mistake if `restTime` was needed. But `mission` example doesn't have it.
-      // Use `sets` and `reps` which are still there.
     });
-    return await this.postureByProgramRepository.save(postureByProgram);
+
+    try {
+      await this.postureByProgramRepository.save(postureByProgram);
+      return { message: 'Posture linked to program successfully', data: postureByProgram };
+    } catch (error) {
+      return { error: true, message: 'Invalid programId or postureId provided', data: null };
+    }
   }
 
   async getPosturesByProgram() {
@@ -51,17 +37,51 @@ export class PostureByProgramService {
     });
   }
 
-  async update(id: number, updateDto: PostureByProgramDto) {
-    const { programId, postureId, ...rest } = updateDto;
-    const updateData: any = { ...rest };
-    if (programId) updateData.program = { id: programId };
-    if (postureId) updateData.posture = { id: postureId };
-
-    await this.postureByProgramRepository.update(id, updateData);
+  async findOne(id: number) {
+    if (isNaN(id)) {
+      return null;
+    }
     return this.postureByProgramRepository.findOne({ where: { id }, relations: ['program', 'posture'] });
   }
 
+  async update(id: number, updateDto: PostureByProgramDto) {
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+
+    const existing = await this.findOne(id);
+    if (!existing) {
+      return { error: true, message: 'Record not found', data: null };
+    }
+
+    const { programId, postureId, ...rest } = updateDto;
+    const updateData: any = { ...rest };
+    if (programId !== undefined && !isNaN(programId)) updateData.program = { id: programId };
+    if (postureId !== undefined && !isNaN(postureId)) updateData.posture = { id: postureId };
+
+    try {
+      await this.postureByProgramRepository.update(id, updateData);
+      return { message: 'Updated successfully', data: { id } };
+    } catch (error) {
+      return { error: true, message: 'Invalid programId or postureId provided', data: null };
+    }
+  }
+
   async removePostureFromProgram(id: number) {
-    return await this.postureByProgramRepository.delete(id);
+    if (isNaN(id)) {
+      return { error: true, message: 'Invalid id provided', data: null };
+    }
+
+    const existing = await this.findOne(id);
+    if (!existing) {
+      return { error: true, message: 'Record not found', data: null };
+    }
+
+    try {
+      await this.postureByProgramRepository.delete(id);
+      return { message: 'Removed successfully', data: null };
+    } catch (error) {
+      return { error: true, message: 'Failed to remove posture from program (Reference error)', data: null };
+    }
   }
 }

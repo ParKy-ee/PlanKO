@@ -6,12 +6,23 @@ meta {
 
 get {
   url: {{api}}/program
-  body: none
+  body: json
   auth: inherit
 }
 
+body:json {
+  {
+    "programName": "yamala",
+    "programType": "BEGINNER",
+    "period": 200,
+    "frequency": 2,
+    "workDays": [1, 2],
+    "restDays": [6, 7]
+  }
+}
+
 vars:pre-request {
-  api: http://10.0.2.2:3001/api/v1
+  api: http://localhost:3001/api/v1
 }
 
 settings {

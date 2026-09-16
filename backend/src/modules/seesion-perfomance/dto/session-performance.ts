@@ -9,6 +9,10 @@ export class PerfomanceDto {
 
     @IsOptional()
     @IsNumber()
+    userId: number;
+
+    @IsOptional()
+    @IsNumber()
     total_score: number;
 
     @IsOptional()
@@ -37,5 +41,5 @@ export class PerfomanceDto {
 
     @IsOptional()
     @IsNumber()
-    figure_count: number;
+    kcal: number;
 }

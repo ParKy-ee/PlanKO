@@ -1,0 +1,24 @@
+meta {
+  name: Get-quest-category
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{api}}/quest-category
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: <YOUR_JWT_TOKEN>
+}
+
+vars:pre-request {
+  api: http://localhost:3001/api/v1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Post-quest-category
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{api}}/quest-category
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Sample Category",
+    "description": "A sample quest category"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

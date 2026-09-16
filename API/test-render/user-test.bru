@@ -1,0 +1,24 @@
+meta {
+  name: user-test
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://planko.onrender.com/api/v1/user
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email" : "aaaaaa11@gmail.com",
+    "name" : "gaag",
+    "password" : "1234"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

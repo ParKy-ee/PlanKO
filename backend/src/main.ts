@@ -9,11 +9,16 @@ import cors from 'cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Explicitly set WebSocket Adapter
+  const { IoAdapter } = await import('@nestjs/platform-socket.io');
+  app.useWebSocketAdapter(new IoAdapter(app));
 
-  app.use(cors({
-    origin: true,
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-  }));
+  });
   app.use(cookieParser());
   app.setGlobalPrefix('api');
 

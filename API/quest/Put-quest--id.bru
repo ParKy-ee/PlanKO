@@ -1,0 +1,31 @@
+meta {
+  name: Put-quest/:id
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{api}}/quest/100
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "yaoo"
+  //   "goal_value": 10,
+  //   "unit": "repeat",
+  //   "quest_type": "daily",
+  //   "xp_reward": 100,
+  //   "coin_reward": 50,
+  //   "difficulty": "easy",
+  //   "quest_category_id": 5
+  //   "description": "A sample quest description"
+  //   "is_active": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

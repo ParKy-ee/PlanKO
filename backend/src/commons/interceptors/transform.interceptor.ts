@@ -36,7 +36,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
                 }
 
                 return {
-                    success: true,
+                    success: data && typeof data === 'object' && 'success' in data ? data.success : true,
                     message: message,
                     data: resultData,
                     meta: meta,

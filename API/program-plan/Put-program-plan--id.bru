@@ -1,0 +1,16 @@
+meta {
+  name: Put-program-plan/:id
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{api}}/program-plan/1
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

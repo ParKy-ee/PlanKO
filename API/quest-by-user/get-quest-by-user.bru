@@ -1,0 +1,16 @@
+meta {
+  name: get-quest-by-user
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{api}}/quest-by-uesr
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

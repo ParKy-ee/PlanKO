@@ -1,4 +1,4 @@
-import { Role } from "src/commons/enums/role.enum";
+import { Role } from "../../../commons/enums/role.enum";
 import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UserDto {
