@@ -35,6 +35,24 @@ let beatmap = [];
 let activePlayNotes = []; // Notes currently active for scoring
 let hitNotesMap = new Set(); // Keep track of note indexes that were hit
 
+// Content Studio project state. The browser file itself is kept in memory;
+// the exported JSON stores the portable asset path that Expo can bundle.
+let activeLevelIndex = 0;
+let gameProject = null;
+const levelAudioFiles = new Map();
+const levelAudioUrls = new Map();
+
+// Fast beat placement state for the editor.
+let selectedBeatButton = null;
+let noteSnapMode = 'free';
+let timelineRangeStart = null;
+let timelineRangeEnd = null;
+let isDraggingTimeline = false;
+let timelineDragStartX = 0;
+let timelineDragMoved = false;
+let suppressTimelineClick = false;
+let selectedNoteIndex = null;
+
 // Default Beatmap for the built-in Synthesized Beat (approx. 120 BPM)
 const defaultBeatmap = [
   { time: 1.0, buttonId: "L1" },
@@ -69,6 +87,36 @@ const defaultBeatmap = [
   { time: 15.5, buttonId: "R8" }
 ];
 
+function createInitialGameProject() {
+  return {
+    schemaVersion: "1.0",
+    type: "planKo.game",
+    id: "planko-neon-sessions",
+    title: "PlanKO Neon Sessions",
+    description: "Rhythm plank training levels for PlanKO.",
+    version: 1,
+    levels: [
+      {
+        id: "level-01-neon-warmup",
+        title: "Neon Warmup",
+        difficulty: "normal",
+        bpm: 120,
+        description: "ฝึกจังหวะพื้นฐานก่อนเข้าสู่ด่านจริง",
+        audio: {
+          fileName: "synthwave-beat.wav",
+          mimeType: "audio/wav",
+          duration: 30,
+          uri: "assets/audio/synthwave-beat.wav"
+        },
+        beatmap: defaultBeatmap.map((note, index) => ({
+          id: index + 1,
+          ...note
+        }))
+      }
+    ]
+  };
+}
+
 // Map Keyboard Keys to Board Buttons
 const keyMap = {
   // Left Hand
@@ -91,9 +139,12 @@ let socket = null;
 
 // Initialize on window load
 window.addEventListener('load', () => {
+  gameProject = createInitialGameProject();
   beatmap = [...defaultBeatmap];
   updateBeatmapJSON();
   setupEventListeners();
+  setupStudioListeners();
+  renderStudio();
   setupAudioVisualizer();
   startHeartRateSimulation();
   
@@ -104,6 +155,7 @@ window.addEventListener('load', () => {
 // Switch between Tabs
 function switchTab(tabId) {
   activeTab = tabId;
+  document.body.classList.toggle('editor-mode', tabId === 'editor');
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   
@@ -114,6 +166,7 @@ function switchTab(tabId) {
   } else if (tabId === 'editor') {
     document.querySelector('.tab-btn[onclick*="editor"]').classList.add('active');
     document.getElementById('tab-editor').classList.add('active');
+    renderStudio();
     renderTimelineNotes();
   }
 }
@@ -134,21 +187,16 @@ function setupEventListeners() {
   });
 
   // Audio File input
-  document.getElementById('audio-file').addEventListener('change', handleAudioUpload);
+  document.getElementById('audio-file').addEventListener('change', handleStudioAudioUpload);
+  document.getElementById('level-audio-file').addEventListener('change', handleLinkedLevelAudioUpload);
+  document.getElementById('game-json-file').addEventListener('change', handleGameJsonFileUpload);
 
   // Keyboard Event for game controls
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keyup', handleKeyUp);
 
-  // Timeline click seeking
-  const timelineTrack = document.getElementById('timeline-track');
-  timelineTrack.addEventListener('click', (e) => {
-    if (!audioDuration) return;
-    const rect = timelineTrack.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percentage = clickX / rect.width;
-    seekAudio(percentage * audioDuration);
-  });
+  // Timeline click/drag placement and seeking
+  setupTimelinePlacement();
 
   // Web Board Buttons Clicks (simulate sensor tap)
   document.querySelectorAll('.board-btn').forEach(btn => {
@@ -160,6 +208,661 @@ function setupEventListeners() {
 
   // WS Connect Button
   document.getElementById('btn-ws-connect').addEventListener('click', toggleWSConnection);
+}
+
+// Content Studio controls: project metadata, level management and JSON export.
+function setupStudioListeners() {
+  const projectFields = [
+    ['game-title-input', 'title'],
+    ['game-slug-input', 'id'],
+    ['game-description-input', 'description']
+  ];
+
+  projectFields.forEach(([elementId, projectKey]) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.addEventListener('input', () => {
+      if (!gameProject) return;
+      gameProject[projectKey] = element.value;
+      if (projectKey === 'title' && !document.getElementById('game-slug-input').dataset.userEdited) {
+        document.getElementById('game-slug-input').value = slugify(element.value);
+        gameProject.id = document.getElementById('game-slug-input').value;
+      }
+      renderProjectJSONPreview();
+    });
+  });
+
+  const levelFields = [
+    ['level-title-input', 'title'],
+    ['level-difficulty-input', 'difficulty'],
+    ['level-bpm-input', 'bpm'],
+    ['level-description-input', 'description']
+  ];
+
+  levelFields.forEach(([elementId, levelKey]) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.addEventListener('input', () => updateActiveLevelField(levelKey, element.value));
+    element.addEventListener('change', () => updateActiveLevelField(levelKey, element.value));
+  });
+
+  const slugInput = document.getElementById('game-slug-input');
+  slugInput.addEventListener('input', () => {
+    slugInput.dataset.userEdited = 'true';
+  });
+
+  document.getElementById('btn-add-level').addEventListener('click', addLevel);
+  document.getElementById('btn-new-project').addEventListener('click', createNewProject);
+  document.getElementById('btn-export-game').addEventListener('click', downloadGameJSON);
+  document.getElementById('btn-download-game-json').addEventListener('click', downloadGameJSON);
+  document.getElementById('btn-copy-game-json').addEventListener('click', copyGameJSON);
+  document.getElementById('btn-api-save-game').addEventListener('click', saveGameToMockApi);
+  document.getElementById('btn-api-load-game').addEventListener('click', loadGameFromMockApi);
+
+  document.getElementById('note-snap-select').addEventListener('change', (event) => {
+    noteSnapMode = event.target.value;
+    updateTimelineBuilderUI();
+  });
+  document.getElementById('range-step-input').addEventListener('input', updateTimelineBuilderUI);
+  document.getElementById('btn-add-range').addEventListener('click', addNotesInSelectedRange);
+  document.getElementById('btn-delete-range').addEventListener('click', deleteNotesInSelectedRange);
+  document.getElementById('btn-add-current-time').addEventListener('click', addNoteAtCurrentTime);
+  document.getElementById('btn-clear-range').addEventListener('click', clearTimelineRange);
+  document.getElementById('btn-delete-selected-note').addEventListener('click', deleteSelectedNote);
+  document.getElementById('btn-editor-play-pause').addEventListener('click', togglePlay);
+  document.getElementById('btn-editor-stop').addEventListener('click', stopAudio);
+
+  // Keep the beat builder in the same visual zone as the Timeline.
+  const timelineBuilderMount = document.getElementById('timeline-builder-mount');
+  const noteBuilder = document.querySelector('.editor-sidebar .note-builder');
+  if (timelineBuilderMount && noteBuilder) {
+    timelineBuilderMount.appendChild(noteBuilder);
+  }
+
+  renderBeatPalette();
+}
+
+const editorPadIds = [
+  'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8',
+  'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'
+];
+
+function renderBeatPalette() {
+  const palette = document.getElementById('pad-palette');
+  if (!palette) return;
+
+  palette.innerHTML = editorPadIds.map((buttonId) => {
+    const isMid = ['L3', 'L6', 'R3', 'R6'].includes(buttonId);
+    const sideClass = isMid ? 'mid-choice' : buttonId.startsWith('L') ? 'left-choice' : 'right-choice';
+    return `<button type="button" class="pad-choice ${sideClass}" data-pad-id="${buttonId}">${buttonId}</button>`;
+  }).join('');
+
+  palette.querySelectorAll('[data-pad-id]').forEach((button) => {
+    button.addEventListener('click', () => selectBeatButton(button.dataset.padId));
+  });
+}
+
+function selectBeatButton(buttonId) {
+  if (!buttonId) return;
+  selectedBeatButton = buttonId;
+
+  document.querySelectorAll('.pad-choice').forEach((button) => {
+    button.classList.toggle('active', button.dataset.padId === buttonId);
+  });
+
+  const label = document.getElementById('selected-pad-label');
+  if (label) label.innerText = `เลือก ${buttonId}`;
+
+  const track = document.getElementById('timeline-track');
+  if (track) track.classList.add('note-entry-mode');
+  updateTimelineBuilderUI();
+}
+
+function setupTimelinePlacement() {
+  const track = document.getElementById('timeline-track');
+  if (!track) return;
+
+  track.addEventListener('click', handleTimelineClick);
+  track.addEventListener('mousedown', beginTimelineDrag);
+  window.addEventListener('mousemove', updateTimelineDrag);
+  window.addEventListener('mouseup', finishTimelineDrag);
+}
+
+function timelineTimeFromClientX(clientX) {
+  const track = document.getElementById('timeline-track');
+  if (!track || !audioDuration) return 0;
+  const rect = track.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  return ratio * audioDuration;
+}
+
+function beginTimelineDrag(event) {
+  if (event.button !== 0 || !audioDuration || event.target.closest('.timeline-note')) return;
+  isDraggingTimeline = true;
+  timelineDragStartX = event.clientX;
+  timelineDragMoved = false;
+}
+
+function updateTimelineDrag(event) {
+  if (!isDraggingTimeline) return;
+  if (Math.abs(event.clientX - timelineDragStartX) < 5 && !timelineDragMoved) return;
+
+  timelineDragMoved = true;
+  const start = timelineTimeFromClientX(timelineDragStartX);
+  const end = timelineTimeFromClientX(event.clientX);
+  setTimelineRange(start, end);
+}
+
+function finishTimelineDrag() {
+  if (!isDraggingTimeline) return;
+  isDraggingTimeline = false;
+
+  if (timelineDragMoved) {
+    suppressTimelineClick = true;
+    updateTimelineBuilderUI();
+  }
+}
+
+function handleTimelineClick(event) {
+  if (!audioDuration) return;
+  if (event.target.closest('.timeline-note')) return;
+  if (suppressTimelineClick) {
+    suppressTimelineClick = false;
+    return;
+  }
+
+  const time = snapTimelineTime(timelineTimeFromClientX(event.clientX));
+  seekAudio(time);
+
+  if (selectedBeatButton) {
+    addNoteAtTime(selectedBeatButton, time, true);
+  } else {
+    showToast('เลือกปุ่มจากแผงเพิ่มจังหวะก่อน แล้วคลิก Timeline อีกครั้ง');
+  }
+}
+
+function getSnapStep() {
+  const level = getActiveLevel();
+  const bpm = Number(level?.bpm) || 120;
+  if (noteSnapMode === 'quarter') return 60 / bpm;
+  if (noteSnapMode === 'eighth') return 30 / bpm;
+  if (noteSnapMode === 'sixteenth') return 15 / bpm;
+  return 0;
+}
+
+function snapTimelineTime(time) {
+  const boundedTime = Math.max(0, Math.min(audioDuration || time, time));
+  const step = getSnapStep();
+  if (!step) return Number(boundedTime.toFixed(2));
+  return Number((Math.round(boundedTime / step) * step).toFixed(2));
+}
+
+function setTimelineRange(start, end) {
+  timelineRangeStart = snapTimelineTime(Math.min(start, end));
+  timelineRangeEnd = snapTimelineTime(Math.max(start, end));
+  renderTimelineRange();
+  updateTimelineBuilderUI();
+}
+
+function renderTimelineRange() {
+  const selection = document.getElementById('timeline-selection');
+  if (!selection || !audioDuration || timelineRangeStart === null || timelineRangeEnd === null) return;
+
+  const left = (timelineRangeStart / audioDuration) * 100;
+  const width = Math.max(0.5, ((timelineRangeEnd - timelineRangeStart) / audioDuration) * 100);
+  selection.style.left = `${left}%`;
+  selection.style.width = `${width}%`;
+  selection.classList.add('visible');
+}
+
+function clearTimelineRange() {
+  timelineRangeStart = null;
+  timelineRangeEnd = null;
+  const selection = document.getElementById('timeline-selection');
+  if (selection) selection.classList.remove('visible');
+  updateTimelineBuilderUI();
+}
+
+function updateTimelineBuilderUI() {
+  const timeLabel = document.getElementById('current-add-time');
+  if (timeLabel) timeLabel.innerText = `${playbackTime.toFixed(2)}s`;
+
+  const summary = document.getElementById('range-summary');
+  const addRangeButton = document.getElementById('btn-add-range');
+  const deleteRangeButton = document.getElementById('btn-delete-range');
+  const hasRange = timelineRangeStart !== null && timelineRangeEnd !== null;
+  if (summary) {
+    summary.classList.toggle('empty', !hasRange);
+    summary.innerText = hasRange
+      ? `ช่วง ${timelineRangeStart.toFixed(2)}s – ${timelineRangeEnd.toFixed(2)}s (${Math.max(0, timelineRangeEnd - timelineRangeStart).toFixed(2)}s)`
+      : 'ยังไม่ได้เลือกช่วงเวลา';
+  }
+  if (addRangeButton) addRangeButton.disabled = !hasRange || !selectedBeatButton;
+  if (deleteRangeButton) deleteRangeButton.disabled = !hasRange;
+
+  const hint = document.getElementById('timeline-action-hint');
+  if (hint) {
+    hint.innerText = selectedBeatButton
+      ? `เลือก ${selectedBeatButton} แล้ว · คลิกเพื่อวาง 1 โน้ต · ลากเพื่อเลือกช่วงเวลา`
+      : 'เลือกปุ่มด้านขวา แล้วคลิก Timeline เพื่อวางโน้ต หรือ ลากเพื่อเลือกช่วงเวลา';
+  }
+}
+
+function addNoteAtTime(buttonId, time, notify) {
+  if (!buttonId || !audioDuration) return false;
+  const normalizedTime = snapTimelineTime(time);
+  const duplicate = beatmap.some((note) => note.buttonId === buttonId && Math.abs(note.time - normalizedTime) < 0.01);
+  if (duplicate) {
+    if (notify) showToast(`${buttonId} มีอยู่ที่ ${normalizedTime.toFixed(2)}s แล้ว`);
+    return false;
+  }
+
+  beatmap.push({ time: normalizedTime, buttonId });
+  beatmap.sort((a, b) => a.time - b.time);
+  updateBeatmapJSON();
+  renderTimelineNotes();
+  if (notify) showToast(`เพิ่ม ${buttonId} ที่ ${normalizedTime.toFixed(2)}s`);
+  return true;
+}
+
+function addNoteAtCurrentTime() {
+  if (!selectedBeatButton) {
+    showToast('เลือกปุ่มที่จะเพิ่มก่อน');
+    return;
+  }
+  addNoteAtTime(selectedBeatButton, playbackTime, true);
+}
+
+function addNotesInSelectedRange() {
+  if (!selectedBeatButton || timelineRangeStart === null || timelineRangeEnd === null) {
+    showToast('เลือกปุ่มและลากช่วงเวลาบน Timeline ก่อน');
+    return;
+  }
+
+  const step = Math.max(0.05, Number(document.getElementById('range-step-input').value) || 0.5);
+  const start = Math.min(timelineRangeStart, timelineRangeEnd);
+  const end = Math.max(timelineRangeStart, timelineRangeEnd);
+  let addedCount = 0;
+
+  for (let time = start; time <= end + 0.001; time += step) {
+    if (addNoteAtTime(selectedBeatButton, time, false)) addedCount += 1;
+  }
+
+  showToast(`เพิ่ม ${selectedBeatButton} ในช่วงแล้ว ${addedCount} โน้ต`);
+}
+
+function deleteNotesInSelectedRange() {
+  if (timelineRangeStart === null || timelineRangeEnd === null) {
+    showToast('ลากเลือกช่วงเวลาบน Timeline ก่อน');
+    return;
+  }
+
+  const start = Math.min(timelineRangeStart, timelineRangeEnd);
+  const end = Math.max(timelineRangeStart, timelineRangeEnd);
+  const previousCount = beatmap.length;
+  beatmap = beatmap.filter((note) => note.time < start || note.time > end);
+  const deletedCount = previousCount - beatmap.length;
+
+  selectedNoteIndex = null;
+  updateBeatmapJSON();
+  renderTimelineNotes();
+  showToast(deletedCount > 0
+    ? `ลบโน้ตในช่วง ${start.toFixed(2)}s – ${end.toFixed(2)}s แล้ว ${deletedCount} โน้ต`
+    : 'ไม่มีโน้ตอยู่ในช่วงเวลาที่เลือก');
+}
+
+function slugify(value) {
+  return String(value || 'game')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'planko-game';
+}
+
+function getActiveLevel() {
+  return gameProject && gameProject.levels ? gameProject.levels[activeLevelIndex] : null;
+}
+
+function updateActiveLevelField(field, value) {
+  const level = getActiveLevel();
+  if (!level) return;
+
+  if (field === 'bpm') {
+    level.bpm = Math.max(1, Number(value) || 120);
+  } else {
+    level[field] = value;
+  }
+
+  renderLevelList();
+  renderProjectJSONPreview();
+}
+
+function saveActiveLevel() {
+  const level = getActiveLevel();
+  if (!level) return;
+
+  level.beatmap = beatmap.map((note, index) => ({
+    id: index + 1,
+    time: note.time,
+    buttonId: note.buttonId
+  }));
+
+  if (audioDuration > 0 && levelAudioFiles.has(activeLevelIndex)) {
+    level.audio.duration = Number(audioDuration.toFixed(2));
+  }
+}
+
+function syncStudioInputs() {
+  const level = getActiveLevel();
+  if (!gameProject || !level) return;
+
+  document.getElementById('game-title-input').value = gameProject.title;
+  document.getElementById('game-slug-input').value = gameProject.id;
+  document.getElementById('game-description-input').value = gameProject.description;
+  document.getElementById('level-title-input').value = level.title;
+  document.getElementById('level-difficulty-input').value = level.difficulty;
+  document.getElementById('level-bpm-input').value = level.bpm;
+  document.getElementById('level-description-input').value = level.description;
+  document.getElementById('active-level-label').innerText = `Level ${String(activeLevelIndex + 1).padStart(2, '0')}`;
+
+  const file = levelAudioFiles.get(activeLevelIndex);
+  const fileName = file ? file.name : level.audio.fileName;
+  document.getElementById('studio-audio-name').innerText = fileName || 'ยังไม่ได้เลือกเพลงของด่านนี้';
+  document.getElementById('studio-audio-meta').innerText = file
+    ? `${file.type || 'audio/*'} · ${(file.size / 1024 / 1024).toFixed(2)} MB · พร้อมสร้าง JSON`
+    : `รองรับ MP3, WAV, M4A · ${level.audio.duration ? `${level.audio.duration}s` : 'ยังไม่ทราบความยาว'}`;
+}
+
+function renderLevelList() {
+  const list = document.getElementById('level-list');
+  if (!list || !gameProject) return;
+
+  document.getElementById('level-count-label').innerText = `${gameProject.levels.length} level${gameProject.levels.length === 1 ? '' : 's'}`;
+  list.innerHTML = gameProject.levels.map((level, index) => `
+    <button class="level-item ${index === activeLevelIndex ? 'active' : ''}" data-level-index="${index}">
+      <div class="level-item-top">
+        <span class="level-number">${String(index + 1).padStart(2, '0')}</span>
+        <span class="level-item-title">${escapeHtml(level.title || 'Untitled level')}</span>
+        <span class="level-status ${level.difficulty}">${String(level.difficulty).toUpperCase()}</span>
+      </div>
+      <div class="level-item-meta">
+        <span><i class="fa-solid fa-music"></i> ${escapeHtml(level.audio.fileName || 'No audio')}</span>
+        <span><i class="fa-solid fa-note-sticky"></i> ${level.beatmap.length} notes</span>
+      </div>
+    </button>
+  `).join('');
+
+  list.querySelectorAll('[data-level-index]').forEach((button) => {
+    button.addEventListener('click', () => selectLevel(Number(button.dataset.levelIndex)));
+  });
+}
+
+function renderProjectJSONPreview() {
+  const output = document.getElementById('game-json-output');
+  if (!output || !gameProject) return;
+
+  saveActiveLevel();
+  const exportedProject = serializeGameProject();
+  output.value = JSON.stringify(exportedProject, null, 2);
+
+  const noteCount = exportedProject.levels.reduce((sum, level) => sum + level.beatmap.length, 0);
+  document.getElementById('studio-json-summary').innerHTML =
+    `<strong>${exportedProject.levels.length}</strong> ด่าน · <strong>${noteCount}</strong> notes · schema <strong>${exportedProject.schemaVersion}</strong>`;
+}
+
+function serializeGameProject() {
+  return {
+    schemaVersion: gameProject.schemaVersion,
+    type: gameProject.type,
+    id: gameProject.id || slugify(gameProject.title),
+    title: gameProject.title,
+    description: gameProject.description,
+    version: gameProject.version,
+    levels: gameProject.levels.map((level, levelIndex) => ({
+      id: level.id || `${slugify(gameProject.title)}-level-${levelIndex + 1}`,
+      title: level.title,
+      difficulty: level.difficulty,
+      bpm: Number(level.bpm) || 120,
+      description: level.description,
+      duration: Number(level.audio.duration) || 0,
+      audio: {
+        fileName: level.audio.fileName || '',
+        mimeType: level.audio.mimeType || 'audio/mpeg',
+        uri: level.audio.uri || `assets/audio/${level.audio.fileName || 'replace-me.mp3'}`
+      },
+      beatmap: level.beatmap.map((note, noteIndex) => ({
+        id: note.id || noteIndex + 1,
+        time: Number(note.time.toFixed ? note.time.toFixed(2) : note.time),
+        buttonId: note.buttonId
+      }))
+    }))
+  };
+}
+
+function selectLevel(index) {
+  if (!gameProject || index === activeLevelIndex || !gameProject.levels[index]) return;
+
+  saveActiveLevel();
+  activeLevelIndex = index;
+  clearTimelineRange();
+  const level = getActiveLevel();
+  beatmap = (level.beatmap || []).map((note) => ({
+    time: note.time,
+    buttonId: note.buttonId
+  }));
+
+  stopAudio();
+  audioDuration = Number(level.audio.duration) || 0;
+  const file = levelAudioFiles.get(activeLevelIndex);
+  if (file) {
+    loadAudioFile(file, false, false);
+  } else {
+    currentSongName = level.audio.fileName || 'ยังไม่ได้เลือกเพลง';
+    document.getElementById('song-name').innerText = currentSongName;
+    document.getElementById('song-duration').innerText = formatTime(audioDuration);
+    document.getElementById('editor-duration-text').innerText = `${audioDuration.toFixed(2)}s`;
+  }
+
+  syncStudioInputs();
+  renderLevelList();
+  updateBeatmapJSON();
+  renderTimelineNotes();
+  showToast(`เปิดด่าน ${level.title}`);
+}
+
+function addLevel() {
+  if (!gameProject) return;
+  saveActiveLevel();
+  const nextNumber = gameProject.levels.length + 1;
+  gameProject.levels.push({
+    id: `${slugify(gameProject.title)}-level-${String(nextNumber).padStart(2, '0')}`,
+    title: `New Level ${String(nextNumber).padStart(2, '0')}`,
+    difficulty: 'normal',
+    bpm: 120,
+    description: 'เพิ่มคำอธิบายของด่านนี้',
+    audio: {
+      fileName: '',
+      mimeType: 'audio/mpeg',
+      duration: 0,
+      uri: `assets/audio/level-${String(nextNumber).padStart(2, '0')}.mp3`
+    },
+    beatmap: []
+  });
+  activeLevelIndex = gameProject.levels.length - 1;
+  clearTimelineRange();
+  beatmap = [];
+  audioDuration = 0;
+  stopAudio();
+  syncStudioInputs();
+  renderLevelList();
+  updateBeatmapJSON();
+  renderTimelineNotes();
+  showToast('เพิ่มด่านใหม่แล้ว — อัปโหลดเพลงแล้วเริ่มอัดโน้ตได้เลย');
+}
+
+function createNewProject() {
+  if (!window.confirm('เริ่มเกมใหม่และล้างข้อมูล project นี้หรือไม่?')) return;
+  gameProject = createInitialGameProject();
+  activeLevelIndex = 0;
+  clearTimelineRange();
+  levelAudioFiles.clear();
+  levelAudioUrls.clear();
+  beatmap = [...defaultBeatmap];
+  audioDuration = 30;
+  stopAudio();
+  syncStudioInputs();
+  renderLevelList();
+  updateBeatmapJSON();
+  renderTimelineNotes();
+  showToast('สร้างเกมใหม่แล้ว');
+}
+
+function copyGameJSON() {
+  const output = document.getElementById('game-json-output');
+  if (!output) return;
+  output.select();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(output.value).catch(() => document.execCommand('copy'));
+  } else {
+    document.execCommand('copy');
+  }
+  showToast('คัดลอก game JSON แล้ว');
+}
+
+function downloadGameJSON() {
+  if (!gameProject) return;
+  saveActiveLevel();
+  const json = JSON.stringify(serializeGameProject(), null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${slugify(gameProject.title)}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+  showToast('ดาวน์โหลด game JSON แล้ว — นำไฟล์ไปไว้ใน planko_expo/src/mocks/');
+}
+
+async function saveGameToMockApi() {
+  if (!gameProject || !window.MocApi) {
+    showToast('ยังไม่พบ Mock API');
+    return;
+  }
+
+  saveActiveLevel();
+  const project = serializeGameProject();
+  const result = await window.MocApi.saveGame(project);
+  if (!result.ok) {
+    showToast(`บันทึก Mock API ไม่สำเร็จ (${result.status})`);
+    return;
+  }
+
+  showToast(`บันทึกเกม ${project.id} ลง Mock API แล้ว`);
+}
+
+async function loadGameFromMockApi() {
+  if (!gameProject || !window.MocApi) {
+    showToast('ยังไม่พบ Mock API');
+    return;
+  }
+
+  const inputId = document.getElementById('game-slug-input').value.trim();
+  const gameId = inputId || gameProject.id;
+  const result = await window.MocApi.getGame(gameId);
+  if (!result.ok) {
+    showToast(`ยังไม่มีเกม ${gameId} ใน Mock API — กดบันทึกก่อน`);
+    return;
+  }
+
+  applyMockApiProject(result.data);
+  showToast(`โหลดเกม ${gameId} จาก Mock API แล้ว`);
+}
+
+function applyMockApiProject(project) {
+  const projectId = project.id || slugify(project.title);
+  const levels = Array.isArray(project.levels) ? project.levels : [];
+
+  gameProject = {
+    schemaVersion: project.schemaVersion || '1.0',
+    type: project.type || 'planKo.game',
+    id: projectId,
+    title: project.title || 'Untitled PlanKO Game',
+    description: project.description || '',
+    version: Number(project.version) || 1,
+    levels: levels.map((level, index) => ({
+      id: level.id || `${projectId}-level-${String(index + 1).padStart(2, '0')}`,
+      title: level.title || `Level ${String(index + 1).padStart(2, '0')}`,
+      difficulty: level.difficulty || 'normal',
+      bpm: Number(level.bpm) || 120,
+      description: level.description || '',
+      audio: {
+        fileName: level.audio?.fileName || '',
+        mimeType: level.audio?.mimeType || 'audio/mpeg',
+        duration: Number(level.audio?.duration) || 0,
+        uri: level.audio?.uri || ''
+      },
+      beatmap: Array.isArray(level.beatmap)
+        ? level.beatmap.map((note, noteIndex) => ({
+          id: note.id || noteIndex + 1,
+          time: Number(note.time) || 0,
+          buttonId: note.buttonId || 'L1'
+        }))
+        : []
+    }))
+  };
+
+  if (!gameProject.levels.length) {
+    gameProject.levels.push({
+      id: `${projectId}-level-01`,
+      title: 'Level 01',
+      difficulty: 'normal',
+      bpm: 120,
+      description: '',
+      audio: { fileName: '', mimeType: 'audio/mpeg', duration: 0, uri: '' },
+      beatmap: []
+    });
+  }
+
+  activeLevelIndex = 0;
+  beatmap = gameProject.levels[0].beatmap.map((note) => ({
+    time: Number(note.time) || 0,
+    buttonId: note.buttonId
+  }));
+  audioDuration = Number(gameProject.levels[0].audio.duration) || 0;
+  levelAudioFiles.clear();
+  levelAudioUrls.clear();
+  clearTimelineRange();
+  selectedNoteIndex = null;
+  stopAudio();
+  audioEl.removeAttribute('src');
+  audioEl.load();
+
+  currentSongName = gameProject.levels[0].audio.fileName || 'ยังไม่ได้เลือกเพลง';
+  document.getElementById('song-name').innerText = currentSongName;
+  document.getElementById('song-duration').innerText = formatTime(audioDuration);
+  document.getElementById('editor-duration-text').innerText = `${audioDuration.toFixed(2)}s`;
+  syncStudioInputs();
+  renderLevelList();
+  updateBeatmapJSON();
+  renderTimelineNotes();
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function renderStudio() {
+  if (!gameProject) return;
+  syncStudioInputs();
+  renderLevelList();
+  renderProjectJSONPreview();
 }
 
 // Web Audio API Synthesizer & Audio Setup
@@ -278,6 +981,108 @@ function handleAudioUpload(e) {
   };
 }
 
+// Studio audio loader. It keeps the browser file in memory and stores a
+// portable assets/audio path in the game JSON for the Expo client.
+function handleStudioAudioUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  loadAudioFile(file, true, true);
+}
+
+function handleLinkedLevelAudioUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // This picker belongs to the active level, so keep beatmap notes loaded from JSON.
+  loadAudioFile(file, false, true);
+  e.target.value = '';
+}
+
+async function handleGameJsonFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const parsed = JSON.parse(await file.text());
+
+    if (Array.isArray(parsed?.levels)) {
+      applyMockApiProject(parsed);
+    } else if (Array.isArray(parsed?.beatmap)) {
+      const currentProject = serializeGameProject();
+      currentProject.levels = [{
+        ...currentProject.levels[0],
+        ...parsed,
+        audio: { ...currentProject.levels[0].audio, ...(parsed.audio || {}) }
+      }];
+      applyMockApiProject(currentProject);
+    } else if (Array.isArray(parsed)) {
+      const currentProject = serializeGameProject();
+      currentProject.levels[0].beatmap = parsed;
+      applyMockApiProject(currentProject);
+    } else {
+      throw new Error('ไฟล์ต้องมี levels, beatmap หรือเป็น Array ของโน้ต');
+    }
+
+    showToast(`เลือกไฟล์ด่าน ${file.name} แล้ว — เลือกเพลงของด่านเพื่อเชื่อมต่อได้เลย`);
+  } catch (error) {
+    console.error('Level JSON import error:', error);
+    showToast(`อ่านไฟล์ด่านไม่สำเร็จ: ${error.message}`);
+  } finally {
+    e.target.value = '';
+  }
+}
+
+function loadAudioFile(file, clearBeatmap, showSuccess) {
+  initAudioContext();
+
+  levelAudioFiles.set(activeLevelIndex, file);
+  currentSongName = file.name;
+  document.getElementById('song-name').innerText = file.name;
+  document.getElementById('studio-audio-name').innerText = file.name;
+  document.getElementById('studio-audio-meta').innerText = `${file.type || 'audio/*'} · ${(file.size / 1024 / 1024).toFixed(2)} MB · กำลังอ่านความยาวเพลง...`;
+
+  const previousUrl = levelAudioUrls.get(activeLevelIndex);
+  if (previousUrl) URL.revokeObjectURL(previousUrl);
+  const objectUrl = URL.createObjectURL(file);
+  levelAudioUrls.set(activeLevelIndex, objectUrl);
+  audioEl.src = objectUrl;
+  audioEl.load();
+
+  audioEl.onloadedmetadata = () => {
+    audioDuration = audioEl.duration;
+    document.getElementById('song-duration').innerText = formatTime(audioDuration);
+    document.getElementById('editor-duration-text').innerText = audioDuration.toFixed(2) + 's';
+
+    const level = getActiveLevel();
+    if (level) {
+      level.audio.fileName = file.name;
+      level.audio.mimeType = file.type || 'audio/mpeg';
+      level.audio.duration = Number(audioDuration.toFixed(2));
+      level.audio.uri = `assets/audio/${file.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
+    }
+
+    if (clearBeatmap) {
+      beatmap = [];
+      clearTimelineRange();
+    }
+    syncStudioInputs();
+    updateBeatmapJSON();
+    renderTimelineNotes();
+    if (showSuccess) showToast('อัปโหลดเพลงสำเร็จ — พร้อมอัด beatmap แล้ว');
+  };
+}
+
+function updatePlaybackButtons() {
+  const mainButton = document.getElementById('btn-play-pause');
+  const editorButton = document.getElementById('btn-editor-play-pause');
+  const icon = isPlaying ? 'fa-pause' : 'fa-play';
+
+  if (mainButton) mainButton.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+  if (editorButton) {
+    editorButton.innerHTML = `<i class="fa-solid ${icon}"></i> ${isPlaying ? 'หยุดชั่วคราว' : 'เล่นเพลง'}`;
+  }
+}
+
 // Play & Pause Mechanics
 function togglePlay() {
   initAudioContext();
@@ -288,12 +1093,12 @@ function togglePlay() {
   if (isPlaying) {
     audioEl.pause();
     isPlaying = false;
-    document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
+    updatePlaybackButtons();
     cancelAnimationFrame(animationFrameId);
   } else {
     audioEl.play().then(() => {
       isPlaying = true;
-      document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
+      updatePlaybackButtons();
       
       // Reset active notes to play from current timestamp forward
       prepareNotesForPlay();
@@ -312,13 +1117,14 @@ function stopAudio() {
   audioEl.pause();
   audioEl.currentTime = 0;
   isPlaying = false;
-  document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
+  updatePlaybackButtons();
   cancelAnimationFrame(animationFrameId);
   
   playbackTime = 0;
   document.getElementById('game-time').innerText = "0:00";
   document.getElementById('editor-time').innerText = "0.00";
   document.getElementById('timeline-cursor').style.left = '0%';
+  updateTimelineBuilderUI();
   
   resetGame();
 }
@@ -329,6 +1135,7 @@ function seekAudio(seconds) {
   playbackTime = seconds;
   document.getElementById('game-time').innerText = formatTime(seconds);
   document.getElementById('editor-time').innerText = seconds.toFixed(2);
+  updateTimelineBuilderUI();
   
   const pct = (seconds / audioDuration) * 100;
   document.getElementById('timeline-cursor').style.left = pct + '%';
@@ -382,6 +1189,7 @@ function gameLoop() {
   // Update HUD values
   document.getElementById('game-time').innerText = formatTime(playbackTime);
   document.getElementById('editor-time').innerText = playbackTime.toFixed(2);
+  updateTimelineBuilderUI();
   
   const pct = (playbackTime / audioDuration) * 100;
   document.getElementById('timeline-cursor').style.left = pct + '%';
@@ -435,6 +1243,17 @@ function updateRhythmNodes() {
 
 // Handle key down mapping to physical board
 function handleKeyDown(e) {
+  const activeElementTag = document.activeElement?.tagName;
+  if (
+    activeTab === 'editor' &&
+    (e.key === 'Delete' || e.key === 'Backspace') &&
+    !['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElementTag)
+  ) {
+    e.preventDefault();
+    deleteSelectedNote();
+    return;
+  }
+
   const key = e.key.toLowerCase();
   if (keyMap[key]) {
     triggerButtonPress(keyMap[key]);
@@ -476,8 +1295,9 @@ function triggerButtonPress(buttonId) {
   if (activeTab === 'game' && isPlaying) {
     validateHit(buttonId);
   } 
-  // If active tab is editor and song is playing, record beat!
-  else if (activeTab === 'editor' && isPlaying) {
+  // In editor: record to the current playhead while playing, or place at
+  // the paused playhead when a pad has been selected in the builder.
+  else if (activeTab === 'editor' && (isPlaying || selectedBeatButton)) {
     recordBeat(buttonId);
   }
   
@@ -645,16 +1465,7 @@ function registerHit(diff, note) {
 
 // Record Beat in Editor Mode
 function recordBeat(buttonId) {
-  const noteTime = parseFloat(playbackTime.toFixed(2));
-  
-  // Add note
-  beatmap.push({ time: noteTime, buttonId: buttonId });
-  
-  // Sort beatmap chronological order
-  beatmap.sort((a, b) => a.time - b.time);
-  
-  updateBeatmapJSON();
-  renderTimelineNotes();
+  addNoteAtTime(buttonId, playbackTime, false);
 }
 
 // Render beat notes in Timeline track (editor tab)
@@ -666,6 +1477,8 @@ function renderTimelineNotes() {
   notes.forEach(n => n.remove());
   
   document.getElementById('editor-note-count').innerText = beatmap.length;
+  if (selectedNoteIndex !== null && !beatmap[selectedNoteIndex]) selectedNoteIndex = null;
+  updateSelectedNoteUI();
   
   if (!audioDuration) return;
   
@@ -675,6 +1488,8 @@ function renderTimelineNotes() {
     
     const noteEl = document.createElement('div');
     noteEl.className = 'timeline-note';
+    noteEl.dataset.noteIndex = String(index);
+    if (index === selectedNoteIndex) noteEl.classList.add('selected');
     noteEl.style.left = pct + '%';
     
     // Color coding matching side
@@ -688,7 +1503,12 @@ function renderTimelineNotes() {
     
     noteEl.title = `วินาทีที่ ${note.time} [ปุ่ม ${note.buttonId}] - ดับเบิ้ลคลิกเพื่อลบ`;
     
-    // Double click to remove note
+    // Single click selects; double click keeps the original quick-delete flow.
+    noteEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectTimelineNote(index);
+    });
+
     noteEl.addEventListener('dblclick', (e) => {
       e.stopPropagation();
       deleteNoteIndex(index);
@@ -698,9 +1518,40 @@ function renderTimelineNotes() {
   });
 }
 
+function selectTimelineNote(index) {
+  if (!beatmap[index]) return;
+  selectedNoteIndex = index;
+  document.querySelectorAll('.timeline-note').forEach((noteEl) => {
+    noteEl.classList.toggle('selected', Number(noteEl.dataset.noteIndex) === index);
+  });
+  updateSelectedNoteUI();
+}
+
+function updateSelectedNoteUI() {
+  const deleteButton = document.getElementById('btn-delete-selected-note');
+  const label = document.getElementById('selected-note-label');
+  const hasSelection = selectedNoteIndex !== null && Boolean(beatmap[selectedNoteIndex]);
+  if (deleteButton) deleteButton.disabled = !hasSelection;
+  if (label) {
+    label.innerText = hasSelection
+      ? `(${beatmap[selectedNoteIndex].buttonId} ${beatmap[selectedNoteIndex].time.toFixed(2)}s)`
+      : '(ยังไม่ได้เลือก)';
+  }
+}
+
+function deleteSelectedNote() {
+  if (selectedNoteIndex === null) {
+    showToast('คลิกเลือกโน้ตบน Timeline ก่อน');
+    return;
+  }
+  deleteNoteIndex(selectedNoteIndex);
+}
+
 // Delete Note at Index
 function deleteNoteIndex(index) {
+  if (!beatmap[index]) return;
   beatmap.splice(index, 1);
+  selectedNoteIndex = null;
   updateBeatmapJSON();
   renderTimelineNotes();
   showToast("ลบโน้ตที่เลือกเรียบร้อย");
@@ -709,12 +1560,16 @@ function deleteNoteIndex(index) {
 // Update JSON display textbox
 function updateBeatmapJSON() {
   const textbox = document.getElementById('beatmap-json-output');
-  textbox.value = JSON.stringify(beatmap, null, 2);
+  if (textbox) textbox.value = JSON.stringify(beatmap, null, 2);
+  saveActiveLevel();
+  renderLevelList();
+  renderProjectJSONPreview();
 }
 
 // Clear all beatmaps
 function clearBeatmap() {
   beatmap = [];
+  selectedNoteIndex = null;
   updateBeatmapJSON();
   renderTimelineNotes();
   resetGame();
@@ -725,6 +1580,7 @@ function clearBeatmap() {
 function deleteLastNote() {
   if (beatmap.length > 0) {
     const removed = beatmap.pop();
+    selectedNoteIndex = null;
     updateBeatmapJSON();
     renderTimelineNotes();
     showToast(`ลบโน้ตล่าสุด (${removed.buttonId} ที่ ${removed.time}s) เรียบร้อย`);
@@ -758,6 +1614,7 @@ function importBeatmapJSON() {
     if (!isValid) throw new Error("ฟอร์แมตโน้ตไม่ถูกต้อง (ต้องมี time และ buttonId)");
     
     beatmap = parsed;
+    selectedNoteIndex = null;
     // Sort
     beatmap.sort((a, b) => a.time - b.time);
     

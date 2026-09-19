@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Modal,
-  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { RootStackParamList } from '../../navigation/types';
-import { Colors } from '../../theme/colors';
 import { useApp } from '../../context/AppContext';
 import { mockBiofeedbackScenarios } from '../../mocks/mockBeatmap';
 import { Posture } from '../../types';
@@ -25,12 +23,35 @@ type PlankWorkoutNavigationProp = NativeStackNavigationProp<
   'PlankWorkout'
 >;
 
+const leftSensorRows = [
+  ['L2', 'L1'],
+  ['L5', 'L4'],
+  ['L8', 'L7'],
+];
+
+const rightSensorRows = [
+  ['R1', 'R2'],
+  ['R4', 'R5'],
+  ['R7', 'R8'],
+];
+
+const centerSensorRows = [
+  ['L3', 'R3'],
+  ['L6', 'R6'],
+];
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${minutes}:${String(remainder).padStart(2, '0')}`;
+};
+
 export const PlankWorkoutScreen: React.FC = () => {
   const route = useRoute<PlankWorkoutRouteProp>();
   const navigation = useNavigation<PlankWorkoutNavigationProp>();
   const { postures, addSessionPerformance } = useApp();
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
+  const { width } = useWindowDimensions();
+  const boardScale = Math.min(1.65, Math.max(0.72, (width / 568) * 1.15));
 
   const {
     mode = 'planned',
@@ -38,125 +59,113 @@ export const PlankWorkoutScreen: React.FC = () => {
     restTime = 10,
   } = route.params || {};
 
-  // Force Landscape Orientation when entering workout screen
   useEffect(() => {
-    async function lockLandscape() {
-      try {
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE
-        );
-      } catch (err) {
-        console.warn('Orientation lock error:', err);
-      }
-    }
-
-    lockLandscape();
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(
+      (err) => console.warn('Orientation lock error:', err),
+    );
 
     return () => {
-      // Revert back to portrait when exiting
       ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.PORTRAIT_UP
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
       ).catch(() => {});
     };
   }, []);
 
-  // Workout state
   const [currentPostureIndex, setCurrentPostureIndex] = useState(0);
   const [isResting, setIsResting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(durationPerPosture);
   const [isPaused, setIsPaused] = useState(false);
   const [totalElapsedTime, setTotalElapsedTime] = useState(0);
-
-  // Scoring & Game metrics
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [lastHitRating, setLastHitRating] = useState<string | null>(null);
-
-  // Biofeedback and Smart Mat state
-  const [activePads, setActivePads] = useState<string[]>(['L2', 'L3', 'R2', 'R3']);
+  const [activePads, setActivePads] = useState<string[]>([
+    'L2',
+    'L3',
+    'R2',
+    'R3',
+  ]);
   const [biofeedback, setBiofeedback] = useState(mockBiofeedbackScenarios[0]);
   const [isFinished, setIsFinished] = useState(false);
 
   const activePostureList: Posture[] = postures.slice(0, 4);
   const currentPosture = activePostureList[currentPostureIndex] || postures[0];
+  const postureName = currentPosture?.name || 'Standard Elbow Plank';
 
-  const leftPads = ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8'];
-  const rightPads = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'];
-
-  // Timer loop
   useEffect(() => {
     if (isPaused || isFinished) return;
 
     const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
+      setTimeLeft((previous) => {
+        if (previous <= 1) {
           if (isResting) {
             if (currentPostureIndex + 1 < activePostureList.length) {
-              setCurrentPostureIndex((idx) => idx + 1);
+              setCurrentPostureIndex((index) => index + 1);
               setIsResting(false);
               return durationPerPosture;
-            } else {
-              setIsFinished(true);
-              return 0;
             }
-          } else {
-            if (currentPostureIndex + 1 < activePostureList.length) {
-              setIsResting(true);
-              return restTime;
-            } else {
-              setIsFinished(true);
-              return 0;
-            }
+
+            setIsFinished(true);
+            return 0;
           }
+
+          if (currentPostureIndex + 1 < activePostureList.length) {
+            setIsResting(true);
+            return restTime;
+          }
+
+          setIsFinished(true);
+          return 0;
         }
-        return prev - 1;
+
+        return previous - 1;
       });
 
-      setTotalElapsedTime((prev) => {
-        const nextTime = prev + 1;
+      setTotalElapsedTime((previous) => {
+        const nextTime = previous + 1;
         const matchedScenario = mockBiofeedbackScenarios.find(
-          (s) => s.time === nextTime % 20
+          (scenario) => scenario.time === nextTime % 20,
         );
+
         if (matchedScenario) {
           setBiofeedback(matchedScenario);
           setActivePads(matchedScenario.activePads);
         }
+
         return nextTime;
       });
     }, 1000);
 
     return () => clearInterval(interval);
   }, [
+    activePostureList.length,
+    currentPostureIndex,
+    durationPerPosture,
+    isFinished,
     isPaused,
     isResting,
-    currentPostureIndex,
-    isFinished,
-    durationPerPosture,
     restTime,
   ]);
 
-  // Handle tapping Smart Mat pad
   const handlePadTap = (padId: string) => {
-    setActivePads((prev) =>
-      prev.includes(padId) ? prev.filter((p) => p !== padId) : [...prev, padId]
+    setActivePads((previous) =>
+      previous.includes(padId)
+        ? previous.filter((pad) => pad !== padId)
+        : [...previous, padId],
     );
 
-    const pts = 50 + Math.floor(Math.random() * 30);
-    setScore((s) => s + pts);
-    setCombo((c) => {
-      const nextCombo = c + 1;
+    const points = 50 + Math.floor(Math.random() * 30);
+    setScore((previous) => previous + points);
+    setCombo((previous) => {
+      const nextCombo = previous + 1;
       if (nextCombo > maxCombo) setMaxCombo(nextCombo);
       return nextCombo;
     });
 
     const ratings = ['PERFECT!', 'GREAT!', 'PERFECT!'];
-    const selectedRating = ratings[Math.floor(Math.random() * ratings.length)];
-    setLastHitRating(selectedRating);
-
-    setTimeout(() => {
-      setLastHitRating(null);
-    }, 600);
+    setLastHitRating(ratings[Math.floor(Math.random() * ratings.length)]);
+    setTimeout(() => setLastHitRating(null), 600);
   };
 
   const handleSaveAndExit = () => {
@@ -166,7 +175,7 @@ export const PlankWorkoutScreen: React.FC = () => {
     addSessionPerformance({
       planName:
         mode === 'planned'
-          ? `ตามแผนการ - ${currentPosture.name}`
+          ? `ตามแผน - ${postureName}`
           : 'กำหนดเอง - Custom Plank Session',
       score: score || 650,
       duration: totalElapsedTime || 60,
@@ -189,232 +198,174 @@ export const PlankWorkoutScreen: React.FC = () => {
     }
   };
 
+  const renderPad = (padId: string, scale = boardScale) => {
+    const isActive = activePads.includes(padId);
+    const isGold = padId.endsWith('3');
+
+    return (
+      <TouchableOpacity
+        key={padId}
+        onPress={() => handlePadTap(padId)}
+        style={[
+          styles.padButton,
+          {
+            width: 48 * scale,
+            height: 48 * scale,
+            borderRadius: 24 * scale,
+          },
+          isActive && styles.padButtonActive,
+          isActive && isGold && styles.padButtonGold,
+        ]}
+        activeOpacity={0.75}
+      >
+        <Text style={styles.padText}>{padId.substring(1)}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Top Header Bar */}
-      <View style={styles.headerBar}>
-        <TouchableOpacity
-          onPress={handleClose}
-          style={styles.headerBtn}
-          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="close" size={26} color="#FFFFFF" />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <View style={styles.screen}>
+        <View style={styles.headerBar}>
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.headerBackButton}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
 
-        <View style={styles.sessionModeBadge}>
-          <Text style={styles.sessionModeText}>
-            {isResting ? '💤 ช่วงเวลาพัก' : `ท่าที่ ${currentPostureIndex + 1}/${activePostureList.length} • ${currentPosture.name}`}
-          </Text>
-        </View>
+          <Text style={styles.headerTimer}>{formatTime(timeLeft)}</Text>
 
-        {/* Header HUD: Score, Combo, BPM */}
-        <View style={styles.headerHudRow}>
-          <View style={styles.headerScoreBox}>
-            <Text style={styles.headerScoreText}>คะแนน: {score}</Text>
-            <Text style={styles.headerComboText}>🔥 {combo} COMBO</Text>
+          <View style={styles.headerProgress}>
+            <View style={styles.headerProgressFill} />
+            <View style={styles.headerProgressThumb} />
+          </View>
+
+          <View style={styles.headerDots}>
+            <View style={styles.headerDotActive} />
+            <View style={styles.headerDotActive} />
+            <View style={styles.headerDot} />
+            <View style={styles.headerDot} />
           </View>
 
           <TouchableOpacity
-            onPress={() => setIsPaused(!isPaused)}
-            style={styles.headerBtn}
+            onPress={() => setIsPaused((previous) => !previous)}
+            style={styles.pauseButton}
+            activeOpacity={0.75}
           >
             <Ionicons
               name={isPaused ? 'play' : 'pause'}
-              size={24}
+              size={18}
               color="#FFFFFF"
             />
           </TouchableOpacity>
         </View>
-      </View>
 
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          isLandscape && styles.scrollContentLandscape,
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Landscape Dual-Column Layout */}
-        <View style={[styles.mainLayout, isLandscape && styles.mainLayoutLandscape]}>
-          
-          {/* LEFT COLUMN: Timer & Biofeedback HUD */}
-          <View style={[styles.leftColumn, isLandscape && styles.leftColumnLandscape]}>
-            {/* Countdown & Posture Info */}
-            <View style={styles.timerCard}>
-              <Text style={styles.postureTitle}>
-                {isResting ? 'พักฟื้นกล้ามเนื้อ' : currentPosture.name}
-              </Text>
-              <Text style={styles.postureSub} numberOfLines={1}>
-                {isResting ? 'เตรียมพร้อมสำหรับท่าถัดไป' : currentPosture.benefit}
-              </Text>
-
-              {/* Large Countdown Ring */}
-              <View style={styles.countdownContainer}>
-                <Text style={styles.timerNumber}>{timeLeft}</Text>
-                <Text style={styles.timerUnit}>วินาที</Text>
-              </View>
-
-              {/* Floating Hit Indicator */}
-              {lastHitRating && (
-                <View style={styles.hitRatingBadge}>
-                  <Text style={styles.hitRatingText}>{lastHitRating}</Text>
-                </View>
-              )}
+        <View style={styles.gameArea}>
+          <View style={styles.gameHud}>
+            <Text style={styles.comboText}>combo {combo || 0}x</Text>
+            <Text style={styles.pointsText}>{score || 0} Point</Text>
+            <View style={styles.settingsBadge}>
+              <Ionicons name="settings" size={24} color="#B7B7B7" />
             </View>
+          </View>
 
-            {/* Wearable Biometrics */}
-            <View style={styles.hudRow}>
-              <View style={styles.hudCard}>
-                <Text style={styles.hudLabel}>อัตราหัวใจ</Text>
-                <View style={styles.hudStatRow}>
-                  <Ionicons name="heart" size={16} color="#FF3B30" />
-                  <Text style={styles.hudValue}>{biofeedback.bpm}</Text>
-                </View>
-                <Text style={styles.hudSub}>BPM</Text>
-              </View>
-
-              <View style={styles.hudCard}>
-                <Text style={styles.hudLabel}>ออกซิเจน</Text>
-                <View style={styles.hudStatRow}>
-                  <Ionicons name="water" size={16} color="#55E6FF" />
-                  <Text style={styles.hudValue}>{biofeedback.spo2}%</Text>
-                </View>
-                <Text style={styles.hudSub}>SpO₂</Text>
-              </View>
-            </View>
-
-            {/* Real-time Biofeedback Alert Banner */}
+          <View style={[styles.playField, { gap: 6 }]}>
             <View
               style={[
-                styles.biofeedbackBanner,
-                biofeedback.statusType === 'warning' && styles.bannerWarning,
-                biofeedback.statusType === 'alert' && styles.bannerAlert,
-                biofeedback.statusType === 'success' && styles.bannerSuccess,
+                styles.sensorGroup,
+                { width: 112 * boardScale, gap: 10 * boardScale },
               ]}
             >
-              <Ionicons
-                name={
-                  biofeedback.statusType === 'alert'
-                    ? 'warning'
-                    : biofeedback.statusType === 'warning'
-                    ? 'alert-circle'
-                    : 'checkmark-circle'
-                }
-                size={20}
-                color="#FFFFFF"
-              />
-              <Text style={styles.bannerText} numberOfLines={2}>
-                {biofeedback.statusText}
-              </Text>
+              {leftSensorRows.map((row) => (
+                <View key={row.join('-')} style={styles.sensorRow}>
+                  {row.map((padId) => renderPad(padId))}
+                </View>
+              ))}
+            </View>
+
+            <View
+              style={[
+                styles.centerLane,
+                { width: 158 * boardScale, gap: 8 * boardScale },
+              ]}
+            >
+              <View
+                style={[
+                  styles.bioCard,
+                  {
+                    width: 150 * boardScale,
+                    height: 55 * boardScale,
+                    borderRadius: 9 * boardScale,
+                    paddingHorizontal: 13 * boardScale,
+                    paddingVertical: 5 * boardScale,
+                  },
+                ]}
+                >
+                  <View style={styles.bioRow}>
+                    <Ionicons name="heart-outline" size={16} color="#F13D48" />
+                    <Text
+                      style={[styles.bioValue, { fontSize: 12 * boardScale }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      {biofeedback.bpm} BPM
+                    </Text>
+                  </View>
+                  <View style={styles.bioRow}>
+                    <Ionicons name="keypad-outline" size={12} color="#514BFF" />
+                    <Text
+                      style={[styles.bioSmallValue, { fontSize: 11 * boardScale }]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      {biofeedback.spo2}%
+                    </Text>
+                  </View>
+              </View>
+
+              <View style={[styles.centerSensorGrid, { gap: 8 * boardScale }]}>
+                {centerSensorRows.map((row) => (
+                  <View
+                    key={row.join('-')}
+                    style={[styles.centerSensorRow, { gap: 12 * boardScale }]}
+                  >
+                    {row.map((padId) => renderPad(padId, boardScale))}
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.sensorGroup,
+                { width: 112 * boardScale, gap: 10 * boardScale },
+              ]}
+            >
+              {rightSensorRows.map((row) => (
+                <View key={row.join('-')} style={styles.sensorRow}>
+                  {row.map((padId) => renderPad(padId))}
+                </View>
+              ))}
             </View>
           </View>
 
-          {/* RIGHT COLUMN: CoP Balance & Smart Mat 16-point Grid */}
-          <View style={[styles.rightColumn, isLandscape && styles.rightColumnLandscape]}>
-            {/* Center of Pressure (CoP) Balance Bar */}
-            <View style={styles.copContainer}>
-              <View style={styles.copHeaderRow}>
-                <Text style={styles.copTitle}>สมดุลน้ำหนัก (Center of Pressure)</Text>
-                <Text style={styles.copValues}>
-                  ซ้าย {biofeedback.leftPressure}% : ขวา {biofeedback.rightPressure}%
-                </Text>
-              </View>
-              <View style={styles.copTrack}>
-                <View
-                  style={[
-                    styles.copBarLeft,
-                    { width: `${biofeedback.leftPressure}%` },
-                  ]}
-                />
-                <View
-                  style={[
-                    styles.copBarRight,
-                    { width: `${biofeedback.rightPressure}%` },
-                  ]}
-                />
-                <View style={styles.copCenterDivider} />
-              </View>
+          {lastHitRating && (
+            <View style={styles.hitRatingBadge}>
+              <Text style={styles.hitRatingText}>{lastHitRating}</Text>
             </View>
-
-            {/* Smart Mat 16-Point Interactive Grid */}
-            <View style={styles.matContainer}>
-              <Text style={styles.matTitle}>
-                แผ่นรองอัจฉริยะ Smart Mat (กดปุ่ม L/R เพื่อจำลองเซนเซอร์)
-              </Text>
-
-              <View style={styles.matGrid}>
-                {/* Left Pads */}
-                <View style={styles.matColumn}>
-                  <Text style={styles.matSideLabel}>ฝั่งซ้าย (Left)</Text>
-                  <View style={styles.padsWrap}>
-                    {leftPads.map((pad) => {
-                      const isActive = activePads.includes(pad);
-                      return (
-                        <TouchableOpacity
-                          key={pad}
-                          onPress={() => handlePadTap(pad)}
-                          style={[
-                            styles.padButton,
-                            isActive && styles.padButtonActive,
-                          ]}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            style={[
-                              styles.padText,
-                              isActive && styles.padTextActive,
-                            ]}
-                          >
-                            {pad}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                {/* Right Pads */}
-                <View style={styles.matColumn}>
-                  <Text style={styles.matSideLabel}>ฝั่งขวา (Right)</Text>
-                  <View style={styles.padsWrap}>
-                    {rightPads.map((pad) => {
-                      const isActive = activePads.includes(pad);
-                      return (
-                        <TouchableOpacity
-                          key={pad}
-                          onPress={() => handlePadTap(pad)}
-                          style={[
-                            styles.padButton,
-                            isActive && styles.padButtonActive,
-                          ]}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            style={[
-                              styles.padText,
-                              isActive && styles.padTextActive,
-                            ]}
-                          >
-                            {pad}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
-
+          )}
         </View>
-      </ScrollView>
+      </View>
 
-      {/* Workout Complete Summary Modal */}
       <Modal
         visible={isFinished}
         animationType="slide"
-        transparent={true}
+        transparent
         onRequestClose={() => {}}
       >
         <View style={styles.modalOverlay}>
@@ -424,41 +375,36 @@ export const PlankWorkoutScreen: React.FC = () => {
             </View>
             <Text style={styles.summaryTitle}>ยอดเยี่ยม! การฝึกสำเร็จ</Text>
             <Text style={styles.summarySub}>
-              คุณได้ฝึกแพลงก์อย่างมีประสิทธิภาพตามมาตรฐาน Closed-Loop Biofeedback
+              คุณฝึกแพลงก์ได้อย่างมีประสิทธิภาพตามมาตรฐาน Closed-Loop Biofeedback
             </Text>
 
-            {/* Result Stats Grid */}
             <View style={styles.statsSummaryGrid}>
               <View style={styles.summaryStatItem}>
                 <Text style={styles.summaryStatLabel}>คะแนนรวม</Text>
                 <Text style={styles.summaryStatVal}>{score || 720}</Text>
               </View>
-
               <View style={styles.summaryStatItem}>
                 <Text style={styles.summaryStatLabel}>แคลอรี่</Text>
                 <Text style={styles.summaryStatVal}>
                   {Math.max(20, Math.round(totalElapsedTime * 0.22))} kcal
                 </Text>
               </View>
-
               <View style={styles.summaryStatItem}>
                 <Text style={styles.summaryStatLabel}>ความแม่นยำ</Text>
                 <Text style={styles.summaryStatVal}>94%</Text>
               </View>
-
               <View style={styles.summaryStatItem}>
                 <Text style={styles.summaryStatLabel}>Max Combo</Text>
                 <Text style={styles.summaryStatVal}>{maxCombo || 16}x</Text>
               </View>
             </View>
 
-            {/* Save & Finish Button */}
             <TouchableOpacity
               style={styles.saveResultButton}
               onPress={handleSaveAndExit}
               activeOpacity={0.85}
             >
-              <Text style={styles.saveResultText}>บันทึกผลและกลับสู่หน้าหลัก</Text>
+              <Text style={styles.saveResultText}>บันทึกผลและกลับหน้าหลัก</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -470,300 +416,212 @@ export const PlankWorkoutScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0B1020',
+    backgroundColor: '#202020',
+  },
+  screen: {
+    flex: 1,
+    backgroundColor: '#202020',
   },
   headerBar: {
-    height: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
-  },
-  headerBtn: {
-    padding: 6,
-  },
-  sessionModeBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  sessionModeText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  headerHudRow: {
+    height: 28,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    backgroundColor: '#0789EE',
+    paddingHorizontal: 8,
   },
-  headerScoreBox: {
-    alignItems: 'flex-end',
-  },
-  headerScoreText: {
-    color: '#55E6FF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  headerComboText: {
-    color: '#FFD166',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  scrollContent: {
-    padding: 12,
-  },
-  scrollContentLandscape: {
-    flexGrow: 1,
+  headerBackButton: {
+    width: 28,
+    alignItems: 'flex-start',
     justifyContent: 'center',
   },
-  mainLayout: {
-    flexDirection: 'column',
-    gap: 12,
-  },
-  mainLayoutLandscape: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'stretch',
-  },
-  leftColumn: {
-    flex: 1,
-    gap: 10,
-  },
-  leftColumnLandscape: {
-    flex: 1,
-  },
-  rightColumn: {
-    flex: 1,
-    gap: 10,
-  },
-  rightColumnLandscape: {
-    flex: 1.2,
-  },
-  timerCard: {
-    backgroundColor: '#121A2E',
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2B3A59',
-  },
-  postureTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#55E6FF',
-    textAlign: 'center',
-  },
-  postureSub: {
-    fontSize: 11,
-    color: '#9EACC5',
-    textAlign: 'center',
-    marginTop: 2,
-    marginBottom: 10,
-  },
-  countdownContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#18233B',
-    borderWidth: 3,
-    borderColor: '#0084FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#0084FF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  timerNumber: {
-    fontSize: 32,
-    fontWeight: '900',
+  headerTimer: {
+    width: 52,
     color: '#FFFFFF',
-  },
-  timerUnit: {
-    fontSize: 10,
-    color: '#9EACC5',
-    marginTop: -2,
-  },
-  hitRatingBadge: {
-    position: 'absolute',
-    bottom: 8,
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  hitRatingText: {
-    color: '#000000',
-    fontWeight: '900',
-    fontSize: 11,
-  },
-  hudRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  hudCard: {
-    flex: 1,
-    backgroundColor: '#121A2E',
-    borderRadius: 12,
-    padding: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2B3A59',
-  },
-  hudLabel: {
-    fontSize: 10,
-    color: '#9EACC5',
+    fontSize: 17,
+    lineHeight: 20,
     fontWeight: '500',
+    letterSpacing: 0.4,
   },
-  hudValue: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginTop: 2,
-  },
-  hudStatRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  hudSub: {
-    fontSize: 9,
-    color: '#55E6FF',
-  },
-  biofeedbackBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 12,
-    gap: 8,
-  },
-  bannerSuccess: {
-    backgroundColor: '#1B4D3E',
-    borderWidth: 1,
-    borderColor: '#34C759',
-  },
-  bannerWarning: {
-    backgroundColor: '#5C3810',
-    borderWidth: 1,
-    borderColor: '#FF9500',
-  },
-  bannerAlert: {
-    backgroundColor: '#5C1D24',
-    borderWidth: 1,
-    borderColor: '#FF3B30',
-  },
-  bannerText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '600',
+  headerProgress: {
+    height: 4,
     flex: 1,
-  },
-  copContainer: {
-    backgroundColor: '#121A2E',
-    borderRadius: 14,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#2B3A59',
-  },
-  copHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  copTitle: {
-    fontSize: 11,
-    color: '#9EACC5',
-    fontWeight: '600',
-  },
-  copValues: {
-    fontSize: 11,
-    color: '#55E6FF',
-    fontWeight: 'bold',
-  },
-  copTrack: {
-    height: 10,
-    backgroundColor: '#18233B',
-    borderRadius: 5,
-    flexDirection: 'row',
-    overflow: 'hidden',
+    maxWidth: 146,
+    marginHorizontal: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     position: 'relative',
   },
-  copBarLeft: {
-    backgroundColor: '#0084FF',
-    height: '100%',
-  },
-  copBarRight: {
-    backgroundColor: '#55E6FF',
-    height: '100%',
-  },
-  copCenterDivider: {
-    position: 'absolute',
-    left: '50%',
-    width: 2,
+  headerProgressFill: {
+    width: '72%',
     height: '100%',
     backgroundColor: '#FFFFFF',
   },
-  matContainer: {
-    backgroundColor: '#121A2E',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2B3A59',
-    flex: 1,
+  headerProgressThumb: {
+    position: 'absolute',
+    left: '72%',
+    top: -3,
+    width: 2,
+    height: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  headerDots: {
+    flexDirection: 'row',
+    gap: 3,
+    alignItems: 'center',
+    marginLeft: 5,
+  },
+  headerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+  },
+  headerDotActive: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  pauseButton: {
+    width: 26,
+    alignItems: 'flex-end',
     justifyContent: 'center',
   },
-  matTitle: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#EDF4FF',
-    marginBottom: 8,
-    textAlign: 'center',
+  gameArea: {
+    flex: 1,
+    minHeight: 135,
+    backgroundColor: '#5F5F5F',
+    position: 'relative',
   },
-  matGrid: {
+  gameHud: {
+    position: 'absolute',
+    top: 3,
+    right: 9,
+    zIndex: 2,
     flexDirection: 'row',
     gap: 10,
+    alignItems: 'center',
   },
-  matColumn: {
-    flex: 1,
+  settingsBadge: {
+    width: 38,
+    height: 38,
+    marginLeft: -2,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(125, 125, 125, 0.34)',
   },
-  matSideLabel: {
+  comboText: {
+    color: '#E7E7E7',
     fontSize: 10,
-    color: '#9EACC5',
-    textAlign: 'center',
-    marginBottom: 6,
+    fontWeight: '500',
   },
-  padsWrap: {
+  pointsText: {
+    color: '#F1F1F1',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  playField: {
+    flex: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 0,
+    paddingTop: 7,
+    gap: 0,
+  },
+  sensorGroup: {
+    width: 112,
+    gap: 10,
+  },
+  sensorRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  centerLane: {
+    width: 158,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  bioCard: {
+    width: 150,
+    height: 55,
+    borderRadius: 9,
+    backgroundColor: '#E6E6E6',
+    paddingHorizontal: 13,
+    paddingVertical: 5,
+    justifyContent: 'center',
+    gap: 1,
+  },
+  bioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  bioValue: {
+    flex: 1,
+    color: '#202020',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  bioSmallValue: {
+    flex: 1,
+    color: '#202020',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  centerPads: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  centerSensorGrid: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  centerSensorRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
   },
   padButton: {
-    width: '22%',
-    aspectRatio: 1,
-    borderRadius: 6,
-    backgroundColor: '#18233B',
-    justifyContent: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#2B3A59',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(72, 72, 72, 0.28)',
+    borderWidth: 2,
+    borderColor: '#F1F1F1',
   },
   padButtonActive: {
-    backgroundColor: '#0084FF',
-    borderColor: '#55E6FF',
+    borderColor: '#00A7FF',
+    backgroundColor: 'rgba(43, 94, 124, 0.45)',
+  },
+  padButtonGold: {
+    borderColor: '#FFD400',
+    backgroundColor: 'rgba(102, 89, 27, 0.42)',
   },
   padText: {
-    color: '#9EACC5',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  padTextActive: {
     color: '#FFFFFF',
+    fontSize: 16,
+    lineHeight: 18,
+    fontWeight: '400',
+  },
+  hitRatingBadge: {
+    position: 'absolute',
+    left: '50%',
+    bottom: 5,
+    transform: [{ translateX: -36 }],
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 7,
+    backgroundColor: '#FFD400',
+  },
+  hitRatingText: {
+    color: '#202020',
+    fontSize: 9,
+    fontWeight: '800',
   },
   modalOverlay: {
     flex: 1,
@@ -827,7 +685,7 @@ const styles = StyleSheet.create({
   saveResultButton: {
     width: '100%',
     height: 48,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#0084FF',
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
