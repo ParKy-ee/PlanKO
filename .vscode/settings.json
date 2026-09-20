@@ -1,5 +1,6 @@
 {
   "prisma-smart-formatter.typescript.defaultFormatter": "esbenp.prettier-vscode",
   "prisma-smart-formatter.prisma.defaultFormatter": "Prisma.prisma",
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.gradle.buildServer.enabled": "off"
 }
