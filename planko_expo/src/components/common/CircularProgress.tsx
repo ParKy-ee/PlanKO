@@ -11,6 +11,7 @@ interface CircularProgressProps {
   centerText?: string;
   textColor?: string;
   fontSize?: number;
+  children?: React.ReactNode;
 }
 
 export const CircularProgress: React.FC<CircularProgressProps> = ({
@@ -22,6 +23,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   centerText,
   textColor = '#FFFFFF',
   fontSize = 18,
+  children,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -54,18 +56,22 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      {centerText !== undefined && (
+      {(children !== undefined || centerText !== undefined) && (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <View style={styles.centerContainer}>
-            <Text
-              style={[
-                styles.centerText,
-                { color: textColor, fontSize: fontSize, fontWeight: 'bold' },
-              ]}
-              numberOfLines={1}
-            >
-              {centerText}
-            </Text>
+            {children ? (
+              children
+            ) : (
+              <Text
+                style={[
+                  styles.centerText,
+                  { color: textColor, fontSize: fontSize, fontWeight: 'bold' },
+                ]}
+                numberOfLines={1}
+              >
+                {centerText}
+              </Text>
+            )}
           </View>
         </View>
       )}

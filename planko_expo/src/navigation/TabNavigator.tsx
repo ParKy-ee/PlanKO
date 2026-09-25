@@ -27,7 +27,7 @@ export const TabNavigator: React.FC = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarLabel: 'โฮม',
+          tabBarLabel: 'Home',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'home' : 'home-outline'}
@@ -42,10 +42,10 @@ export const TabNavigator: React.FC = () => {
         name="Activity"
         component={ActivityScreen}
         options={{
-          tabBarLabel: 'กิจกรรม',
+          tabBarLabel: 'Activity',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons
-              name="show-chart"
+              name="directions-run"
               size={size ? size + 2 : 26}
               color={color}
             />
@@ -57,7 +57,7 @@ export const TabNavigator: React.FC = () => {
         name="Calendar"
         component={CalendarScreen}
         options={{
-          tabBarLabel: 'ปฏิทิน',
+          tabBarLabel: 'Calendar',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'calendar' : 'calendar-outline'}
@@ -72,7 +72,7 @@ export const TabNavigator: React.FC = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'โปรไฟล์',
+          tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}

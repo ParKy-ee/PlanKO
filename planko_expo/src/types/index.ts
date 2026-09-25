@@ -23,6 +23,7 @@ export interface Posture {
   postureCategory?: PostureCategory;
   iconName: string;
   imageUrl?: string;
+  images?: any[];
   targetDurationSeconds?: number;
 }
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   User,
   Mission,
@@ -13,9 +13,47 @@ import { mockPostures } from '../mocks/mockPostures';
 import { mockQuests } from '../mocks/mockQuests';
 import { mockHistory } from '../mocks/mockHistory';
 
+// In-file Storage helper with safe fallbacks
+let AsyncStorageModule: any = null;
+try {
+  AsyncStorageModule = require('@react-native-async-storage/async-storage').default || require('@react-native-async-storage/async-storage');
+} catch (e) {
+  AsyncStorageModule = null;
+}
+
+const memoryStore: Record<string, string> = {};
+
+const LocalStorage = {
+  getItem: async (key: string): Promise<string | null> => {
+    try {
+      if (AsyncStorageModule && typeof AsyncStorageModule.getItem === 'function') {
+        return await AsyncStorageModule.getItem(key);
+      }
+    } catch (e) {}
+    return memoryStore[key] || null;
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    try {
+      memoryStore[key] = value;
+      if (AsyncStorageModule && typeof AsyncStorageModule.setItem === 'function') {
+        await AsyncStorageModule.setItem(key, value);
+      }
+    } catch (e) {}
+  },
+  removeItem: async (key: string): Promise<void> => {
+    try {
+      delete memoryStore[key];
+      if (AsyncStorageModule && typeof AsyncStorageModule.removeItem === 'function') {
+        await AsyncStorageModule.removeItem(key);
+      }
+    } catch (e) {}
+  },
+};
+
 interface AppContextType {
   user: User;
   isAuthenticated: boolean;
+  isLoadingAuth: boolean;
   mission: Mission | null;
   programs: Program[];
   postures: Posture[];
@@ -32,14 +70,40 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const AUTH_STORAGE_KEY = '@planko_is_authenticated';
+const USER_STORAGE_KEY = '@planko_user';
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>(initialMockUser);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true); // default true for instant interactive preview
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
   const [mission, setMission] = useState<Mission | null>(initialMockMission);
   const [programs] = useState<Program[]>(mockPrograms);
   const [postures] = useState<Posture[]>(mockPostures);
   const [quests, setQuests] = useState<Quest[]>(mockQuests);
   const [history, setHistory] = useState<SessionPerformance[]>(mockHistory);
+
+  // Load saved persistent login session on startup
+  useEffect(() => {
+    const loadStoredAuth = async () => {
+      try {
+        const storedAuth = await LocalStorage.getItem(AUTH_STORAGE_KEY);
+        const storedUser = await LocalStorage.getItem(USER_STORAGE_KEY);
+        if (storedAuth === 'true') {
+          setIsAuthenticated(true);
+        }
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (err) {
+        console.log('Error loading auth session from storage:', err);
+      } finally {
+        setIsLoadingAuth(false);
+      }
+    };
+
+    loadStoredAuth();
+  }, []);
 
   // Calculate total calories burned
   const totalCalories = history.reduce((sum, item) => sum + (item.kcal || 0), 0);
@@ -47,6 +111,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const login = (email: string, pass: string) => {
     if (email && pass) {
       setIsAuthenticated(true);
+      LocalStorage.setItem(AUTH_STORAGE_KEY, 'true').catch(() => {});
       return true;
     }
     return false;
@@ -54,8 +119,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const register = (name: string, email: string, pass: string) => {
     if (name && email && pass) {
-      setUser((prev) => ({ ...prev, name, email }));
+      const updatedUser = { ...user, name, email };
+      setUser(updatedUser);
       setIsAuthenticated(true);
+      LocalStorage.setItem(AUTH_STORAGE_KEY, 'true').catch(() => {});
+      LocalStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser)).catch(() => {});
       return true;
     }
     return false;
@@ -63,10 +131,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setIsAuthenticated(false);
+    LocalStorage.removeItem(AUTH_STORAGE_KEY).catch(() => {});
   };
 
   const updateUser = (updatedData: Partial<User>) => {
-    setUser((prev) => ({ ...prev, ...updatedData }));
+    setUser((prev) => {
+      const updatedUser = { ...prev, ...updatedData };
+      LocalStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser)).catch(() => {});
+      return updatedUser;
+    });
   };
 
   const startMission = (programId: number, period: number) => {
@@ -90,51 +163,40 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     sessionData: Omit<SessionPerformance, 'id' | 'createdAt' | 'userId'>
   ) => {
     const newSession: SessionPerformance = {
-      ...sessionData,
       id: Date.now(),
-      userId: user.id,
       createdAt: new Date().toISOString(),
+      userId: user.id,
+      ...sessionData,
     };
 
     setHistory((prev) => [newSession, ...prev]);
 
-    // Also update mission progress if active
-    if (mission) {
-      setMission((prev) => {
-        if (!prev) return prev;
-        const newCurrent = Math.min(prev.current + 1, prev.target);
-        return {
-          ...prev,
-          current: newCurrent,
-          status: newCurrent >= prev.target ? 'COMPLETED' : 'ACTIVE',
-        };
-      });
-    }
-
-    // Update daily quests
-    setQuests((prev) =>
-      prev.map((q) => {
-        if (q.categoryName === 'เวลา') {
-          return {
-            ...q,
-            currentValue: Math.min(q.targetValue, q.currentValue + sessionData.duration),
-          };
+    // Update quest progress
+    setQuests((prevQuests) =>
+      prevQuests.map((q) => {
+        if (q.id === 1) {
+          const updated = q.current + 1;
+          return { ...q, current: updated, isCompleted: updated >= q.target };
         }
-        if (q.categoryName === 'แคลอรี่') {
-          return {
-            ...q,
-            currentValue: Math.min(q.targetValue, q.currentValue + sessionData.kcal),
-          };
+        if (q.id === 2 && sessionData.duration) {
+          const addedMin = Math.round(sessionData.duration / 60);
+          const updated = q.current + addedMin;
+          return { ...q, current: updated, isCompleted: updated >= q.target };
         }
-        if (q.categoryName === 'เกม') {
-          return {
-            ...q,
-            currentValue: Math.max(q.currentValue, sessionData.maxCombo),
-          };
+        if (q.id === 3 && sessionData.kcal) {
+          const updated = q.current + sessionData.kcal;
+          return { ...q, current: updated, isCompleted: updated >= q.target };
         }
         return q;
       })
     );
+
+    // Update user stats
+    setUser((prev) => ({
+      ...prev,
+      totalWorkoutCount: prev.totalWorkoutCount + 1,
+      totalMinutes: prev.totalMinutes + Math.round(sessionData.duration / 60),
+    }));
   };
 
   return (
@@ -142,6 +204,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         isAuthenticated,
+        isLoadingAuth,
         mission,
         programs,
         postures,

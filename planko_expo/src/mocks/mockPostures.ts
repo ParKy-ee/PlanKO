@@ -16,6 +16,11 @@ export const mockPostures: Posture[] = [
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'fitness-center',
+    images: [
+      require('../../assets/postures/standard_elbow_plank_1.jpg'),
+      require('../../assets/postures/standard_elbow_plank_2.jpg'),
+      require('../../assets/postures/standard_elbow_plank_3.jpg'),
+    ],
     targetDurationSeconds: 30,
   },
   {
@@ -26,6 +31,11 @@ export const mockPostures: Posture[] = [
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'accessibility-new',
+    images: [
+      require('../../assets/postures/high_plank_1.jpg'),
+      require('../../assets/postures/high_plank_2.jpg'),
+      require('../../assets/postures/high_plank_3.jpg'),
+    ],
     targetDurationSeconds: 30,
   },
   {
@@ -35,7 +45,12 @@ export const mockPostures: Posture[] = [
     benefit: 'เน้นกล้ามเนื้อหน้าท้องด้านข้าง (Obliques) และความมั่นคงของกระดูกสันหลัง',
     difficulty: 'medium',
     postureCategory: mockCategories[1],
-    iconName: 'sports-gymnastics',
+    iconName: 'fitness-center',
+    images: [
+      require('../../assets/postures/side_plank_left_1.jpg'),
+      require('../../assets/postures/side_plank_left_2.jpg'),
+      require('../../assets/postures/side_plank_left_3.jpg'),
+    ],
     targetDurationSeconds: 25,
   },
   {
@@ -45,7 +60,12 @@ export const mockPostures: Posture[] = [
     benefit: 'สร้างสมดุลของกล้ามเนื้อเอวด้านขวาและความแข็งแรงของไหล่',
     difficulty: 'medium',
     postureCategory: mockCategories[1],
-    iconName: 'sports-gymnastics',
+    iconName: 'fitness-center',
+    images: [
+      require('../../assets/postures/side_plank_right_1.jpg'),
+      require('../../assets/postures/side_plank_right_2.jpg'),
+      require('../../assets/postures/side_plank_right_3.jpg'),
+    ],
     targetDurationSeconds: 25,
   },
   {
@@ -56,6 +76,11 @@ export const mockPostures: Posture[] = [
     difficulty: 'hard',
     postureCategory: mockCategories[2],
     iconName: 'pan-tool',
+    images: [
+      require('../../assets/postures/arm_reach_1.jpg'),
+      require('../../assets/postures/arm_reach_2.jpg'),
+      require('../../assets/postures/arm_reach_3.jpg'),
+    ],
     targetDurationSeconds: 30,
   },
   {
@@ -66,6 +91,11 @@ export const mockPostures: Posture[] = [
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'airline-seat-legroom-reduced',
+    images: [
+      require('../../assets/postures/knee_plank_1.jpg'),
+      require('../../assets/postures/knee_plank_2.jpg'),
+      require('../../assets/postures/knee_plank_3.jpg'),
+    ],
     targetDurationSeconds: 20,
   },
   {

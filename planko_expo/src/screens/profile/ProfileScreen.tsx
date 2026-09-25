@@ -8,37 +8,38 @@ import {
   Modal,
   TextInput,
   Alert,
+  StatusBar,
+  Image,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Svg, {
+  Defs,
+  LinearGradient as SvgGradient,
+  Stop,
+  Rect,
+  Circle,
+  Path,
+} from 'react-native-svg';
 import { RootStackParamList } from '../../navigation/types';
 import { Colors } from '../../theme/colors';
 import { useApp } from '../../context/AppContext';
 import { CircularProgress } from '../../components/common/CircularProgress';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const MISSION_CARD_WIDTH = SCREEN_WIDTH - 32;
+
 export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, mission, history, updateUser, logout } = useApp();
 
-  const [editWeightVisible, setEditWeightVisible] = useState(false);
-  const [newWeight, setNewWeight] = useState(user.weight.toString());
-
   const missionProgress =
     mission && mission.target > 0 ? mission.current / mission.target : 0.0;
   const missionPercentage = Math.round(missionProgress * 100);
-
-  const handleSaveWeight = () => {
-    const w = parseFloat(newWeight);
-    if (!isNaN(w) && w > 20 && w < 300) {
-      updateUser({ weight: w });
-      setEditWeightVisible(false);
-      Alert.alert('สำเร็จ', 'อัปเดตน้ำหนักของคุณเรียบร้อยแล้ว');
-    } else {
-      Alert.alert('ข้อผิดพลาด', 'กรุณากรอกค่าน้ำหนักที่ถูกต้อง');
-    }
-  };
 
   const formatDate = (isoString: string) => {
     try {
@@ -49,189 +50,354 @@ export const ProfileScreen: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs', { screen: 'Home' });
+    }
+  };
+
+  const handlePickImageFromLibrary = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อเปลี่ยนรูปโปรไฟล์');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        updateUser({ avatarUrl: result.assets[0].uri });
+        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+      } else if (!(result as any).cancelled && (result as any).uri) {
+        updateUser({ avatarUrl: (result as any).uri });
+        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+      }
+    } catch (error) {
+      console.log('Error picking image:', error);
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถเลือกรูปภาพได้');
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงกล้องเพื่อถ่ายรูปโปรไฟล์');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        updateUser({ avatarUrl: result.assets[0].uri });
+        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+      } else if (!(result as any).cancelled && (result as any).uri) {
+        updateUser({ avatarUrl: (result as any).uri });
+        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+      }
+    } catch (error) {
+      console.log('Error taking photo:', error);
+      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถถ่ายรูปภาพได้');
+    }
+  };
+
+  const handleChoosePhotoSource = () => {
+    Alert.alert(
+      'เปลี่ยนรูปโปรไฟล์',
+      'เลือกวิธีการอัปโหลดรูปภาพที่คุณต้องการ',
+      [
+        {
+          text: 'ถ่ายภาพใหม่',
+          onPress: handleTakePhoto,
+        },
+        {
+          text: 'เลือกจากคลังรูปภาพ',
+          onPress: handlePickImageFromLibrary,
+        },
+        {
+          text: 'ยกเลิก',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.appBar}>
-        <Text style={styles.appBarTitle}>โปรไฟล์</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor="#0084FF" />
+
+      {/* 1. Header (Blue Bar) */}
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          onPress={handleBack}
+          style={styles.headerBackBtn}
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="person" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
+          <Text style={styles.headerTitle}>โปรไฟล์</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.headerBtn}
+          onPress={() => navigation.navigate('Settings')}
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
+
+      {/* Curved background decoration */}
+      <View style={styles.topCurveBg} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. Header: Avatar + Info */}
-        <View style={styles.userHeaderRow}>
-          <View style={styles.avatarContainer}>
-            <Ionicons name="person-outline" size={32} color={Colors.purple} />
+        {/* 2. User Info Card */}
+        <View style={styles.userHeaderCard}>
+          {/* Avatar with Camera Badge */}
+          <View style={styles.avatarWrapper}>
+            <TouchableOpacity
+              style={styles.avatarContainer}
+              activeOpacity={0.85}
+              onPress={handleChoosePhotoSource}
+            >
+              {user.avatarUrl ? (
+                <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
+              ) : (
+                <Ionicons name="person-outline" size={42} color="#818CF8" />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cameraBadge}
+              activeOpacity={0.8}
+              onPress={handleChoosePhotoSource}
+            >
+              <Ionicons name="camera" size={13} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
+
+          {/* User Details */}
           <View style={styles.userInfoCol}>
             <Text style={styles.userName}>{user.name}</Text>
             <Text style={styles.userEmail}>{user.email}</Text>
+            <View style={styles.memberBadge}>
+              <Ionicons name="bookmark-outline" size={12} color="#0284C7" style={{ marginRight: 4 }} />
+              <Text style={styles.memberBadgeText}>สมาชิกทั่วไป</Text>
+            </View>
           </View>
         </View>
 
-        {/* 2. Active Mission Card */}
+        {/* 3. Active Mission Card (Gradient with Fluid Waves) */}
         <View style={styles.missionCard}>
-          <View style={styles.missionTopRow}>
-            <View style={styles.missionTitleCol}>
-              <Text style={styles.missionTitle}>
-                {mission ? mission.programName : 'ยังไม่มีแผนภารกิจ'}
-              </Text>
-              <View style={styles.missionBadge}>
-                <Text style={styles.missionBadgeText}>
-                  {mission?.status || 'PENDING'}
+          <Svg
+            width={MISSION_CARD_WIDTH}
+            height={160}
+            viewBox={`0 0 ${MISSION_CARD_WIDTH} 160`}
+            style={StyleSheet.absoluteFillObject}
+          >
+            <Defs>
+              <SvgGradient id="profileMissionGrad" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0%" stopColor="#0072FF" />
+                <Stop offset="55%" stopColor="#0099FE" />
+                <Stop offset="100%" stopColor="#00C4FF" />
+              </SvgGradient>
+            </Defs>
+            <Rect
+              x="0"
+              y="0"
+              width={MISSION_CARD_WIDTH}
+              height={160}
+              rx="24"
+              ry="24"
+              fill="url(#profileMissionGrad)"
+            />
+            {/* Subtle fluid wave curves in background */}
+            <Path
+              d={`M ${MISSION_CARD_WIDTH * 0.25} 160 Q ${MISSION_CARD_WIDTH * 0.6} 20, ${MISSION_CARD_WIDTH} 50 L ${MISSION_CARD_WIDTH} 160 Z`}
+              fill="rgba(255, 255, 255, 0.12)"
+            />
+            <Path
+              d={`M ${MISSION_CARD_WIDTH * 0.45} 160 Q ${MISSION_CARD_WIDTH * 0.75} 45, ${MISSION_CARD_WIDTH} 85 L ${MISSION_CARD_WIDTH} 160 Z`}
+              fill="rgba(255, 255, 255, 0.14)"
+            />
+            <Circle
+              cx={MISSION_CARD_WIDTH - 25}
+              cy={80}
+              r={65}
+              fill="rgba(255, 255, 255, 0.06)"
+            />
+          </Svg>
+
+          <View style={styles.missionCardInner}>
+            <View style={styles.missionTopRow}>
+              {/* Dumbbell Badge */}
+              <View style={styles.missionIconWrapper}>
+                <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
+              </View>
+
+              <View style={styles.missionTitleCol}>
+                <Text style={styles.missionTitle}>
+                  {mission ? mission.programName : 'สร้างแกนกลาง 7 วัน'}
                 </Text>
+                <View style={styles.missionStatusBadge}>
+                  <Text style={styles.missionStatusBadgeText}>
+                    {mission?.status || 'ACTIVE'}
+                  </Text>
+                </View>
+              </View>
+
+              <CircularProgress
+                size={56}
+                strokeWidth={6}
+                progress={missionProgress > 0 ? missionProgress : 0.43}
+                color="#FFFFFF"
+                backgroundColor="rgba(255, 255, 255, 0.25)"
+                centerText={`${missionProgress > 0 ? missionPercentage : 43}%`}
+                textColor="#FFFFFF"
+                fontSize={13}
+              />
+            </View>
+
+            <View style={styles.divider} />
+
+            {/* Stats Sub-row (Flame & Calendar) */}
+            <View style={styles.missionStatsRow}>
+              {/* Start Date */}
+              <View style={styles.missionStatBox}>
+                <Ionicons name="flame" size={20} color="#BAE6FD" style={{ marginRight: 8 }} />
+                <View>
+                  <Text style={styles.missionStatLabel}>เริ่มเมื่อ</Text>
+                  <Text style={styles.missionStatVal}>
+                    {mission ? formatDate(mission.startAt) : '20/9/69'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.statsDivider} />
+
+              {/* Completed Days */}
+              <View style={styles.missionStatBox}>
+                <Ionicons name="calendar-outline" size={19} color="#BAE6FD" style={{ marginRight: 8 }} />
+                <View>
+                  <Text style={styles.missionStatLabel}>สำเร็จไปแล้ว</Text>
+                  <Text style={styles.missionStatVal}>
+                    {mission ? `${mission.current} วัน` : '3 วัน'}
+                  </Text>
+                </View>
               </View>
             </View>
-
-            <CircularProgress
-              size={54}
-              strokeWidth={5}
-              progress={missionProgress}
-              color="#FFFFFF"
-              backgroundColor="rgba(255, 255, 255, 0.2)"
-              centerText={`${missionPercentage}%`}
-              textColor="#FFFFFF"
-              fontSize={12}
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* Stats Sub-row */}
-          <View style={styles.missionStatsRow}>
-            <View style={styles.missionStatBox}>
-              <Text style={styles.missionStatLabel}>เริ่มเมื่อ</Text>
-              <Text style={styles.missionStatVal}>
-                {mission ? formatDate(mission.startAt) : '-'}
-              </Text>
-            </View>
-
-            <View style={styles.missionStatBox}>
-              <Text style={styles.missionStatLabel}>ดำเนินไปแล้ว</Text>
-              <Text style={styles.missionStatVal}>
-                {mission ? `${mission.current} วัน` : '0 วัน'}
-              </Text>
-            </View>
           </View>
         </View>
 
-        {/* 3. Body Stats Grid (Height, Weight, Age, Gender) */}
+        {/* 4. Body Stats Grid (2x2) */}
         <View style={styles.statsGrid}>
           {/* Height */}
           <View style={styles.statGridCard}>
-            <Ionicons name="person-add-outline" size={36} color="#334155" />
-            <Text style={styles.statGridLabel}>
-              ส่วนสูง : <Text style={styles.statGridVal}>{user.height} cm</Text>
-            </Text>
+            <View style={[styles.statIconCircle, { backgroundColor: '#E0F2FE' }]}>
+              <Ionicons name="body-outline" size={22} color="#0284C7" />
+            </View>
+            <View style={styles.statTextCol}>
+              <Text style={styles.statGridLabel}>ส่วนสูง</Text>
+              <Text style={styles.statGridVal}>{user.height} cm</Text>
+            </View>
           </View>
 
-          {/* Weight (with edit icon) */}
-          <TouchableOpacity
-            style={styles.statGridCard}
-            activeOpacity={0.8}
-            onPress={() => setEditWeightVisible(true)}
-          >
-            <View style={styles.editPencilBadge}>
-              <Ionicons name="pencil" size={12} color="#000000" />
+          {/* Weight */}
+          <View style={styles.statGridCard}>
+            <View style={[styles.statIconCircle, { backgroundColor: '#E0F2FE' }]}>
+              <MaterialCommunityIcons name="scale-bathroom" size={22} color="#0284C7" />
             </View>
-            <MaterialIcons name="monitor-weight" size={36} color="#334155" />
-            <Text style={styles.statGridLabel}>
-              น้ำหนัก : <Text style={styles.statGridVal}>{user.weight} Kg</Text>
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.statTextCol}>
+              <Text style={styles.statGridLabel}>น้ำหนัก</Text>
+              <Text style={styles.statGridVal}>{user.weight} Kg</Text>
+            </View>
+          </View>
 
           {/* Age */}
           <View style={styles.statGridCard}>
-            <Ionicons name="hourglass-outline" size={36} color="#334155" />
-            <Text style={styles.statGridLabel}>
-              อายุ : <Text style={styles.statGridVal}>{user.age}</Text>
-            </Text>
+            <View style={[styles.statIconCircle, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="hourglass-outline" size={20} color="#4F46E5" />
+            </View>
+            <View style={styles.statTextCol}>
+              <Text style={styles.statGridLabel}>อายุ</Text>
+              <Text style={styles.statGridVal}>{user.age} ปี</Text>
+            </View>
           </View>
 
           {/* Gender */}
           <View style={styles.statGridCard}>
-            <MaterialIcons name="transgender" size={36} color="#334155" />
-            <Text style={styles.statGridLabel}>
-              เพศ : <Text style={styles.statGridVal}>{user.gender}</Text>
-            </Text>
+            <View style={[styles.statIconCircle, { backgroundColor: '#E0F2FE' }]}>
+              <Ionicons name="male-outline" size={22} color="#0284C7" />
+            </View>
+            <View style={styles.statTextCol}>
+              <Text style={styles.statGridLabel}>เพศ</Text>
+              <Text style={styles.statGridVal}>{user.gender}</Text>
+            </View>
           </View>
         </View>
 
-        {/* 4. Workout History Timeline */}
+        {/* 5. Workout History Timeline */}
         <View style={styles.historyHeaderRow}>
-          <Text style={styles.historyTitle}>ประวัติ</Text>
+          <View style={styles.historyHeaderLeft}>
+            <Ionicons name="time-outline" size={24} color="#0084FF" style={{ marginRight: 6 }} />
+            <Text style={styles.historyTitle}>ประวัติ</Text>
+          </View>
           <TouchableOpacity
-            onPress={() => Alert.alert('ประวัติทั้งหมด', 'แสดงประวัติการฝึกแพลงก์ของคุณ')}
+            onPress={() => navigation.navigate('WorkoutHistory')}
+            style={styles.seeAllBtn}
           >
             <Text style={styles.historySeeAll}>ดูทั้งหมด</Text>
+            <Ionicons name="chevron-forward" size={16} color="#0084FF" style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.historyList}>
-          {history.map((item) => (
-            <View key={item.id} style={styles.historyCard}>
+          {history.slice(0, 4).map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.historyCard}
+              activeOpacity={0.7}
+              onPress={() => Alert.alert(item.planName, `แต้ม: ${item.score}\nเวลา: ${Math.round(item.duration / 60)} นาที\nแคลอรี่: ${item.kcal} Cal\nวันที่: ${formatDate(item.createdAt)}`)}
+            >
               <View style={styles.historyIconWrapper}>
-                <MaterialIcons name="fitness-center" size={26} color={Colors.primary} />
+                <MaterialIcons name="fitness-center" size={24} color="#0084FF" />
               </View>
               <View style={styles.historyInfo}>
                 <Text style={styles.historyPlanTitle}>{item.planName}</Text>
                 <Text style={styles.historyScoreRow}>
-                  {item.score} แต้ม • {Math.round(item.duration / 60)} นาที ({item.kcal} แคล)
+                  {item.score} แต้ม • {Math.round(item.duration / 60)} นาที ({item.kcal} Cal)
                 </Text>
-                <Text style={styles.historyDate}>{formatDate(item.createdAt)}</Text>
+                <View style={styles.historyDateRow}>
+                  <Ionicons name="calendar-outline" size={13} color="#94A3B8" style={{ marginRight: 4 }} />
+                  <Text style={styles.historyDate}>{formatDate(item.createdAt)}</Text>
+                </View>
               </View>
-            </View>
+              <View style={styles.historyChevronCircle}>
+                <Ionicons name="chevron-forward" size={16} color="#0084FF" />
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
-
-        {/* Logout / Switch Account */}
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => {
-            logout();
-            navigation.replace('Login');
-          }}
-        >
-          <Ionicons name="log-out-outline" size={20} color={Colors.danger} />
-          <Text style={styles.logoutText}>ออกจากระบบ</Text>
-        </TouchableOpacity>
       </ScrollView>
-
-      {/* Edit Weight Modal */}
-      <Modal
-        visible={editWeightVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setEditWeightVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.editModalContent}>
-            <Text style={styles.editModalTitle}>อัปเดตน้ำหนัก</Text>
-            <TextInput
-              style={styles.editModalInput}
-              keyboardType="numeric"
-              value={newWeight}
-              onChangeText={setNewWeight}
-              placeholder="น้ำหนัก (กก.)"
-            />
-            <View style={styles.editModalBtnsRow}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => setEditWeightVisible(false)}
-              >
-                <Text style={styles.cancelBtnText}>ยกเลิก</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.saveWeightBtn}
-                onPress={handleSaveWeight}
-              >
-                <Text style={styles.saveWeightBtnText}>บันทึก</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -239,91 +405,177 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#0084FF',
   },
-  appBar: {
-    height: 56,
+  topHeader: {
+    height: 58,
+    backgroundColor: '#0084FF',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    zIndex: 10,
+  },
+  headerBackBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
   },
-  appBarTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: Colors.textPrimary,
+  headerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  scrollContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  userHeaderRow: {
+  headerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  topCurveBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+    backgroundColor: '#0084FF',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: '#EDF4FE',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  userHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    paddingHorizontal: 4,
+  },
+  avatarWrapper: {
+    position: 'relative',
+    marginRight: 14,
   },
   avatarContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.purpleLight,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#EEF2FF',
     borderWidth: 2,
-    borderColor: Colors.purpleBorder,
+    borderColor: '#E0E7FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 36,
+  },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#0084FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   userInfoCol: {
     flex: 1,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
+    color: '#1E293B',
   },
   userEmail: {
     fontSize: 13,
     color: '#64748B',
     marginTop: 2,
   },
+  memberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0F2FE',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    alignSelf: 'flex-start',
+    marginTop: 6,
+  },
+  memberBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#0284C7',
+  },
   missionCard: {
-    backgroundColor: '#1F65CD',
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 24,
-    shadowColor: '#1F65CD',
-    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 24,
+    marginBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.38)',
+    shadowColor: '#0072FF',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 5,
+    position: 'relative',
+  },
+  missionCardInner: {
+    padding: 18,
   },
   missionTopRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  missionIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   missionTitleCol: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 8,
   },
   missionTitle: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 6,
+    marginBottom: 4,
   },
-  missionBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 20,
+  missionStatusBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
     alignSelf: 'flex-start',
   },
-  missionBadgeText: {
-    color: '#CECBF6',
-    fontSize: 11,
+  missionStatusBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: 'bold',
   },
   divider: {
@@ -333,20 +585,26 @@ const styles = StyleSheet.create({
   },
   missionStatsRow: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   missionStatBox: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 10,
-    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statsDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginHorizontal: 8,
   },
   missionStatLabel: {
     fontSize: 11,
-    color: '#CECBF6',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   missionStatVal: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginTop: 2,
@@ -354,38 +612,45 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 28,
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   statGridCard: {
     width: '48%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    position: 'relative',
+    borderColor: '#E8F1FC',
+    marginBottom: 12,
+    shadowColor: '#0084FF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  editPencilBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#FFD700',
+  statIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 10,
+  },
+  statTextCol: {
+    flex: 1,
   },
   statGridLabel: {
-    fontSize: 14,
-    color: Colors.textPrimary,
-    fontWeight: '500',
-    marginTop: 8,
+    fontSize: 12,
+    color: '#64748B',
+    marginBottom: 2,
   },
   statGridVal: {
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#1E293B',
   },
   historyHeaderRow: {
     flexDirection: 'row',
@@ -393,68 +658,97 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  historyHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   historyTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
+    color: '#1E293B',
+  },
+  seeAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   historySeeAll: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#0084FF',
+    fontWeight: '600',
   },
   historyList: {
-    gap: 12,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   historyCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cyanLight,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E8F1FC',
+    shadowColor: '#0084FF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   historyIconWrapper: {
-    width: 50,
-    height: 50,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#EBF5FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   historyInfo: {
     flex: 1,
   },
   historyPlanTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
+    color: '#1E293B',
     marginBottom: 2,
   },
   historyScoreRow: {
     fontSize: 13,
-    color: '#0066CC',
+    color: '#0084FF',
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: 3,
+  },
+  historyDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   historyDate: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#94A3B8',
+  },
+  historyChevronCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#EBF4FE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
   },
   logoutButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
     paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: '#FFEBEB',
+    borderRadius: 20,
+    backgroundColor: '#FFF0F0',
+    borderWidth: 1,
+    borderColor: '#FFE0E0',
     marginBottom: 20,
   },
   logoutText: {
-    color: Colors.danger,
-    fontSize: 15,
+    color: '#EF4444',
+    fontSize: 16,
     fontWeight: 'bold',
   },
   modalOverlay: {
@@ -467,38 +761,40 @@ const styles = StyleSheet.create({
   editModalContent: {
     width: '100%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 24,
     alignItems: 'center',
   },
   editModalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
-    marginBottom: 16,
+    color: '#1E293B',
   },
   editModalInput: {
     width: '100%',
     backgroundColor: '#F1F5F9',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: 18,
+    marginVertical: 16,
     textAlign: 'center',
+    color: '#1E293B',
+    fontWeight: 'bold',
   },
   editModalBtnsRow: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
     width: '100%',
   },
   cancelBtn: {
     flex: 1,
-    height: 46,
-    borderRadius: 12,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 8,
   },
   cancelBtnText: {
     fontSize: 15,
@@ -507,11 +803,12 @@ const styles = StyleSheet.create({
   },
   saveWeightBtn: {
     flex: 1,
-    height: 46,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: '#0084FF',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 8,
   },
   saveWeightBtnText: {
     fontSize: 15,

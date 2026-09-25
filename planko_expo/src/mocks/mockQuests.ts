@@ -33,4 +33,29 @@ export const mockQuests: Quest[] = [
     unit: 'คอมโบ',
     categoryName: 'เกม',
   },
+  {
+    id: 5,
+    questName: 'ออกกำลังกายต่อเนื่อง (Streak)',
+    targetValue: 7,
+    currentValue: 5,
+    unit: 'วัน',
+    categoryName: 'สม่ำเสมอ',
+  },
+  {
+    id: 6,
+    questName: 'ฝึก Side Plank ท้าทาย',
+    targetValue: 120,
+    currentValue: 120,
+    unit: 'วินาที',
+    categoryName: 'เวลา',
+  },
+  {
+    id: 7,
+    questName: 'ทำสำเร็จครบทุกท่าพื้นฐาน',
+    targetValue: 6,
+    currentValue: 4,
+    unit: 'ท่า',
+    categoryName: 'ท่าทาง',
+  },
 ];
+

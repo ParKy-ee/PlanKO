@@ -7,13 +7,17 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { Colors } from '../../theme/colors';
 import { useApp } from '../../context/AppContext';
 import { Posture } from '../../types';
+import {
+  PostureIllustratedIcon,
+  getPostureTheme,
+} from '../../components/common/PostureIllustratedIcon';
 
 export const PostureListScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -35,28 +39,6 @@ export const PostureListScreen: React.FC = () => {
     selectedCategoryId === 0
       ? postures
       : postures.filter((p) => p.postureCategory?.id === selectedCategoryId);
-
-  const renderDifficultyBadge = (difficulty: string) => {
-    let color = '#34C759';
-    let text = 'ง่าย';
-    let bgColor = '#E8F8EE';
-
-    if (difficulty === 'medium') {
-      color = '#FF9500';
-      text = 'ปานกลาง';
-      bgColor = '#FFF4E5';
-    } else if (difficulty === 'hard') {
-      color = '#FF3B30';
-      text = 'ยาก';
-      bgColor = '#FFEBEB';
-    }
-
-    return (
-      <View style={[styles.diffBadge, { backgroundColor: bgColor, borderColor: color }]}>
-        <Text style={[styles.diffBadgeText, { color }]}>{text}</Text>
-      </View>
-    );
-  };
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -82,7 +64,7 @@ export const PostureListScreen: React.FC = () => {
         <View style={styles.headerPlaceholder} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* Horizontal Category Chips */}
         <ScrollView
           horizontal
@@ -99,6 +81,7 @@ export const PostureListScreen: React.FC = () => {
                   styles.filterChip,
                   isSelected && styles.filterChipSelected,
                 ]}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -115,51 +98,60 @@ export const PostureListScreen: React.FC = () => {
 
         {/* Posture Cards List */}
         <View style={styles.postureList}>
-          {filteredPostures.map((posture: Posture) => (
-            <TouchableOpacity
-              key={posture.id}
-              style={styles.postureCard}
-              activeOpacity={0.88}
-              onPress={() => navigation.navigate('PostureDetail', { posture })}
-            >
-              {/* Left Gradient Icon Block */}
-              <View style={styles.leftIconBlock}>
-                <MaterialIcons
-                  name={(posture.iconName as any) || 'fitness-center'}
-                  size={36}
-                  color="#FFFFFF"
-                />
-              </View>
+          {filteredPostures.map((posture: Posture) => {
+            const theme = getPostureTheme(posture.id, posture.name);
+            return (
+              <TouchableOpacity
+                key={posture.id}
+                style={styles.postureCard}
+                activeOpacity={0.88}
+                onPress={() => navigation.navigate('PostureDetail', { posture })}
+              >
+                {/* Left Illustrated Icon Box */}
+                <View style={[styles.leftIconBlock, { backgroundColor: theme.bgColor }]}>
+                  <PostureIllustratedIcon
+                    postureId={posture.id}
+                    postureName={posture.name}
+                    size={48}
+                  />
+                </View>
 
-              {/* Right Content */}
-              <View style={styles.cardContent}>
-                <View style={styles.cardTopRow}>
+                {/* Right Content */}
+                <View style={styles.cardContent}>
                   <Text style={styles.postureName} numberOfLines={1}>
                     {posture.name}
                   </Text>
-                  {renderDifficultyBadge(posture.difficulty)}
+
+                  <Text style={styles.postureDesc} numberOfLines={1}>
+                    {posture.description}
+                  </Text>
+
+                  {/* Category & Tags Pill Row */}
+                  <View style={styles.cardBottomRow}>
+                    <View style={styles.categoryPill}>
+                      <Text style={styles.categoryPillText}>
+                        {posture.postureCategory?.name || 'พื้นฐาน'}
+                      </Text>
+                    </View>
+                    <View style={[styles.categoryPill, styles.secondaryPill]}>
+                      <Text style={styles.secondaryPillText}>
+                        {posture.id === 2
+                          ? 'แขนและไหล่'
+                          : posture.id === 5
+                          ? 'แขนและไหล่'
+                          : 'แกนกลางลำตัว'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
 
-                <Text style={styles.postureDesc} numberOfLines={2}>
-                  {posture.description}
-                </Text>
-
-                <View style={styles.cardBottomRow}>
-                  <View style={styles.categoryTag}>
-                    <Ionicons name="star" size={14} color="#D97706" />
-                    <Text style={styles.categoryTagText}>
-                      {posture.postureCategory?.name || 'ทั่วไป'}
-                    </Text>
-                  </View>
-
-                  <View style={styles.viewDetailLink}>
-                    <Text style={styles.viewDetailText}>ดูรายละเอียด</Text>
-                    <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
-                  </View>
+                {/* Right Arrow Chevron */}
+                <View style={styles.arrowBox}>
+                  <Ionicons name="chevron-forward" size={18} color="#0084FF" />
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -169,7 +161,7 @@ export const PostureListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F9FD',
   },
   topHeader: {
     height: 56,
@@ -179,133 +171,123 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: '#EDF2F7',
     zIndex: 10,
   },
   backBtn: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 22,
-    zIndex: 20,
+    borderRadius: 20,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
+    color: '#0F172A',
   },
   headerPlaceholder: {
-    width: 44,
+    width: 40,
   },
   scrollContainer: {
-    paddingBottom: 40,
+    paddingBottom: 30,
   },
   chipRow: {
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     gap: 8,
     backgroundColor: '#FFFFFF',
   },
   filterChip: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderRadius: 20,
     backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   filterChipSelected: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primary,
+    backgroundColor: '#E0F2FE',
+    borderColor: '#38BDF8',
   },
   filterChipText: {
     fontSize: 13,
     color: '#64748B',
+    fontWeight: '500',
   },
   filterChipTextSelected: {
-    color: Colors.primary,
+    color: '#0284C7',
     fontWeight: 'bold',
   },
   postureList: {
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
   postureCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     flexDirection: 'row',
-    overflow: 'hidden',
+    alignItems: 'center',
+    padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    borderColor: '#EEF3F8',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   leftIconBlock: {
-    width: 90,
-    backgroundColor: Colors.primary,
+    width: 66,
+    height: 66,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
   cardContent: {
     flex: 1,
-    padding: 14,
-  },
-  cardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    justifyContent: 'center',
   },
   postureName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: Colors.textPrimary,
-    flex: 1,
-    marginRight: 6,
-  },
-  diffBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  diffBadgeText: {
-    fontSize: 11,
-    fontWeight: 'bold',
+    color: '#0F172A',
+    marginBottom: 3,
   },
   postureDesc: {
-    fontSize: 13,
-    color: '#64748B',
-    lineHeight: 18,
-    marginBottom: 10,
+    fontSize: 12,
+    color: '#94A3B8',
+    marginBottom: 8,
+    lineHeight: 16,
   },
   cardBottomRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 6,
   },
-  categoryTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+  categoryPill: {
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#EFF6FF',
   },
-  categoryTagText: {
+  categoryPillText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#B45309',
+    fontWeight: '600',
+    color: '#3B82F6',
   },
-  viewDetailLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
+  secondaryPill: {
+    backgroundColor: '#F1F5F9',
   },
-  viewDetailText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: Colors.primary,
+  secondaryPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  arrowBox: {
+    paddingLeft: 4,
+    paddingRight: 2,
   },
 });
+
