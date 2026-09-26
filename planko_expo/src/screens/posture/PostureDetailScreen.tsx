@@ -86,7 +86,7 @@ export const PostureDetailScreen: React.FC = () => {
         quality: 0.85,
       });
 
-      if (!result.cancelled && result.uri) {
+      if (!result.cancelled && 'uri' in result) {
         setCustomImages((prev) => (prev ? [...prev, { uri: result.uri }] : [{ uri: result.uri }]));
         Alert.alert('สำเร็จ', 'เพิ่มรูปภาพท่าฝึกของคุณเรียบร้อยแล้ว');
       }
