@@ -73,11 +73,8 @@ export const ProfileScreen: React.FC = () => {
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        updateUser({ avatarUrl: result.assets[0].uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
-      } else if (!(result as any).cancelled && (result as any).uri) {
-        updateUser({ avatarUrl: (result as any).uri });
+      if (!result.cancelled && 'uri' in result) {
+        updateUser({ avatarUrl: result.uri });
         Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
       }
     } catch (error) {
@@ -100,11 +97,8 @@ export const ProfileScreen: React.FC = () => {
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        updateUser({ avatarUrl: result.assets[0].uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
-      } else if (!(result as any).cancelled && (result as any).uri) {
-        updateUser({ avatarUrl: (result as any).uri });
+      if (!result.cancelled && 'uri' in result) {
+        updateUser({ avatarUrl: result.uri });
         Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
       }
     } catch (error) {
