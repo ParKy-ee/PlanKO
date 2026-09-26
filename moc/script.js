@@ -42,6 +42,11 @@ let gameProject = null;
 const levelAudioFiles = new Map();
 const levelAudioUrls = new Map();
 
+// Optional local content loaded when this mock is opened from the project root.
+// Keep the paths relative so the page also works from a local HTTP server.
+const LOCAL_GAME_JSON_URL = '../moc-api/planko-neon-sessions%20(1)%20(1).json';
+const LOCAL_SPARKS_AUDIO_URL = '../Sparks.mp3';
+
 // Fast beat placement state for the editor.
 let selectedBeatButton = null;
 let noteSnapMode = 'free';
@@ -150,6 +155,9 @@ window.addEventListener('load', () => {
   
   // Create a default synthesized audio track (sine/square pulse generator)
   createDefaultAudio();
+
+  // Load the supplied game JSON and Sparks track when available.
+  loadLocalGameProject();
 });
 
 // Switch between Tabs
@@ -849,6 +857,32 @@ function applyMockApiProject(project) {
   renderTimelineNotes();
 }
 
+// Load the project's JSON and attach the local Sparks.mp3 file to its Sparks level.
+// This is intentionally best-effort: if the page is opened directly with file://,
+// the browser may block fetch(), and the existing file pickers remain available.
+async function loadLocalGameProject() {
+  try {
+    const response = await fetch(LOCAL_GAME_JSON_URL, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const project = await response.json();
+    applyMockApiProject(project);
+
+    const sparksIndex = gameProject.levels.findIndex((level) =>
+      String(level.audio?.fileName || '').toLowerCase() === 'sparks.mp3'
+    );
+
+    if (sparksIndex >= 0) {
+      selectLevel(sparksIndex);
+      loadAudioUrl(LOCAL_SPARKS_AUDIO_URL, false);
+    }
+
+    showToast('โหลด JSON และเพลง Sparks.mp3 แล้ว');
+  } catch (error) {
+    console.warn('Local game project auto-load skipped:', error);
+  }
+}
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -1069,6 +1103,39 @@ function loadAudioFile(file, clearBeatmap, showSuccess) {
     updateBeatmapJSON();
     renderTimelineNotes();
     if (showSuccess) showToast('อัปโหลดเพลงสำเร็จ — พร้อมอัด beatmap แล้ว');
+  };
+}
+
+// Load an audio asset by URL (used for the checked-in Sparks.mp3 file).
+function loadAudioUrl(url, showSuccess) {
+  initAudioContext();
+  currentSongName = 'Sparks.mp3';
+  document.getElementById('song-name').innerText = currentSongName;
+
+  audioEl.src = url;
+  audioEl.load();
+
+  audioEl.onloadedmetadata = () => {
+    audioDuration = audioEl.duration;
+    document.getElementById('song-duration').innerText = formatTime(audioDuration);
+    document.getElementById('editor-duration-text').innerText = audioDuration.toFixed(2) + 's';
+
+    const level = getActiveLevel();
+    if (level) {
+      level.audio.fileName = 'Sparks.mp3';
+      level.audio.mimeType = 'audio/mpeg';
+      level.audio.duration = Number(audioDuration.toFixed(2));
+      level.audio.uri = url;
+    }
+
+    syncStudioInputs();
+    updateBeatmapJSON();
+    renderTimelineNotes();
+    if (showSuccess) showToast('โหลดเพลง Sparks.mp3 สำเร็จ');
+  };
+
+  audioEl.onerror = () => {
+    showToast('โหลด Sparks.mp3 ไม่สำเร็จ — ตรวจสอบว่าไฟล์อยู่ที่โฟลเดอร์หลักของโปรเจกต์');
   };
 }
 

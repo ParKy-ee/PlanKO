@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "1.0",
+  "type": "planKo.game",
+  "id": "planko-neon-sessions",
+  "title": "PlanKO Neon Sessions",
+  "description": "Rhythm plank training levels for PlanKO.",
+  "version": 1,
+  "levels": [
+    {
+      "id": "level-01-neon-warmup",
+      "title": "Neon Warmup",
+      "difficulty": "normal",
+      "bpm": 120,
+      "description": "ฝึกจังหวะพื้นฐานก่อนเข้าสู่ด่านจริง",
+      "duration": 30,
+      "audio": {
+        "fileName": "synthwave-beat.wav",
+        "mimeType": "audio/wav",
+        "uri": "assets/audio/synthwave-beat.wav"
+      },
+      "beatmap":[
+  {
+    "time": 3.65,
+    "buttonId": "R4"
+  },
+  {
+    "time": 3.65,
+    "buttonId": "L4"
+  },
+  {
+    "time": 14.2,
+    "buttonId": "R1"
+  },
+  {
+    "time": 14.2,
+    "buttonId": "L1"
+  },
+  {
+    "time": 17.4,
+    "buttonId": "R4"
+  },
+  {
+    "time": 17.4,
+    "buttonId": "L4"
+  },
+  {
+    "time": 21.7,
+    "buttonId": "L5"
+  },
+  {
+    "time": 21.7,
+    "buttonId": "R5"
+  },
+  {
+    "time": 30.62,
+    "buttonId": "L4"
+  },
+  {
+    "time": 30.62,
+    "buttonId": "R4"
+  },
+  {
+    "time": 34.14,
+    "buttonId": "L3"
+  },
+  {
+    "time": 35.57,
+    "buttonId": "L4"
+  },
+  {
+    "time": 37.52,
+    "buttonId": "R3"
+  },
+  {
+    "time": 38.69,
+    "buttonId": "R4"
+  },
+  {
+    "time": 50.64,
+    "buttonId": "L3"
+  },
+  {
+    "time": 52.14,
+    "buttonId": "L4"
+  },
+  {
+    "time": 54.06,
+    "buttonId": "R3"
+  },
+  {
+    "time": 55.92,
+    "buttonId": "R4"
+  },
+  {
+    "time": 61.88,
+    "buttonId": "L5"
+  },
+  {
+    "time": 63.88,
+    "buttonId": "R5"
+  },
+  {
+    "time": 68.38,
+    "buttonId": "L4"
+  },
+  {
+    "time": 70.38,
+    "buttonId": "R4"
+  },
+  {
+    "time": 77.58,
+    "buttonId": "L3"
+  },
+  {
+    "time": 80.29,
+    "buttonId": "L4"
+  },
+  {
+    "time": 84.52,
+    "buttonId": "R3"
+  },
+  {
+    "time": 87.25,
+    "buttonId": "R1"
+  },
+  {
+    "time": 87.25,
+    "buttonId": "L1"
+  },
+  {
+    "time": 109.84,
+    "buttonId": "L4"
+  },
+  {
+    "time": 109.84,
+    "buttonId": "R4"
+  },
+  {
+    "time": 111.7,
+    "buttonId": "R3"
+  },
+  {
+    "time": 113.58,
+    "buttonId": "R4"
+  },
+  {
+    "time": 120.57,
+    "buttonId": "L5"
+  },
+  {
+    "time": 122.4,
+    "buttonId": "R5"
+  },
+  {
+    "time": 124.74,
+    "buttonId": "L4"
+  },
+  {
+    "time": 126.73,
+    "buttonId": "R4"
+  },
+  {
+    "time": 131.46,
+    "buttonId": "L3"
+  },
+  {
+    "time": 133.01,
+    "buttonId": "L4"
+  },
+  {
+    "time": 136.96,
+    "buttonId": "R3"
+  },
+  {
+    "time": 138.88,
+    "buttonId": "R4"
+  },
+  {
+    "time": 144.95,
+    "buttonId": "L5"
+  },
+  {
+    "time": 146.36,
+    "buttonId": "R5"
+  },
+  {
+    "time": 150.31,
+    "buttonId": "L4"
+  },
+  {
+    "time": 153.87,
+    "buttonId": "R4"
+  },
+  {
+    "time": 156.73,
+    "buttonId": "L3"
+  },
+  {
+    "time": 159.5,
+    "buttonId": "L4"
+  },
+  {
+    "time": 162.71,
+    "buttonId": "R3"
+  },
+  {
+    "time": 165.13,
+    "buttonId": "R4"
+  },
+  {
+    "time": 167.02,
+    "buttonId": "L5"
+  },
+  {
+    "time": 169.81,
+    "buttonId": "L4"
+  },
+  {
+    "time": 172.58,
+    "buttonId": "R5"
+  },
+  {
+    "time": 175.42,
+    "buttonId": "R4"
+  },
+  {
+    "time": 179.19,
+    "buttonId": "R3"
+  },
+  {
+    "time": 181.98,
+    "buttonId": "R4"
+  },
+  {
+    "time": 184.77,
+    "buttonId": "L3"
+  },
+  {
+    "time": 187.52,
+    "buttonId": "L4"
+  }
+]
+    }
+  ]
+}
