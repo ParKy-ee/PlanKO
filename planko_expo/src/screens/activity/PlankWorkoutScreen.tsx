@@ -457,27 +457,59 @@ export const PlankWorkoutScreen: React.FC = () => {
     const connect = () => {
       if (!active) return;
       setSensorConnection('connecting');
+      console.log(`🔌 [PlanKO-WS] Connecting to ESP32 WebSocket: ${SENSOR_WS_URL}`);
       try {
         socket = new WebSocket(SENSOR_WS_URL);
       } catch (error) {
-        console.warn('Sensor WebSocket connection failed:', error);
+        console.warn('❌ [PlanKO-WS] WebSocket connection failed:', error);
         setSensorConnection('disconnected');
         retry = setTimeout(connect, 3000);
         return;
       }
+
       socket.onopen = () => {
-        if (active) setSensorConnection('connected');
-      };
-      socket.onmessage = (event) => {
-        if (!active || !canReceiveSensorRef.current || typeof event.data !== 'string') return;
-        const sensorId = getPressedSensorId(event.data);
-        if (sensorId) handlePadTapRef.current(sensorId);
-      };
-      socket.onerror = () => {
-        if (active) setSensorConnection('disconnected');
-      };
-      socket.onclose = () => {
         if (!active) return;
+        console.log('✅ [PlanKO-WS] Connected to ESP32 WebSocket server successfully!');
+        setSensorConnection('connected');
+      };
+
+      socket.onmessage = (event) => {
+        if (!active || typeof event.data !== 'string') return;
+
+        // 📥 Log ข้อมูลดิบที่ได้รับจาก ESP32 ทุกครั้ง
+        console.log('📥 [ESP32 -> PlanKO WS Event Raw]:', event.data);
+
+        const sensorId = getPressedSensorId(event.data);
+        if (sensorId) {
+          const isGameActive = canReceiveSensorRef.current;
+          console.log(`⚡ [PAD EVENT DETECTED] Button: ${sensorId} | Active Game: ${isGameActive ? 'YES (Score/Rhythm)' : 'NO (Ignored)'}`);
+          if (isGameActive) {
+            handlePadTapRef.current(sensorId);
+          }
+        } else {
+          // ตรวจสอบว่าเป็นข้อความสถานะระบบหรือเซ็นเซอร์อื่น เช่น อัตราการเต้นของหัวใจ
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.status === 'connected') {
+              console.log('🤝 [ESP32 Device Ready]:', parsed);
+            } else if (parsed.type === 'heartRate') {
+              console.log(`❤️ [ESP32 Biometrics]: BPM: ${parsed.bpm} (Avg: ${parsed.avgBpm}) | SpO2: ${parsed.spo2Approx}% | Finger: ${parsed.fingerDetected}`);
+            }
+          } catch {
+            // ไม่ใช่ JSON หรือ parse ไม่ผ่าน
+          }
+        }
+      };
+
+      socket.onerror = (error) => {
+        if (!active) return;
+        console.warn('⚠️ [PlanKO-WS] WebSocket error occurred:', error);
+        setSensorConnection('disconnected');
+      };
+
+      socket.onclose = (event) => {
+        if (!active) return;
+        console.log(`🔌 [PlanKO-WS] Disconnected from ESP32 (code: ${event.code}). Retrying in 3s...`);
         setSensorConnection('disconnected');
         retry = setTimeout(connect, 3000);
       };
