@@ -7,6 +7,8 @@ export interface User {
   age: number;
   gender: string; // 'ผู้ชาย' | 'ผู้หญิง' | 'อื่นๆ' | 'male' | 'female' | 'other'
   avatarUrl?: string;
+  totalWorkoutCount?: number;
+  totalMinutes?: number;
 }
 
 export interface PostureCategory {
