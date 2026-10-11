@@ -23,7 +23,7 @@ export const mockBiofeedbackScenarios = [
   {
     time: 3,
     statusType: 'success' as const,
-    statusText: 'ท่าทางถูกต้อง ยอดเยี่ยม! (+1.5x Multiplier)',
+    statusText: 'Excellent posture form! (+1.5x Multiplier)',
     isSafe: true,
     leftPressure: 50,
     rightPressure: 50,
@@ -35,7 +35,7 @@ export const mockBiofeedbackScenarios = [
   {
     time: 8,
     statusType: 'warning' as const,
-    statusText: 'น้ำหนักเอียงขวาเล็กน้อย ปรับจุดศูนย์ถ่วง (CoP) ให้สมดุล',
+    statusText: 'Slight right lean. Re-center your Center of Pressure (CoP)',
     isSafe: true,
     leftPressure: 35,
     rightPressure: 65,
@@ -47,7 +47,7 @@ export const mockBiofeedbackScenarios = [
   {
     time: 14,
     statusType: 'alert' as const,
-    statusText: 'หลังเริ่มแอ่น! เกร็งหน้าท้องและยกสะโพกขึ้นเล็กน้อย',
+    statusText: 'Lower back sagging! Engage your core and lift hips slightly',
     isSafe: false,
     leftPressure: 48,
     rightPressure: 52,
@@ -59,7 +59,7 @@ export const mockBiofeedbackScenarios = [
   {
     time: 18,
     statusType: 'success' as const,
-    statusText: 'ปรับท่าถูกต้องแล้ว! เข้าสู่ Perfect Zone',
+    statusText: 'Posture corrected! Perfect Zone entered',
     isSafe: true,
     leftPressure: 50,
     rightPressure: 50,

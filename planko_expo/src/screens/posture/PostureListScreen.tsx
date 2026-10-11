@@ -25,7 +25,7 @@ export const PostureListScreen: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(0);
 
   const categories = [
-    { id: 0, name: 'ทั้งหมด' },
+    { id: 0, name: 'All' },
     ...Array.from(
       new Map(
         postures
@@ -60,7 +60,7 @@ export const PostureListScreen: React.FC = () => {
         >
           <Ionicons name="arrow-back" size={26} color={Colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>ข้อมูลท่า Plank</Text>
+        <Text style={styles.headerTitle}>Plank Library</Text>
         <View style={styles.headerPlaceholder} />
       </View>
 
@@ -130,16 +130,16 @@ export const PostureListScreen: React.FC = () => {
                   <View style={styles.cardBottomRow}>
                     <View style={styles.categoryPill}>
                       <Text style={styles.categoryPillText}>
-                        {posture.postureCategory?.name || 'พื้นฐาน'}
+                        {posture.postureCategory?.name || 'Basic'}
                       </Text>
                     </View>
                     <View style={[styles.categoryPill, styles.secondaryPill]}>
                       <Text style={styles.secondaryPillText}>
                         {posture.id === 2
-                          ? 'แขนและไหล่'
+                          ? 'Arms & Shoulders'
                           : posture.id === 5
-                          ? 'แขนและไหล่'
-                          : 'แกนกลางลำตัว'}
+                          ? 'Arms & Shoulders'
+                          : 'Core'}
                       </Text>
                     </View>
                   </View>

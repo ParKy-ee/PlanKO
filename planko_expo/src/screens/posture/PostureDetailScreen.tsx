@@ -75,7 +75,7 @@ export const PostureDetailScreen: React.FC = () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อเลือกรูปท่าฝึก');
+        Alert.alert('Permission Required', 'Please grant photo library access to upload posture images.');
         return;
       }
 
@@ -88,7 +88,7 @@ export const PostureDetailScreen: React.FC = () => {
 
       if (!result.cancelled && 'uri' in result) {
         setCustomImages((prev) => (prev ? [...prev, { uri: result.uri }] : [{ uri: result.uri }]));
-        Alert.alert('สำเร็จ', 'เพิ่มรูปภาพท่าฝึกของคุณเรียบร้อยแล้ว');
+        Alert.alert('Success', 'Posture image uploaded successfully');
       }
     } catch (e) {
       console.log('Error picking posture image:', e);
@@ -191,7 +191,7 @@ export const PostureDetailScreen: React.FC = () => {
           >
             <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>รายละเอียด</Text>
+          <Text style={styles.headerTitle}>Details</Text>
           <View style={styles.headerPlaceholder} />
         </View>
 
@@ -202,7 +202,7 @@ export const PostureDetailScreen: React.FC = () => {
           {/* Title and Subtitle */}
           <View style={styles.titleSection}>
             <Text style={styles.postureName}>{posture.name}</Text>
-            <Text style={styles.postureSubtitle}>อัปเดตรูปภาพและข้อมูลท่าของคุณ</Text>
+            <Text style={styles.postureSubtitle}>Posture guide and details</Text>
           </View>
 
           {/* Visual Showcase: Swipeable Carousel OR Dashed Upload Card */}
@@ -305,42 +305,42 @@ export const PostureDetailScreen: React.FC = () => {
                 />
               </Svg>
 
-              <Text style={styles.uploadPromptTitle}>แตะเพื่อเพิ่มรูปภาพ</Text>
-              <Text style={styles.uploadPromptSubtitle}>รองรับไฟล์ JPG, PNG (ไม่เกิน 5MB)</Text>
+              <Text style={styles.uploadPromptTitle}>Tap to add image</Text>
+              <Text style={styles.uploadPromptSubtitle}>Supports JPG, PNG (up to 5MB)</Text>
             </TouchableOpacity>
           )}
 
           {/* 3 Detail Info Cards */}
           <View style={styles.cardsList}>
-            {/* Card 1: ประเภท */}
+            {/* Card 1: Category */}
             <View style={styles.infoCard}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="disc" size={22} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>ประเภท</Text>
-                <Text style={styles.cardValue}>{posture.postureCategory?.name || 'ทั่วไป'}</Text>
+                <Text style={styles.cardLabel}>Category</Text>
+                <Text style={styles.cardValue}>{posture.postureCategory?.name || 'General'}</Text>
               </View>
             </View>
 
-            {/* Card 2: คำอธิบาย */}
+            {/* Card 2: Description */}
             <View style={styles.infoCard}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="person" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>คำอธิบาย</Text>
+                <Text style={styles.cardLabel}>Description</Text>
                 <Text style={styles.cardValue}>{posture.description}</Text>
               </View>
             </View>
 
-            {/* Card 3: ช่วยด้าน */}
+            {/* Card 3: Benefits */}
             <View style={styles.infoCard}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="barbell" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>ช่วยด้าน</Text>
+                <Text style={styles.cardLabel}>Benefits</Text>
                 <Text style={styles.cardValue}>{posture.benefit}</Text>
               </View>
             </View>
@@ -371,7 +371,7 @@ export const PostureDetailScreen: React.FC = () => {
               <View style={styles.startWorkoutButtonContent}>
                 <Ionicons name="play" size={18} color="#FFFFFF" style={styles.playIcon} />
                 <Text style={styles.startWorkoutButtonText}>
-                  ฝึกท่านี้ตอนนี้ ({posture.targetDurationSeconds || 30} วิ)
+                  Practice Now ({posture.targetDurationSeconds || 30}s)
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color="#FFFFFF" style={styles.chevronIcon} />
               </View>
