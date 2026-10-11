@@ -60,22 +60,22 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     setConfirmError(null);
 
     if (!email.trim()) {
-      setEmailError('กรุณากรอกอีเมล');
+      setEmailError('Please enter your email');
       isValid = false;
     }
     if (!name.trim()) {
-      setNameError('กรุณากรอกชื่อผู้ใช้งาน');
+      setNameError('Please enter your username');
       isValid = false;
     }
     if (!password.trim()) {
-      setPasswordError('กรุณากรอกรหัสผ่าน');
+      setPasswordError('Please enter a password');
       isValid = false;
     }
     if (!confirmPassword.trim()) {
-      setConfirmError('กรุณากรอกยืนยันรหัสผ่าน');
+      setConfirmError('Please confirm your password');
       isValid = false;
     } else if (password !== confirmPassword) {
-      setConfirmError('รหัสผ่านไม่ตรงกัน');
+      setConfirmError('Passwords do not match');
       isValid = false;
     }
 
@@ -174,9 +174,9 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           {/* Header Section */}
           <View style={styles.headerSection}>
             <View style={styles.headerTextWrapper}>
-              <Text style={styles.headerTitle}>สร้างบัญชีใหม่</Text>
+              <Text style={styles.headerTitle}>Create Account</Text>
               <Text style={styles.headerSubtitle}>
-                เริ่มต้นสร้างสุขภาพที่ดีและแตกต่างสำหรับตัวคุณไปกับเรา
+                Start your core health journey and transform yourself with us
               </Text>
             </View>
 
@@ -236,17 +236,17 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
           {/* Form Cards List */}
           <View style={styles.cardsList}>
-            {/* Card 1: ชื่อเมล / อีเมล */}
+            {/* Card 1: Email */}
             <View style={[styles.inputCard, emailFocused && styles.inputCardFocused]}>
               <View style={styles.cardIconBadge}>
-                <Ionicons name="person" size={20} color="#0084FF" />
+                <Ionicons name="mail" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>ชื่อเมล</Text>
-                <View style={[styles.cardInputWrapper, emailError && styles.cardInputWrapperError]}>
+                <Text style={styles.cardLabel}>Email</Text>
+                <View style={[styles.cardInputWrapper, emailError ? styles.cardInputWrapperError : null]}>
                   <TextInput
                     style={styles.cardInput}
-                    placeholder="กรอกชื่อผู้เมล"
+                    placeholder="Enter your email"
                     placeholderTextColor="#94A3B8"
                     value={email}
                     onChangeText={(text) => {
@@ -263,17 +263,17 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Card 2: ชื่อผู้ใช้งาน */}
+            {/* Card 2: Username */}
             <View style={[styles.inputCard, nameFocused && styles.inputCardFocused]}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="person-outline" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>ชื่อผู้ใช้งาน</Text>
-                <View style={[styles.cardInputWrapper, nameError && styles.cardInputWrapperError]}>
+                <Text style={styles.cardLabel}>Username</Text>
+                <View style={[styles.cardInputWrapper, nameError ? styles.cardInputWrapperError : null]}>
                   <TextInput
                     style={styles.cardInput}
-                    placeholder="กรอกชื่อผู้ใช้งาน"
+                    placeholder="Enter your username"
                     placeholderTextColor="#94A3B8"
                     value={name}
                     onChangeText={(text) => {
@@ -288,17 +288,17 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Card 3: รหัสผ่าน */}
+            {/* Card 3: Password */}
             <View style={[styles.inputCard, passwordFocused && styles.inputCardFocused]}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="lock-closed" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>รหัสผ่าน</Text>
-                <View style={[styles.cardInputWrapper, passwordError && styles.cardInputWrapperError]}>
+                <Text style={styles.cardLabel}>Password</Text>
+                <View style={[styles.cardInputWrapper, passwordError ? styles.cardInputWrapperError : null]}>
                   <TextInput
                     style={styles.cardInput}
-                    placeholder="กรอกรหัสผ่าน"
+                    placeholder="Enter password"
                     placeholderTextColor="#94A3B8"
                     value={password}
                     onChangeText={(text) => {
@@ -325,17 +325,17 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Card 4: ยืนยันรหัสอีกครั้ง */}
+            {/* Card 4: Confirm Password */}
             <View style={[styles.inputCard, confirmFocused && styles.inputCardFocused]}>
               <View style={styles.cardIconBadge}>
                 <Ionicons name="shield-checkmark" size={20} color="#0084FF" />
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.cardLabel}>ยืนยันรหัสอีกครั้ง</Text>
-                <View style={[styles.cardInputWrapper, confirmError && styles.cardInputWrapperError]}>
+                <Text style={styles.cardLabel}>Confirm Password</Text>
+                <View style={[styles.cardInputWrapper, confirmError ? styles.cardInputWrapperError : null]}>
                   <TextInput
                     style={styles.cardInput}
-                    placeholder="กรอกรหัสผ่านอีกครั้ง"
+                    placeholder="Confirm your password"
                     placeholderTextColor="#94A3B8"
                     value={confirmPassword}
                     onChangeText={(text) => {
@@ -363,7 +363,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Submit Button (สมัครใช้งาน ->) */}
+          {/* Submit Button */}
           <TouchableOpacity
             style={styles.submitButtonContainer}
             onPress={handleRegister}
@@ -393,7 +393,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 />
               </Svg>
               <View style={styles.submitButtonContent}>
-                <Text style={styles.submitButtonText}>สมัครใช้งาน</Text>
+                <Text style={styles.submitButtonText}>Sign Up</Text>
                 <Ionicons name="arrow-forward" size={19} color="#FFFFFF" style={styles.submitButtonIcon} />
               </View>
             </View>
@@ -403,12 +403,12 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.loginDividerContainer}>
             <View style={styles.dividerLine} />
             <View style={styles.loginTextRow}>
-              <Text style={styles.loginPromptText}>คุณมีบัญชีอยู่แล้วใช่ไหม? </Text>
+              <Text style={styles.loginPromptText}>Already have an account? </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Login')}
                 activeOpacity={0.7}
               >
-                <Text style={styles.loginLinkText}>ลงชื่อเข้าใช้</Text>
+                <Text style={styles.loginLinkText}>Sign In</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.dividerLine} />

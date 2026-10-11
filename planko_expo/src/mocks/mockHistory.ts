@@ -4,7 +4,7 @@ export const mockHistory: SessionPerformance[] = [
   {
     id: 1,
     userId: 1,
-    planName: 'สร้างแกนกลาง 7 วัน - Session 3',
+    planName: '7-Day Core Foundation - Session 3',
     score: 850,
     duration: 180, // 3 mins
     kcal: 45,
@@ -17,7 +17,7 @@ export const mockHistory: SessionPerformance[] = [
   {
     id: 2,
     userId: 1,
-    planName: 'สร้างแกนกลาง 7 วัน - Session 2',
+    planName: '7-Day Core Foundation - Session 2',
     score: 720,
     duration: 150,
     kcal: 38,
@@ -30,7 +30,7 @@ export const mockHistory: SessionPerformance[] = [
   {
     id: 3,
     userId: 1,
-    planName: 'สร้างแกนกลาง 7 วัน - Session 1',
+    planName: '7-Day Core Foundation - Session 1',
     score: 650,
     duration: 120,
     kcal: 30,
@@ -43,7 +43,7 @@ export const mockHistory: SessionPerformance[] = [
   {
     id: 4,
     userId: 1,
-    planName: 'กำหนดเอง - High Plank Endurance',
+    planName: 'Custom - High Plank Endurance',
     score: 540,
     duration: 90,
     kcal: 22,

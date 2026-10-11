@@ -1,18 +1,18 @@
 import { Posture, PostureCategory } from '../types';
 
 export const mockCategories: PostureCategory[] = [
-  { id: 1, name: 'พื้นฐาน' },
-  { id: 2, name: 'แกนกลางลำตัว' },
-  { id: 3, name: 'แขนและไหล่' },
-  { id: 4, name: 'ขั้นสูง' },
+  { id: 1, name: 'Basic' },
+  { id: 2, name: 'Core' },
+  { id: 3, name: 'Arms & Shoulders' },
+  { id: 4, name: 'Advanced' },
 ];
 
 export const mockPostures: Posture[] = [
   {
     id: 1,
     name: 'Standard Elbow Plank',
-    description: 'ท่าแพลงก์ศอกแบบมาตรฐาน วางศอกใต้ไหล่ เกร็งหน้าท้องและบั้นท้าย ลำตัวตรงขนานพื้น',
-    benefit: 'เสริมสร้างกล้ามเนื้อแกนกลางลำตัว (Core) ทั้งหมด และกระชับหน้าท้อง',
+    description: 'Standard elbow plank. Place elbows under shoulders, brace core and glutes, keep body straight.',
+    benefit: 'Strengthens total core muscles and tones the abdomen.',
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'fitness-center',
@@ -26,8 +26,8 @@ export const mockPostures: Posture[] = [
   {
     id: 2,
     name: 'High Plank (Full Plank)',
-    description: 'ท่าแพลงก์แบบเหยียดแขนตรง วางฝ่ามือใต้หัวไหล่ เกร็งแกนกลางและสะโพก',
-    benefit: 'เพิ่มความแข็งแรงของข้อมือ แขน หัวไหล่ และแกนกลาง',
+    description: 'Full plank with straight arms. Place hands directly under shoulders, brace core and hips.',
+    benefit: 'Enhances wrist, arm, shoulder, and core stability and strength.',
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'accessibility-new',
@@ -41,8 +41,8 @@ export const mockPostures: Posture[] = [
   {
     id: 3,
     name: 'Side Plank Left',
-    description: 'แพลงก์ตะแคงข้างซ้าย วางศอกซ้ายบนแผ่นรอง ลำตัวตรง ยกสะโพกขึ้นไม่ให้หย่อน',
-    benefit: 'เน้นกล้ามเนื้อหน้าท้องด้านข้าง (Obliques) และความมั่นคงของกระดูกสันหลัง',
+    description: 'Side plank on the left. Rest left forearm on mat, keep body in a straight line, lift hips.',
+    benefit: 'Targets the obliques and reinforces spinal stability.',
     difficulty: 'medium',
     postureCategory: mockCategories[1],
     iconName: 'fitness-center',
@@ -56,8 +56,8 @@ export const mockPostures: Posture[] = [
   {
     id: 4,
     name: 'Side Plank Right',
-    description: 'แพลงก์ตะแคงข้างขวา วางศอกขวาบนแผ่นรอง ยกสะโพกขึ้นและเกร็งหน้าท้องด้านข้าง',
-    benefit: 'สร้างสมดุลของกล้ามเนื้อเอวด้านขวาและความแข็งแรงของไหล่',
+    description: 'Side plank on the right. Rest right forearm on mat, elevate hips, and engage right obliques.',
+    benefit: 'Balances right side waist muscles and strengthens shoulder stability.',
     difficulty: 'medium',
     postureCategory: mockCategories[1],
     iconName: 'fitness-center',
@@ -71,8 +71,8 @@ export const mockPostures: Posture[] = [
   {
     id: 5,
     name: 'Plank with Arm Reach',
-    description: 'อยู่ในท่าแพลงก์ศอก สลับยกแขนข้างหนึ่งยื่นไปข้างหน้าโดยไม่ให้สะโพกเอียง',
-    benefit: 'ฝึก Anti-Rotation และความสมดุลของการถ่ายน้ำหนัก (CoP)',
+    description: 'In an elbow plank, alternate reaching one arm forward while keeping hips stable.',
+    benefit: 'Trains anti-rotation and weight transfer balance (CoP).',
     difficulty: 'hard',
     postureCategory: mockCategories[2],
     iconName: 'pan-tool',
@@ -86,8 +86,8 @@ export const mockPostures: Posture[] = [
   {
     id: 6,
     name: 'Knee Plank',
-    description: 'ท่าแพลงก์แบบวางเข่าบนแผ่นรอง เหมาะสำหรับผู้เริ่มต้นฝึกความแข็งแรงกล้ามเนื้อแกนกลาง',
-    benefit: 'ลดแรงกดที่หลังส่วนล่าง เหมาะสำหรับฟื้นฟูหรือเพิ่งเริ่มต้น',
+    description: 'Plank variation with knees resting on mat. Great for beginners building initial core endurance.',
+    benefit: 'Relieves lower back pressure; ideal for rehabilitation or beginners.',
     difficulty: 'easy',
     postureCategory: mockCategories[0],
     iconName: 'airline-seat-legroom-reduced',
@@ -101,8 +101,8 @@ export const mockPostures: Posture[] = [
   {
     id: 7,
     name: 'Dolphin Plank',
-    description: 'ตั้งศอก ดันสะโพกขึ้นเล็กน้อยคล้ายรูปตัว V คว่ำ แล้วลดระดับกลับมาแพลงก์',
-    benefit: 'เน้นหัวไหล่ หลังส่วนบน และแกนกลางลำตัวด้านบน',
+    description: 'From forearms, press hips up into an inverted V shape, then lower back to plank.',
+    benefit: 'Engages shoulders, upper back, and upper core.',
     difficulty: 'medium',
     postureCategory: mockCategories[2],
     iconName: 'sports-kabaddi',
@@ -111,8 +111,8 @@ export const mockPostures: Posture[] = [
   {
     id: 8,
     name: 'Dynamic Plank Tap',
-    description: 'ท่าแพลงก์เหยียดแขน สลับแตะปุ่มกด/เซนเซอร์ L1-L8 และ R1-R8 ตามจังหวะเกม',
-    benefit: 'เพิ่มความคล่องแคล่ว อัตราการเผาผลาญ และการทรงตัวระดับสูง',
+    description: 'High plank while alternately tapping L1-L8 and R1-R8 pads to rhythm notes.',
+    benefit: 'Boosts agility, metabolic burn, and advanced coordination.',
     difficulty: 'hard',
     postureCategory: mockCategories[3],
     iconName: 'touch-app',

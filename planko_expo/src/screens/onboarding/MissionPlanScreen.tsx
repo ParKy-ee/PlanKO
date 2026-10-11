@@ -26,13 +26,13 @@ interface Props {
 }
 
 const dayNames: { [key: number]: string } = {
-  1: 'จันทร์',
-  2: 'อังคาร',
-  3: 'พุธ',
-  4: 'พฤหัสบดี',
-  5: 'ศุกร์',
-  6: 'เสาร์',
-  7: 'อาทิตย์',
+  1: 'Mon',
+  2: 'Tue',
+  3: 'Wed',
+  4: 'Thu',
+  5: 'Fri',
+  6: 'Sat',
+  7: 'Sun',
 };
 
 export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
@@ -49,9 +49,9 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
     if (!selectedProgram) return;
     startMission(selectedProgram.id, selectedProgram.period);
     setModalVisible(false);
-    Alert.alert('สำเร็จ!', `คุณได้เลือกแผน "${selectedProgram.programName}" เรียบร้อยแล้ว`, [
+    Alert.alert('Success!', `You have selected the "${selectedProgram.programName}" plan`, [
       {
-        text: 'เริ่มฝึกเลย',
+        text: 'Start Training',
         onPress: () => navigation.replace('MainTabs', { screen: 'Home' }),
       },
     ]);
@@ -62,9 +62,9 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>เลือกแผนภารกิจ</Text>
+          <Text style={styles.title}>Select Mission Plan</Text>
           <Text style={styles.subtitle}>
-            เลือกโปรแกรมการฝึกที่ตรงกับเป้าหมายและความพร้อมของคุณ
+            Choose a workout program that fits your goals and fitness level
           </Text>
         </View>
 
@@ -83,7 +83,7 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.cardInfo}>
                 <Text style={styles.programName}>{prog.programName}</Text>
                 <Text style={styles.programPeriod}>
-                  ระยะเวลา: {prog.period} วัน
+                  Duration: {prog.period} days
                 </Text>
                 <Text style={styles.programType}>{prog.programType}</Text>
               </View>
@@ -106,7 +106,7 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
               <>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>
-                    แผน {selectedProgram.programName}
+                    {selectedProgram.programName}
                   </Text>
                   <TouchableOpacity
                     onPress={() => setModalVisible(false)}
@@ -120,26 +120,26 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.modalDesc}>{selectedProgram.description}</Text>
 
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>ใช้ระยะเวลา : </Text>
-                  <Text style={styles.infoValue}>{selectedProgram.period} วัน</Text>
+                  <Text style={styles.infoLabel}>Duration : </Text>
+                  <Text style={styles.infoValue}>{selectedProgram.period} days</Text>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>วันออกกำลังกาย : </Text>
+                  <Text style={styles.infoLabel}>Workout Days : </Text>
                   <Text style={styles.infoValue}>
                     {selectedProgram.workDays.map((d) => dayNames[d]).join(', ')}
                   </Text>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>วันพัก : </Text>
+                  <Text style={styles.infoLabel}>Rest Days : </Text>
                   <Text style={styles.infoValue}>
                     {selectedProgram.restDays.map((d) => dayNames[d]).join(', ')}
                   </Text>
                 </View>
 
                 {/* Example Posture Icons */}
-                <Text style={styles.previewTitle}>ตัวอย่างท่าฝึก</Text>
+                <Text style={styles.previewTitle}>Sample Postures</Text>
                 <View style={styles.previewIconsRow}>
                   <View style={styles.previewBox}>
                     <MaterialIcons name="accessibility-new" size={32} color={Colors.primary} />
@@ -158,7 +158,7 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
                   onPress={handleStartMission}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.startButtonText}>เริ่มต้นภารกิจนี้</Text>
+                  <Text style={styles.startButtonText}>Start This Mission</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   listContainer: {
-    gap: 16,
+    gap: 16 as any,
   },
   programCard: {
     height: 125,

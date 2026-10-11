@@ -5,8 +5,10 @@ export interface User {
   weight: number;
   height: number;
   age: number;
-  gender: string; // 'ผู้ชาย' | 'ผู้หญิง' | 'อื่นๆ' | 'male' | 'female' | 'other'
+  gender: string; // 'Male' | 'Female' | 'Other'
   avatarUrl?: string;
+  totalWorkoutCount?: number;
+  totalMinutes?: number;
 }
 
 export interface PostureCategory {
@@ -32,10 +34,10 @@ export interface Program {
   programName: string;
   programType: string;
   period: number; // e.g., 7, 14, 30 days
-  workDays: number[]; // 1 = จันทร์, ..., 7 = อาทิตย์
+  workDays: number[]; // 1 = Monday, ..., 7 = Sunday
   restDays: number[];
   description: string;
-  level: 'เริ่มต้น' | 'ปานกลาง' | 'ขั้นสูง';
+  level: 'Beginner' | 'Intermediate' | 'Advanced' | string;
   posturesCount: number;
 }
 

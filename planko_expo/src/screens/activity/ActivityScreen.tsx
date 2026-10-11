@@ -75,7 +75,7 @@ export const ActivityScreen: React.FC = () => {
             color="#FFFFFF"
             style={{ marginRight: 6 }}
           />
-          <Text style={styles.headerTitle}>กิจกรรม</Text>
+          <Text style={styles.headerTitle}>Activity</Text>
         </View>
 
         <View style={styles.headerPlaceholder} />
@@ -89,11 +89,11 @@ export const ActivityScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.subtitle}>
-          เลือกดูเมนูการฝึกที่คุณต้องการเริ่มต้นในวันนี้
+          Choose your workout mode to get started today
         </Text>
 
         <View style={styles.cardsList}>
-          {/* CARD 1: ตามแผนการ (Planned Workout) */}
+          {/* CARD 1: Planned Routine */}
           <TouchableOpacity
             style={styles.cardContainer}
             activeOpacity={0.9}
@@ -156,9 +156,9 @@ export const ActivityScreen: React.FC = () => {
 
               {/* Center: Title, Subtitle, Pill Badge */}
               <View style={styles.cardInfoCol}>
-                <Text style={styles.cardHeading}>ตามแผนการ</Text>
+                <Text style={styles.cardHeading}>Planned Routine</Text>
                 <Text style={styles.cardSubheading} numberOfLines={1}>
-                  {mission ? mission.programName : 'สร้างแกนกลาง 7 วัน'}
+                  {mission ? mission.programName : '7-Day Core Foundation'}
                 </Text>
 
                 <View style={styles.pillBadge}>
@@ -168,7 +168,7 @@ export const ActivityScreen: React.FC = () => {
                     color="#FFFFFF"
                     style={{ marginRight: 5 }}
                   />
-                  <Text style={styles.pillBadgeText}>7 วัน • มีแผนชัดเจน</Text>
+                  <Text style={styles.pillBadgeText}>7 Days • Structured Plan</Text>
                 </View>
               </View>
 
@@ -179,7 +179,7 @@ export const ActivityScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
 
-          {/* CARD 2: กำหนดเอง (Custom Workout) */}
+          {/* CARD 2: Custom Workout */}
           <TouchableOpacity
             style={styles.cardContainer}
             activeOpacity={0.9}
@@ -237,9 +237,9 @@ export const ActivityScreen: React.FC = () => {
 
               {/* Center: Title, Subtitle, Pill Badge */}
               <View style={styles.cardInfoCol}>
-                <Text style={styles.cardHeading}>กำหนดเอง</Text>
+                <Text style={styles.cardHeading}>Custom Workout</Text>
                 <Text style={styles.cardSubheading} numberOfLines={1}>
-                  ปรับแต่งเวลา ท่าฝึก และระดับความยาก
+                  Customize duration, postures, and difficulty
                 </Text>
 
                 <View style={styles.pillBadge}>
@@ -249,7 +249,7 @@ export const ActivityScreen: React.FC = () => {
                     color="#FFFFFF"
                     style={{ marginRight: 5 }}
                   />
-                  <Text style={styles.pillBadgeText}>อิสระในการฝึกของคุณ</Text>
+                  <Text style={styles.pillBadgeText}>Full Control Over Your Practice</Text>
                 </View>
               </View>
 

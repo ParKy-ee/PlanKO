@@ -17,13 +17,13 @@ import { Colors } from '../../theme/colors';
 export const CustomWorkoutScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [levelIndex, setLevelIndex] = useState<number>(2); // 0-4 (ระดับ 1-5)
+  const [levelIndex, setLevelIndex] = useState<number>(2); // 0-4 (Levels 1-5)
   const levels = [
-    { name: 'เริ่มต้น', sub: 'ฟื้นฟูกล้ามเนื้อ' },
-    { name: 'ง่าย', sub: 'เน้นความยืดหยุ่น' },
-    { name: 'ทั่วไป', sub: 'ฝึกประจำวัน' },
-    { name: 'ปานกลาง', sub: 'เผาผลาญไขมัน' },
-    { name: 'ขั้นสูง', sub: 'ท้าทายแกนกลาง' },
+    { name: 'Beginner', sub: 'Recovery' },
+    { name: 'Easy', sub: 'Flexibility' },
+    { name: 'General', sub: 'Daily Practice' },
+    { name: 'Medium', sub: 'Fat Burn' },
+    { name: 'Advanced', sub: 'Core Challenge' },
   ];
 
   const timeOptions = [15, 20, 30, 45, 60];
@@ -89,7 +89,7 @@ export const CustomWorkoutScreen: React.FC = () => {
         >
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>กำหนดเอง</Text>
+        <Text style={styles.headerTitle}>Custom Workout</Text>
         {/* Empty placeholder on the right (no calendar icon) */}
         <View style={styles.headerRightPlaceholder} />
       </View>
@@ -103,12 +103,12 @@ export const CustomWorkoutScreen: React.FC = () => {
       >
         {/* Main Big White Card */}
         <View style={styles.mainCard}>
-          {/* Row 1: ระดับ (Level) */}
+          {/* Row 1: Level */}
           <View style={styles.cardRow}>
             <View style={[styles.iconWrapper, { backgroundColor: '#E2F1FF' }]}>
               <MaterialIcons name="directions-run" size={26} color="#0084FF" />
             </View>
-            <Text style={styles.rowLabel}>ระดับ</Text>
+            <Text style={styles.rowLabel}>Level</Text>
 
             <View style={styles.levelSelectorPill}>
               <TouchableOpacity
@@ -148,12 +148,12 @@ export const CustomWorkoutScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Row 2: เวลาต่อท่า (Time per posture) */}
+          {/* Row 2: Duration per posture */}
           <View style={styles.cardRow}>
             <View style={[styles.iconWrapper, { backgroundColor: '#E6F8F0' }]}>
               <Ionicons name="time-outline" size={24} color="#10B981" />
             </View>
-            <Text style={styles.rowLabel}>เวลาต่อท่า</Text>
+            <Text style={styles.rowLabel}>Posture Time</Text>
 
             <View style={styles.timeSelectorPill}>
               <TouchableOpacity
@@ -165,7 +165,7 @@ export const CustomWorkoutScreen: React.FC = () => {
               </TouchableOpacity>
 
               <Text style={styles.timeMainText}>
-                {timeOptions[timeIndex]} วินาที
+                {timeOptions[timeIndex]}s
               </Text>
 
               <TouchableOpacity
@@ -178,12 +178,12 @@ export const CustomWorkoutScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Row 3: เวลาพัก (Rest time) */}
+          {/* Row 3: Rest time */}
           <View style={styles.cardRow}>
             <View style={[styles.iconWrapper, { backgroundColor: '#F0EAFF' }]}>
               <Ionicons name="timer-outline" size={24} color="#8B5CF6" />
             </View>
-            <Text style={styles.rowLabel}>เวลาพัก</Text>
+            <Text style={styles.rowLabel}>Rest Time</Text>
 
             <View style={styles.timeSelectorPill}>
               <TouchableOpacity
@@ -195,7 +195,7 @@ export const CustomWorkoutScreen: React.FC = () => {
               </TouchableOpacity>
 
               <Text style={styles.timeMainText}>
-                {restOptions[restIndex]} วินาที
+                {restOptions[restIndex]}s
               </Text>
 
               <TouchableOpacity
@@ -208,12 +208,12 @@ export const CustomWorkoutScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Row 4: แสดงตัวอย่างท่าทาง (Preview toggle) */}
+          {/* Row 4: Preview toggle */}
           <View style={[styles.cardRow, { marginBottom: 10 }]}>
             <View style={[styles.iconWrapper, { backgroundColor: '#FFF0E5' }]}>
               <Ionicons name="image" size={22} color="#F97316" />
             </View>
-            <Text style={styles.rowLabelLong}>แสดงตัวอย่างท่าทาง</Text>
+            <Text style={styles.rowLabelLong}>Show Posture Preview</Text>
 
             <View style={styles.togglePill}>
               <TouchableOpacity
@@ -230,7 +230,7 @@ export const CustomWorkoutScreen: React.FC = () => {
                     showPreview && styles.toggleOptionTextActive,
                   ]}
                 >
-                  แสดง
+                  Show
                 </Text>
               </TouchableOpacity>
 
@@ -248,7 +248,7 @@ export const CustomWorkoutScreen: React.FC = () => {
                     !showPreview && styles.toggleOptionTextActive,
                   ]}
                 >
-                  ไม่แสดง
+                  Hide
                 </Text>
               </TouchableOpacity>
             </View>
@@ -267,7 +267,7 @@ export const CustomWorkoutScreen: React.FC = () => {
                 color="#FFFFFF"
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.startButtonText}>เริ่ม</Text>
+              <Text style={styles.startButtonText}>Start</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -79,7 +79,7 @@ export const HomeScreen: React.FC = () => {
 
   // Extract unique categories
   const categories = [
-    { id: 0, name: 'ทั้งหมด' },
+    { id: 0, name: 'All' },
     ...Array.from(
       new Map(
         postures
@@ -116,8 +116,8 @@ export const HomeScreen: React.FC = () => {
           activeOpacity={0.8}
           onPress={() =>
             Alert.alert(
-              'การแจ้งเตือน',
-              'วันนี้คุณมีแผนฝึกแพลงก์ตามตารางเวลา 18:00 น. อย่าลืมมาฝึกนะ!'
+              'Notification',
+              'You have a scheduled plank workout today at 6:00 PM. Keep up the streak!'
             )
           }
         >
@@ -185,9 +185,9 @@ export const HomeScreen: React.FC = () => {
             {/* Center: Calorie Texts cleanly aligned without extra mini icons */}
             <View style={styles.calorieInfoCol}>
               <Text style={styles.calorieLabelTitle}>
-                จำนวนแคลอรี่ที่เผาผลาญ
+                Calories Burned
               </Text>
-              <Text style={styles.calorieLabelSub}>รวม</Text>
+              <Text style={styles.calorieLabelSub}>Total</Text>
 
               <View style={styles.calorieNumberRow}>
                 <Text style={styles.calorieNumber}>
@@ -213,7 +213,7 @@ export const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* 2. Progress / Quests Section (การพัฒนา - สูงสุด 4 รายการ) */}
+        {/* 2. Progress / Quests Section */}
         <View style={styles.sectionHeaderRow}>
           <View style={styles.sectionTitleRow}>
             <MaterialCommunityIcons
@@ -222,13 +222,13 @@ export const HomeScreen: React.FC = () => {
               color="#0084FF"
               style={{ marginRight: 6 }}
             />
-            <Text style={styles.sectionTitle}>การพัฒนา</Text>
+            <Text style={styles.sectionTitle}>Progress</Text>
           </View>
           <TouchableOpacity
             style={styles.seeAllBtn}
             onPress={() => setAllQuestsModalVisible(true)}
           >
-            <Text style={styles.seeAllText}>ดูทั้งหมด</Text>
+            <Text style={styles.seeAllText}>View All</Text>
             <Ionicons
               name="chevron-forward"
               size={15}
@@ -310,7 +310,7 @@ export const HomeScreen: React.FC = () => {
           })}
         </ScrollView>
 
-        {/* 3. Posture Library Section (ข้อมูลท่า) */}
+        {/* 3. Posture Library Section */}
         <View style={[styles.sectionHeaderRow, { marginTop: 22 }]}>
           <View style={styles.sectionTitleRow}>
             <Ionicons
@@ -319,13 +319,13 @@ export const HomeScreen: React.FC = () => {
               color="#0084FF"
               style={{ marginRight: 6 }}
             />
-            <Text style={styles.sectionTitle}>ข้อมูลท่า</Text>
+            <Text style={styles.sectionTitle}>Posture Library</Text>
           </View>
           <TouchableOpacity
             style={styles.seeAllBtn}
             onPress={() => navigation.navigate('PostureList')}
           >
-            <Text style={styles.seeAllText}>ดูทั้งหมด</Text>
+            <Text style={styles.seeAllText}>View All</Text>
             <Ionicons
               name="chevron-forward"
               size={15}
@@ -396,16 +396,16 @@ export const HomeScreen: React.FC = () => {
                   <View style={styles.postureTagsRow}>
                     <View style={styles.postureTagPill}>
                       <Text style={styles.postureTagText}>
-                        {posture.postureCategory?.name || 'พื้นฐาน'}
+                        {posture.postureCategory?.name || 'Basic'}
                       </Text>
                     </View>
                     <View style={[styles.postureTagPill, styles.difficultyPill]}>
                       <Text style={[styles.postureTagText, styles.difficultyTagText]}>
                         {posture.id === 2
-                          ? 'แขนและไหล่'
+                          ? 'Arms & Shoulders'
                           : posture.id === 5
-                          ? 'แขนและไหล่'
-                          : 'แกนกลางลำตัว'}
+                          ? 'Arms & Shoulders'
+                          : 'Core'}
                       </Text>
                     </View>
                   </View>
@@ -418,7 +418,7 @@ export const HomeScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* Modal แสดงรายการการพัฒนาทั้งหมด */}
+      {/* Modal displaying all quests */}
       <Modal
         visible={allQuestsModalVisible}
         transparent
@@ -430,9 +430,9 @@ export const HomeScreen: React.FC = () => {
             {/* Modal Header */}
             <View style={styles.modalHeaderRow}>
               <View>
-                <Text style={styles.modalHeaderTitle}>การพัฒนาและเป้าหมาย</Text>
+                <Text style={styles.modalHeaderTitle}>Progress & Goals</Text>
                 <Text style={styles.modalHeaderSubtitle}>
-                  เป้าหมายทั้งหมด ({quests.length} รายการ)
+                  All Goals ({quests.length} items)
                 </Text>
               </View>
               <TouchableOpacity
@@ -495,7 +495,7 @@ export const HomeScreen: React.FC = () => {
                                 color="#10B981"
                               />
                               <Text style={styles.completedBadgeText}>
-                                สำเร็จ
+                                Completed
                               </Text>
                             </View>
                           ) : (
@@ -511,7 +511,7 @@ export const HomeScreen: React.FC = () => {
                                   { color: theme.color },
                                 ]}
                               >
-                                {quest.categoryName || 'เป้าหมาย'}
+                                {quest.categoryName || 'Goal'}
                               </Text>
                             </View>
                           )}
