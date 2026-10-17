@@ -17,8 +17,9 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { RootStackParamList } from '../../navigation/types';
 import { useApp } from '../../context/AppContext';
 import { mockBeatmap, mockBiofeedbackScenarios } from '../../mocks/mockBeatmap';
+import { SENSOR_SOURCE } from '../../config/sensor';
 import { Posture } from '../../types';
-import { getPressedSensorId } from './sensorMessage';
+import { getPressedSensorId, parseSensorEvent } from './sensorMessage';
 
 type PlankWorkoutRouteProp = RouteProp<RootStackParamList, 'PlankWorkout'>;
 type PlankWorkoutNavigationProp = NativeStackNavigationProp<
@@ -150,6 +151,7 @@ export const PlankWorkoutScreen: React.FC = () => {
   const hitRatingScale = useRef(new Animated.Value(0.7)).current;
   const hitRatingOpacity = useRef(new Animated.Value(0)).current;
   const restTransition = useRef(new Animated.Value(0)).current;
+  const hasReceivedRealBioRef = useRef(false);
 
   const activePostureList: Posture[] = postures.slice(0, 4);
   const currentPosture = activePostureList[currentPostureIndex] || postures[0];
@@ -385,12 +387,14 @@ export const PlankWorkoutScreen: React.FC = () => {
 
       setTotalElapsedTime((previous) => {
         const nextTime = previous + 1;
-        const matchedScenario = mockBiofeedbackScenarios.find(
-          (scenario) => scenario.time === nextTime % 20,
-        );
+        if (SENSOR_SOURCE !== 'mqtt' && !hasReceivedRealBioRef.current) {
+          const matchedScenario = mockBiofeedbackScenarios.find(
+            (scenario) => scenario.time === nextTime % 20,
+          );
 
-        if (matchedScenario) {
-          setBiofeedback(matchedScenario);
+          if (matchedScenario) {
+            setBiofeedback(matchedScenario);
+          }
         }
 
         return nextTime;
@@ -452,25 +456,59 @@ export const PlankWorkoutScreen: React.FC = () => {
   useEffect(() => {
     const unsubscribe = subscribeToWebSocketEvents((storedEvent) => {
       const raw = storedEvent.raw;
-      console.log('[ESP32 -> PlanKO WS Event Raw]:', raw);
+      console.log('[PlanKO Event Raw]:', raw);
 
-      const sensorId = getPressedSensorId(raw);
+      const parsedEvent = parseSensorEvent(raw);
+
+      // 1. Mat Pressure / Pad Tap Event
+      const sensorId = parsedEvent?.pressedPadId || getPressedSensorId(raw);
       if (sensorId) {
         const isGameActive = canReceiveSensorRef.current;
         console.log(`[PAD EVENT DETECTED] Button: ${sensorId} | Active Game: ${isGameActive ? 'YES (Score/Rhythm)' : 'NO (Ignored)'}`);
         if (isGameActive) handlePadTapRef.current(sensorId);
-        return;
       }
 
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed.status === 'connected') {
-          console.log('[ESP32 Device Ready]:', parsed);
-        } else if (parsed.type === 'heartRate') {
-          console.log(`[ESP32 Biometrics]: BPM: ${parsed.bpm} (Avg: ${parsed.avgBpm}) | SpO2: ${parsed.spo2Approx}% | Finger: ${parsed.fingerDetected}`);
+      // 2. Biometrics (Heart Rate & SpO2 from planko/bio)
+      if (parsedEvent?.bio) {
+        hasReceivedRealBioRef.current = true;
+        const { bpm, avgBpm, spo2 } = parsedEvent.bio;
+        const currentBpm = bpm ?? avgBpm;
+        console.log(`[Bio Event]: BPM: ${currentBpm} | SpO2: ${spo2}%`);
+        setBiofeedback((prev) => ({
+          ...prev,
+          ...(currentBpm !== undefined ? { bpm: currentBpm } : {}),
+          ...(spo2 !== undefined ? { spo2: spo2 } : {}),
+          statusText:
+            currentBpm && currentBpm > 145
+              ? 'ชีพจรสูงเกินเกณฑ์ ผ่อนลมหายใจ'
+              : 'สัญญาณชีพจรปกติ',
+          statusType: currentBpm && currentBpm > 145 ? 'alert' : 'normal',
+        }));
+      }
+
+      // 3. IMU Balance & CoP (from planko/imu)
+      if (parsedEvent?.imu) {
+        const { roll, copOffset } = parsedEvent.imu;
+        const computedCop =
+          copOffset !== undefined
+            ? copOffset
+            : roll !== undefined
+              ? Math.max(-1, Math.min(1, roll / 30))
+              : undefined;
+
+        if (computedCop !== undefined) {
+          const leftP = Math.round(Math.max(0, Math.min(100, 50 - computedCop * 50)));
+          const rightP = 100 - leftP;
+          const isTilted = Math.abs(computedCop) > 0.35;
+          setBiofeedback((prev) => ({
+            ...prev,
+            copOffset: computedCop,
+            leftPressure: leftP,
+            rightPressure: rightP,
+            statusText: isTilted ? 'น้ำหนักเอียง ปรับจุดศูนย์ถ่วง (CoP)' : 'สมดุลร่างกายดีเยี่ยม',
+            statusType: isTilted ? 'warning' : 'success',
+          }));
         }
-      } catch {
-        // Ignore non-JSON messages that are not pad presses.
       }
     });
 

@@ -162,20 +162,8 @@ export const dataStorage = {
 
   receiveWebSocketMessage(raw: string): Promise<StoredWebSocketEvent> {
     const event = parseEvent(raw);
-    const operation = websocketEventQueue.then(async () => {
-      const latestKey = `${WEBSOCKET_LATEST_PREFIX}${encodeURIComponent(event.type)}`;
-      const previousHistory = (await this.getItem<StoredWebSocketEvent[]>(WEBSOCKET_HISTORY_KEY)) ?? [];
-      await this.setItem(latestKey, event);
-      await this.setItem(
-        WEBSOCKET_HISTORY_KEY,
-        [...previousHistory, event].slice(-MAX_WEBSOCKET_HISTORY),
-      );
-      notifyListeners(event);
-      return event;
-    });
-
-    websocketEventQueue = operation.then(() => undefined, () => undefined);
-    return operation;
+    notifyListeners(event);
+    return Promise.resolve(event);
   },
 
   connectWebSocket(

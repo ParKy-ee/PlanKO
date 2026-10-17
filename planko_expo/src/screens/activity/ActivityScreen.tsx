@@ -30,7 +30,7 @@ const CARD_HEIGHT = 148;
 
 export const ActivityScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { mission } = useApp();
+  const { mission, sensorConnection } = useApp();
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -88,6 +88,31 @@ export const ActivityScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* Sensor MQTT Status Badge */}
+        <View style={styles.sensorStatusBanner}>
+          <View
+            style={[
+              styles.sensorStatusDot,
+              {
+                backgroundColor:
+                  sensorConnection === 'connected'
+                    ? '#00E676'
+                    : sensorConnection === 'connecting'
+                      ? '#FFAB00'
+                      : '#B0BEC5',
+              },
+            ]}
+          />
+          <Text style={styles.sensorStatusText}>
+            MQTT:{' '}
+            {sensorConnection === 'connected'
+              ? 'เชื่อมต่อ broker.emqx.io แล้ว'
+              : sensorConnection === 'connecting'
+                ? 'กำลังเชื่อมต่อ MQTT...'
+                : 'รอการเชื่อมต่อ MQTT'}
+          </Text>
+        </View>
+
         <Text style={styles.subtitle}>
           เลือกดูเมนูการฝึกที่คุณต้องการเริ่มต้นในวันนี้
         </Text>
@@ -432,5 +457,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
+  },
+  sensorStatusBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  sensorStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 7,
+  },
+  sensorStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#455A64',
   },
 });

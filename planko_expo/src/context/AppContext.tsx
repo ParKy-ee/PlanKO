@@ -12,8 +12,9 @@ import { mockPrograms, initialMockMission } from '../mocks/mockPrograms';
 import { mockPostures } from '../mocks/mockPostures';
 import { mockQuests } from '../mocks/mockQuests';
 import { mockHistory } from '../mocks/mockHistory';
-import { SENSOR_WS_URL } from '../config/sensor';
+import { SENSOR_WS_URL, SENSOR_SOURCE, MQTT_CONFIG } from '../config/sensor';
 import { dataStorage } from '../services/dataStorage';
+import { connectMqtt } from '../services/mqttClient';
 import type {
   ApiRequestOptions,
   StoredWebSocketEvent,
@@ -108,6 +109,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // Keep the sensor stream alive across all app screens.
   useEffect(() => {
+    if (SENSOR_SOURCE === 'mqtt' && MQTT_CONFIG.enabled) {
+      console.log(`[PlanKO] Connecting to MQTT broker at ${MQTT_CONFIG.host}:${MQTT_CONFIG.port}...`);
+      return connectMqtt({
+        onStatusChange: setSensorConnection,
+        onError: (error) => console.warn('[PlanKO-MQTT] Connection error:', error),
+      });
+    }
+
     if (!SENSOR_WS_URL) return;
 
     return dataStorage.connectWebSocket(SENSOR_WS_URL, {
