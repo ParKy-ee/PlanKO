@@ -16,7 +16,7 @@ let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const connectMqtt = (
   handlers: MqttHandlers = {},
-  retryDelayMs = 3000,
+  retryDelayMs = 5000,
 ): (() => void) => {
   active = true;
 
@@ -84,7 +84,7 @@ export const connectMqtt = (
     };
 
     const connectOptions: Paho.ConnectionOptions = {
-      timeout: 5,
+      timeout: 15,
       keepAliveInterval: 30,
       cleanSession: true,
       useSSL: MQTT_CONFIG.useSSL,

@@ -13,9 +13,9 @@ export const MQTT_CONFIG = {
   enabled: true,
   // EMQX Public Broker (WebSocket support: 8083 for ws, 8084 for wss)
   host: 'broker.emqx.io',
-  port: 8083,
+  port: 8084,
   path: '/mqtt',
-  useSSL: false,
+  useSSL: true,
   clientIdPrefix: 'planko_mobile_',
   topics: [
     'planko/#',
