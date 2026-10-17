@@ -70,10 +70,10 @@ export const MissionPlanScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Program Cards */}
         <View style={styles.listContainer}>
-          {programs.map((prog) => (
+          {programs.map((prog, index) => (
             <TouchableOpacity
               key={prog.id}
-              style={styles.programCard}
+              style={[styles.programCard, index < programs.length - 1 && styles.programCardSpacing]}
               activeOpacity={0.9}
               onPress={() => handleOpenDetail(prog)}
             >
@@ -194,7 +194,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   listContainer: {
-    gap: 16 as any,
+  },
+  programCardSpacing: {
+    marginBottom: 16,
   },
   programCard: {
     height: 125,

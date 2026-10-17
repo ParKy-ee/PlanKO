@@ -1,0 +1,23 @@
+{
+  "mqtt": {
+    "host": "broker.emqx.io",
+    "port": 1883,
+    "topic": "planko/imu",
+    "qos": 0
+  },
+  "bridge": {
+    "host": "0.0.0.0",
+    "port": 8765,
+    "path": "/ws"
+  },
+  "nodes": [1, 2, 3],
+  "staleAfterSeconds": 2.5,
+  "accelUnit": "g",
+  "gyroUnit": "rad/s",
+  "model": {
+    "bundle": "pose_model_lumbar_flexion_extension_20261010/model_bundle.joblib",
+    "mountSite": "lumbar",
+    "bodyPart": "lumbar",
+    "side": "center"
+  }
+}

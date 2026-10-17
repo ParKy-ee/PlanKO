@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  type DimensionValue,
+  type ViewStyle,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,9 +16,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { RootStackParamList } from '../../navigation/types';
 import { useApp } from '../../context/AppContext';
-import { mockBeatmap, mockBiofeedbackScenarios } from '../../mocks/mockBeatmap';
+import { mockBeatmap } from '../../mocks/mockBeatmap';
+import {
+  connectGameModelBridge,
+  INITIAL_GAME_MODEL_FRAME,
+} from '../../services/gameModelBridge';
+import type { BridgeConnectionStatus, GameSensorFrame } from '../../types/gameModel';
 import { Posture } from '../../types';
-import { getPressedSensorId } from './sensorMessage';
 
 type PlankWorkoutRouteProp = RouteProp<RootStackParamList, 'PlankWorkout'>;
 type PlankWorkoutNavigationProp = NativeStackNavigationProp<
@@ -54,6 +58,63 @@ const RHYTHM_LOOK_AHEAD = 1;
 const RHYTHM_HIT_WINDOW = 0.2;
 const RHYTHM_GOOD_WINDOW = 0.12;
 const RING_START_SCALE = 2.35;
+const NODE_ACTION_LABELS: Record<string, string> = {
+  lumbar_flexion: 'ก้มหลัง',
+  lumbar_extension: 'แอ่นหลัง',
+  unknown: 'รอข้อมูล',
+};
+const NODE_STAGE_LABELS: Record<string, string> = {
+  neutral: 'ท่ากลาง',
+  approaching: 'กำลังเคลื่อนไหว',
+  holding: 'ค้างท่า',
+  returning: 'กำลังกลับ',
+  unknown: 'กำลังประเมิน',
+};
+const NODE_REASON_LABELS: Record<string, string> = {
+  waiting_for_imu: 'ยังไม่มีข้อมูลจาก node',
+  warming_up: 'กำลังเก็บข้อมูล 0.5 วินาที',
+  calibration_required: 'ต้อง calibrate node ก่อน',
+  calibration_method_version_unavailable: 'เวอร์ชัน calibration ไม่ตรงกับ model',
+  mock_sample: 'ข้อมูลจำลอง',
+  low_action_score: 'คะแนน model ต่ำกว่าค่ากำหนด',
+  low_phase_score: 'คะแนน phase model ต่ำกว่าค่ากำหนด',
+  confirming_holding: 'กำลังตรวจสอบว่าค้างท่าครบเวลา',
+  duplicate_or_invalid_sample: 'sample ซ้ำหรือไม่ถูกต้อง',
+};
+
+const getNodeActionLabel = (node: GameSensorFrame['nodes'][number]) =>
+  node.status === 'live'
+    ? NODE_ACTION_LABELS[node.prediction.action] || node.prediction.action
+    : 'รอข้อมูล';
+
+const getNodeStageLabel = (node: GameSensorFrame['nodes'][number]) =>
+  node.status === 'live'
+    ? NODE_STAGE_LABELS[node.prediction.stage] || node.prediction.stage
+    : 'รอข้อมูล';
+
+const getNodeMotionSummary = (node: GameSensorFrame['nodes'][number]) => {
+  const telemetry = node.telemetry;
+  if (!telemetry) return null;
+  const acceleration = telemetry.accel
+    ? telemetry.accel.map((value) => value.toFixed(2)).join('/')
+    : '--/--/--';
+  return `A ${acceleration} · P/R/Y ${telemetry.pitch.toFixed(0)}/${telemetry.roll.toFixed(0)}/${telemetry.yaw.toFixed(0)}°`;
+};
+
+const getNodeReasonLabel = (node: GameSensorFrame['nodes'][number]) => {
+  if (node.status === 'missing') return 'ยังไม่พบ node นี้';
+  if (node.status === 'stale') return 'ข้อมูลเก่า';
+  if (node.missingFields.length) {
+    return `ข้อมูลไม่ครบ: ${node.missingFields.join(', ')}`;
+  }
+  if (NODE_REASON_LABELS[node.prediction.reason]) {
+    return NODE_REASON_LABELS[node.prediction.reason];
+  }
+  if (!node.prediction.reason && node.prediction.score !== null) {
+    return 'ได้รับผลจาก model แล้ว';
+  }
+  return node.prediction.reason;
+};
 
 type RhythmTarget = {
   buttonId: string;
@@ -104,8 +165,6 @@ export const PlankWorkoutScreen: React.FC = () => {
   const {
     postures,
     addSessionPerformance,
-    sensorConnection,
-    subscribeToWebSocketEvents,
   } = useApp();
   const { width } = useWindowDimensions();
   const boardScale = Math.min(1.65, Math.max(0.72, (width / 568) * 1.15));
@@ -139,7 +198,9 @@ export const PlankWorkoutScreen: React.FC = () => {
   const [stepElapsedTime, setStepElapsedTime] = useState(0);
   const [lastHitRating, setLastHitRating] = useState<string | null>(null);
   const [lastHitPadId, setLastHitPadId] = useState<string | null>(null);
-  const [biofeedback, setBiofeedback] = useState(mockBiofeedbackScenarios[0]);
+  const [gameFrame, setGameFrame] = useState<GameSensorFrame>(INITIAL_GAME_MODEL_FRAME);
+  const [bridgeStatus, setBridgeStatus] = useState<BridgeConnectionStatus>('connecting');
+  const [bridgeError, setBridgeError] = useState<string | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [rhythmTime, setRhythmTime] = useState(0);
   const [handledRhythmNotes, setHandledRhythmNotes] = useState<Set<string>>(
@@ -165,11 +226,15 @@ export const PlankWorkoutScreen: React.FC = () => {
     : stepElapsedTime;
   const workoutProgressPercent = (
     String(Math.round(workoutProgress * 100)) + '%'
-  ) as DimensionValue;
+  ) as ViewStyle['width'];
   const restOverlayOpacity = restTransition.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 0.3],
   });
+  const liveBio = gameFrame.nodes
+    .filter((node) => node.status === 'live' && node.telemetry?.bio.finger)
+    .map((node) => node.telemetry?.bio)
+    .find((bio) => bio && (bio.bpm !== null || bio.spo2 !== null));
 
   useEffect(() => {
     setStepElapsedTime(0);
@@ -385,14 +450,6 @@ export const PlankWorkoutScreen: React.FC = () => {
 
       setTotalElapsedTime((previous) => {
         const nextTime = previous + 1;
-        const matchedScenario = mockBiofeedbackScenarios.find(
-          (scenario) => scenario.time === nextTime % 20,
-        );
-
-        if (matchedScenario) {
-          setBiofeedback(matchedScenario);
-        }
-
         return nextTime;
       });
 
@@ -444,37 +501,14 @@ export const PlankWorkoutScreen: React.FC = () => {
     showHitRating('BAD', padId);
   };
 
-  const handlePadTapRef = useRef(handlePadTap);
-  handlePadTapRef.current = handlePadTap;
-  const canReceiveSensorRef = useRef(!isPaused && !isResting && !isFinished);
-  canReceiveSensorRef.current = !isPaused && !isResting && !isFinished;
-
   useEffect(() => {
-    const unsubscribe = subscribeToWebSocketEvents((storedEvent) => {
-      const raw = storedEvent.raw;
-      console.log('[ESP32 -> PlanKO WS Event Raw]:', raw);
-
-      const sensorId = getPressedSensorId(raw);
-      if (sensorId) {
-        const isGameActive = canReceiveSensorRef.current;
-        console.log(`[PAD EVENT DETECTED] Button: ${sensorId} | Active Game: ${isGameActive ? 'YES (Score/Rhythm)' : 'NO (Ignored)'}`);
-        if (isGameActive) handlePadTapRef.current(sensorId);
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed.status === 'connected') {
-          console.log('[ESP32 Device Ready]:', parsed);
-        } else if (parsed.type === 'heartRate') {
-          console.log(`[ESP32 Biometrics]: BPM: ${parsed.bpm} (Avg: ${parsed.avgBpm}) | SpO2: ${parsed.spo2Approx}% | Finger: ${parsed.fingerDetected}`);
-        }
-      } catch {
-        // Ignore non-JSON messages that are not pad presses.
-      }
-    });
-
-    return unsubscribe;
+    return connectGameModelBridge(
+      setGameFrame,
+      (status, error) => {
+        setBridgeStatus(status);
+        setBridgeError(error || null);
+      },
+    );
   }, []);
 
   const handleSaveAndExit = () => {
@@ -491,7 +525,7 @@ export const PlankWorkoutScreen: React.FC = () => {
       kcal: calculatedKcal,
       accuracy,
       maxCombo: maxCombo || 12,
-      avgBpm: biofeedback.bpm,
+      avgBpm: liveBio?.bpm ?? 0,
       postureHits: combo || 16,
     });
 
@@ -534,6 +568,7 @@ export const PlankWorkoutScreen: React.FC = () => {
             width: padSize,
             height: padSize,
             borderRadius: padSize / 2,
+          marginHorizontal: 5 * scale,
           },
           isRatingPad && styles.padButtonRatingTarget,
         ]}
@@ -659,7 +694,10 @@ export const PlankWorkoutScreen: React.FC = () => {
           <View style={styles.gameHud}>
             <Text style={styles.comboText}>combo {combo || 0}x</Text>
             <Text style={styles.pointsText}>{score || 0} Point</Text>
-            <Text style={styles.pointsText}>Sensor: {sensorConnection}</Text>
+            <View>
+              <Text style={styles.pointsText}>MQTT: {gameFrame.mqttStatus}</Text>
+              <Text style={styles.pointsText}>Bridge: {bridgeStatus}</Text>
+            </View>
             <View style={styles.settingsBadge}>
               <Ionicons name="settings" size={24} color="#B7B7B7" />
             </View>
@@ -674,15 +712,15 @@ export const PlankWorkoutScreen: React.FC = () => {
             </Text>
           </View>
 
-          <View style={[styles.playField, { gap: 6 }]}>
+          <View style={styles.playField}>
             <View
               style={[
                 styles.sensorGroup,
-                { width: 112 * boardScale, gap: 10 * boardScale },
+                { width: 112 * boardScale, marginHorizontal: 3 * boardScale },
               ]}
             >
-              {leftSensorRows.map((row) => (
-                <View key={row.join('-')} style={styles.sensorRow}>
+              {leftSensorRows.map((row, index) => (
+                <View key={row.join('-')} style={[styles.sensorRow, index < leftSensorRows.length - 1 && styles.sensorRowSpacing]}>
                   {row.map((padId) => renderPad(padId))}
                 </View>
               ))}
@@ -691,50 +729,59 @@ export const PlankWorkoutScreen: React.FC = () => {
             <View
               style={[
                 styles.centerLane,
-                { width: 158 * boardScale, gap: 8 * boardScale },
+                { width: 208 * boardScale, marginHorizontal: 3 * boardScale },
               ]}
             >
               <View
                 style={[
                   styles.bioCard,
                   {
-                    width: 150 * boardScale,
-                    height: 55 * boardScale,
+                    width: 200 * boardScale,
+                    height: 110 * boardScale,
                     borderRadius: 9 * boardScale,
-                    paddingHorizontal: 13 * boardScale,
+                    paddingHorizontal: 8 * boardScale,
                     paddingVertical: 5 * boardScale,
+                    marginBottom: 8 * boardScale,
                   },
                 ]}
-                >
-                  <View style={styles.bioRow}>
-                    <Ionicons name="heart-outline" size={16} color="#F13D48" />
-                    <Text
-                      style={[styles.bioValue, { fontSize: 12 * boardScale }]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.8}
-                    >
-                      {biofeedback.bpm} BPM
+              >
+                <View style={styles.modelPanelHeader}>
+                  <Text style={[styles.modelPanelTitle, { fontSize: 9 * boardScale }]}>IMU MODEL</Text>
+                  <Text style={[styles.bioSmallValue, { fontSize: 8 * boardScale }]} numberOfLines={1}>
+                    {gameFrame.model.versions[0] || gameFrame.model.bundle.split('/')[0]}
+                  </Text>
+                </View>
+                <Text style={[styles.bioSmallValue, { fontSize: 8 * boardScale }]} numberOfLines={1}>
+                  BPM {liveBio?.bpm ?? '--'}  SpO₂ {liveBio?.spo2 ?? '--'}  |  Pressure {gameFrame.pressure?.raw ?? '--'}
+                </Text>
+                {gameFrame.nodes.map((node) => (
+                  <View key={node.nodeId} style={styles.nodeResultRow}>
+                    <Text style={[styles.nodeResultText, { fontSize: 8 * boardScale }]} numberOfLines={1}>
+                      N{node.nodeId} {node.status.toUpperCase()} · {getNodeActionLabel(node)} · {getNodeStageLabel(node)}
+                      {node.status === 'live' && node.prediction.score !== null ? ` · ${node.prediction.score.toFixed(2)}` : ''}
+                    </Text>
+                    {node.telemetry && (
+                      <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
+                        {getNodeMotionSummary(node)}
+                      </Text>
+                    )}
+                    <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
+                      {getNodeReasonLabel(node)}
                     </Text>
                   </View>
-                  <View style={styles.bioRow}>
-                    <Ionicons name="keypad-outline" size={12} color="#514BFF" />
-                    <Text
-                      style={[styles.bioSmallValue, { fontSize: 11 * boardScale }]}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.8}
-                    >
-                      {biofeedback.spo2}%
-                    </Text>
-                  </View>
+                ))}
+                {(bridgeError || gameFrame.mqttError) && (
+                  <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
+                    {bridgeError || gameFrame.mqttError}
+                  </Text>
+                )}
               </View>
 
-              <View style={[styles.centerSensorGrid, { gap: 8 * boardScale } as any]}>
-                {centerSensorRows.map((row) => (
+              <View style={styles.centerSensorGrid}>
+                {centerSensorRows.map((row, index) => (
                   <View
                     key={row.join('-')}
-                    style={[styles.centerSensorRow, { gap: 12 * boardScale } as any]}
+                    style={[styles.centerSensorRow, index < centerSensorRows.length - 1 && { marginBottom: 8 * boardScale }]}
                   >
                     {row.map((padId) => renderPad(padId, boardScale))}
                   </View>
@@ -745,11 +792,11 @@ export const PlankWorkoutScreen: React.FC = () => {
             <View
               style={[
                 styles.sensorGroup,
-                { width: 112 * boardScale, gap: 10 * boardScale },
+                { width: 112 * boardScale, marginHorizontal: 3 * boardScale },
               ]}
             >
-              {rightSensorRows.map((row) => (
-                <View key={row.join('-')} style={styles.sensorRow}>
+              {rightSensorRows.map((row, index) => (
+                <View key={row.join('-')} style={[styles.sensorRow, index < rightSensorRows.length - 1 && styles.sensorRowSpacing]}>
                   {row.map((padId) => renderPad(padId))}
                 </View>
               ))}
@@ -1057,27 +1104,27 @@ const styles = StyleSheet.create({
   },
   sensorGroup: {
     width: 112,
-    gap: 10,
   },
   sensorRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  sensorRowSpacing: {
+    marginBottom: 10,
+  },
   centerLane: {
-    width: 158,
+    width: 208,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
   },
   bioCard: {
-    width: 150,
-    height: 55,
+    width: 200,
+    height: 110,
     borderRadius: 9,
     backgroundColor: '#E6E6E6',
     paddingHorizontal: 13,
     paddingVertical: 5,
     justifyContent: 'center',
-    gap: 1,
   },
   bioRow: {
     flexDirection: 'row',
@@ -1095,6 +1142,28 @@ const styles = StyleSheet.create({
     color: '#202020',
     fontSize: 11,
     fontWeight: '700',
+  },
+  modelPanelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 4,
+  },
+  modelPanelTitle: {
+    color: '#0789EE',
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  nodeResultRow: {
+    width: '100%',
+  },
+  nodeResultText: {
+    color: '#202020',
+    fontWeight: '800',
+  },
+  nodeResultReason: {
+    color: '#555555',
+    fontWeight: '500',
   },
   centerPads: {
     flexDirection: 'row',

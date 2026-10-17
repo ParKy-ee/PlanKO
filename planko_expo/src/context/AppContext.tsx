@@ -12,13 +12,8 @@ import { mockPrograms, initialMockMission } from '../mocks/mockPrograms';
 import { mockPostures } from '../mocks/mockPostures';
 import { mockQuests } from '../mocks/mockQuests';
 import { mockHistory } from '../mocks/mockHistory';
-import { SENSOR_WS_URL } from '../config/sensor';
 import { dataStorage } from '../services/dataStorage';
-import type {
-  ApiRequestOptions,
-  StoredWebSocketEvent,
-  WebSocketStatus,
-} from '../services/dataStorage';
+import type { ApiRequestOptions } from '../services/dataStorage';
 
 interface AppContextType {
   user: User;
@@ -30,7 +25,6 @@ interface AppContextType {
   quests: Quest[];
   history: SessionPerformance[];
   totalCalories: number;
-  sensorConnection: WebSocketStatus | 'off';
   login: (email: string, pass: string) => boolean;
   register: (name: string, email: string, pass: string) => boolean;
   logout: () => void;
@@ -40,7 +34,6 @@ interface AppContextType {
   requestApi: <T>(cacheKey: string, request: () => Promise<T>, options?: ApiRequestOptions) => Promise<T>;
   requestJson: <T>(cacheKey: string, url: string, init?: RequestInit, options?: ApiRequestOptions) => Promise<T>;
   getCachedApiData: <T>(cacheKey: string) => Promise<T | null>;
-  subscribeToWebSocketEvents: (listener: (event: StoredWebSocketEvent) => void) => () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -64,16 +57,11 @@ const requestJson = <T,>(cacheKey: string, url: string, init?: RequestInit, opti
   dataStorage.requestJson<T>(cacheKey, url, init, options);
 
 const getCachedApiData = <T,>(cacheKey: string) => dataStorage.getApiCache<T>(cacheKey);
-const subscribeToWebSocketEvents = (listener: (event: StoredWebSocketEvent) => void) =>
-  dataStorage.subscribeToWebSocketEvents(listener);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>(initialMockUser);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
-  const [sensorConnection, setSensorConnection] = useState<WebSocketStatus | 'off'>(
-    SENSOR_WS_URL ? 'connecting' : 'off',
-  );
   const [mission, setMission] = useState<Mission | null>(initialMockMission);
   const [programs] = useState<Program[]>(mockPrograms);
   const [postures] = useState<Posture[]>(mockPostures);
@@ -104,16 +92,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadStoredAuth();
-  }, []);
-
-  // Keep the sensor stream alive across all app screens.
-  useEffect(() => {
-    if (!SENSOR_WS_URL) return;
-
-    return dataStorage.connectWebSocket(SENSOR_WS_URL, {
-      onStatusChange: setSensorConnection,
-      onError: (error) => console.warn('[PlanKO-WS] WebSocket error:', error),
-    });
   }, []);
 
   // Calculate total calories burned
@@ -235,7 +213,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         quests,
         history,
         totalCalories,
-        sensorConnection,
         login,
         register,
         logout,
@@ -245,7 +222,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         requestApi,
         requestJson,
         getCachedApiData,
-        subscribeToWebSocketEvents,
       }}
     >
       {children}
