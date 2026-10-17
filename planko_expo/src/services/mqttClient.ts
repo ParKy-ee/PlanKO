@@ -88,6 +88,7 @@ export const connectMqtt = (
       keepAliveInterval: 30,
       cleanSession: true,
       useSSL: MQTT_CONFIG.useSSL,
+      mqttVersion: 4,
       onSuccess: () => {
         if (!active) {
           try {
