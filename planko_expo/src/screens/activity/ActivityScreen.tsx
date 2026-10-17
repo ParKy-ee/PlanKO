@@ -106,10 +106,10 @@ export const ActivityScreen: React.FC = () => {
           <Text style={styles.sensorStatusText}>
             MQTT:{' '}
             {sensorConnection === 'connected'
-              ? 'เชื่อมต่อ broker.emqx.io แล้ว'
+              ? 'Connected to broker.emqx.io'
               : sensorConnection === 'connecting'
-                ? 'กำลังเชื่อมต่อ MQTT...'
-                : 'รอการเชื่อมต่อ MQTT'}
+                ? 'Connecting to MQTT...'
+                : 'Waiting for MQTT connection'}
           </Text>
         </View>
 

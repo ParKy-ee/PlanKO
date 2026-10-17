@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   listContainer: {
-    gap: 16 as any,
+    ...({ gap: 16 } as any),
   },
   programCard: {
     height: 125,

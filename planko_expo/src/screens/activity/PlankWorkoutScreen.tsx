@@ -6,9 +6,10 @@ import {
   Text,
   TouchableOpacity,
   View,
-  type DimensionValue,
   useWindowDimensions,
 } from 'react-native';
+
+type DimensionValue = string | number;
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -480,9 +481,9 @@ export const PlankWorkoutScreen: React.FC = () => {
           ...(spo2 !== undefined ? { spo2: spo2 } : {}),
           statusText:
             currentBpm && currentBpm > 145
-              ? 'ชีพจรสูงเกินเกณฑ์ ผ่อนลมหายใจ'
-              : 'สัญญาณชีพจรปกติ',
-          statusType: currentBpm && currentBpm > 145 ? 'alert' : 'normal',
+              ? 'Heart rate elevated! Breathe deeply'
+              : 'Heart rate & biometrics normal',
+          statusType: currentBpm && currentBpm > 145 ? ('alert' as const) : ('success' as const),
         }));
       }
 
@@ -505,8 +506,8 @@ export const PlankWorkoutScreen: React.FC = () => {
             copOffset: computedCop,
             leftPressure: leftP,
             rightPressure: rightP,
-            statusText: isTilted ? 'น้ำหนักเอียง ปรับจุดศูนย์ถ่วง (CoP)' : 'สมดุลร่างกายดีเยี่ยม',
-            statusType: isTilted ? 'warning' : 'success',
+            statusText: isTilted ? 'Slight body tilt. Adjust your Center of Pressure (CoP)' : 'Excellent balance & posture',
+            statusType: isTilted ? ('warning' as const) : ('success' as const),
           }));
         }
       }
@@ -712,11 +713,11 @@ export const PlankWorkoutScreen: React.FC = () => {
             </Text>
           </View>
 
-          <View style={[styles.playField, { gap: 6 }]}>
+          <View style={[styles.playField, { gap: 6 } as any]}>
             <View
               style={[
                 styles.sensorGroup,
-                { width: 112 * boardScale, gap: 10 * boardScale },
+                { width: 112 * boardScale, gap: 10 * boardScale } as any,
               ]}
             >
               {leftSensorRows.map((row) => (
@@ -729,7 +730,7 @@ export const PlankWorkoutScreen: React.FC = () => {
             <View
               style={[
                 styles.centerLane,
-                { width: 158 * boardScale, gap: 8 * boardScale },
+                { width: 158 * boardScale, gap: 8 * boardScale } as any,
               ]}
             >
               <View
