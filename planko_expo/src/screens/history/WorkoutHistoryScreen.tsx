@@ -30,7 +30,7 @@ export const WorkoutHistoryScreen: React.FC = () => {
   const formatDate = (isoString: string) => {
     try {
       const d = new Date(isoString);
-      return `${d.getDate()}/${d.getMonth() + 1}/${(d.getFullYear() + 543).toString().slice(-2)}`;
+      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
     } catch {
       return isoString;
     }
@@ -45,8 +45,12 @@ export const WorkoutHistoryScreen: React.FC = () => {
   };
 
   const filteredHistory = history.filter((item) => {
-    if (filterType === 'planned') return item.planName.includes('สร้างแกนกลาง');
-    if (filterType === 'custom') return item.planName.includes('กำหนดเอง');
+    if (filterType === 'planned') {
+      return item.planName.includes('Core Foundation') || item.planName.includes('Planned');
+    }
+    if (filterType === 'custom') {
+      return item.planName.includes('Custom');
+    }
     return true;
   });
 
@@ -65,7 +69,7 @@ export const WorkoutHistoryScreen: React.FC = () => {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>ประวัติ</Text>
+        <Text style={styles.headerTitle}>History</Text>
 
         {/* Filter Pill on top right */}
         <TouchableOpacity
@@ -84,10 +88,10 @@ export const WorkoutHistoryScreen: React.FC = () => {
           <Ionicons name="options-outline" size={15} color="#FFFFFF" style={{ marginRight: 4 }} />
           <Text style={styles.filterPillText}>
             {filterType === 'all'
-              ? 'ดูทั้งหมด'
+              ? 'All'
               : filterType === 'planned'
-              ? 'ตามแผนการ'
-              : 'กำหนดเอง'}
+              ? 'Planned'
+              : 'Custom'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -102,7 +106,7 @@ export const WorkoutHistoryScreen: React.FC = () => {
         {filteredHistory.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="time-outline" size={54} color="#94A3B8" />
-            <Text style={styles.emptyText}>ยังไม่มีประวัติการฝึกในหมวดหมู่นี้</Text>
+            <Text style={styles.emptyText}>No workout history in this category</Text>
           </View>
         ) : (
           filteredHistory.map((item, index) => {
@@ -115,7 +119,7 @@ export const WorkoutHistoryScreen: React.FC = () => {
                 onPress={() =>
                   Alert.alert(
                     item.planName,
-                    `แต้ม: ${item.score}\nเวลา: ${Math.round(item.duration / 60)} นาที\nแคลอรี่: ${item.kcal} Cal\nความแม่นยำ: ${item.accuracy}%\nวันที่: ${formatDate(item.createdAt)}`
+                    `Score: ${item.score}\nDuration: ${Math.round(item.duration / 60)} mins\nCalories: ${item.kcal} Cal\nAccuracy: ${item.accuracy}%\nDate: ${formatDate(item.createdAt)}`
                   )
                 }
               >
@@ -138,12 +142,12 @@ export const WorkoutHistoryScreen: React.FC = () => {
                   <View style={styles.statsRow}>
                     <View style={styles.scoreBadge}>
                       <Ionicons name="flame" size={14} color="#0084FF" style={{ marginRight: 3 }} />
-                      <Text style={styles.scoreText}>{item.score} แต้ม</Text>
+                      <Text style={styles.scoreText}>{item.score} pts</Text>
                     </View>
                     <View style={styles.timeBadge}>
                       <Ionicons name="time-outline" size={14} color="#64748B" style={{ marginRight: 3 }} />
                       <Text style={styles.timeText}>
-                        {Math.round(item.duration / 60)} นาที ({item.kcal} Cal)
+                        {Math.round(item.duration / 60)} mins ({item.kcal} Cal)
                       </Text>
                     </View>
                   </View>

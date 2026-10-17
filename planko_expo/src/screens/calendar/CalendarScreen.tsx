@@ -18,36 +18,36 @@ import { Colors } from '../../theme/colors';
 import { useApp } from '../../context/AppContext';
 
 const monthsShort = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 const monthsFull = [
-  'มกราคม',
-  'กุมภาพันธ์',
-  'มีนาคม',
-  'เมษายน',
-  'พฤษภาคม',
-  'มิถุนายน',
-  'กรกฎาคม',
-  'สิงหาคม',
-  'กันยายน',
-  'ตุลาคม',
-  'พฤศจิกายน',
-  'ธันวาคม',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
-const weekDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export const CalendarScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -104,7 +104,7 @@ export const CalendarScreen: React.FC = () => {
   const formatDateShort = (isoString: string) => {
     try {
       const d = new Date(isoString);
-      return `${d.getDate()}/${d.getMonth() + 1}/${(d.getFullYear() + 543).toString().slice(-2)}`;
+      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
     } catch {
       return isoString;
     }
@@ -222,7 +222,7 @@ export const CalendarScreen: React.FC = () => {
 
         <View style={styles.headerTitleRow}>
           <Ionicons name="calendar-outline" size={22} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.headerTitle}>ปฏิทิน</Text>
+          <Text style={styles.headerTitle}>Calendar</Text>
         </View>
 
         <View style={styles.headerPlaceholder} />
@@ -262,7 +262,7 @@ export const CalendarScreen: React.FC = () => {
                 activeOpacity={0.7}
                 onPress={() => setYearPickerVisible(true)}
               >
-                <Text style={styles.dropdownText}>{year + 543}</Text>
+                <Text style={styles.dropdownText}>{year}</Text>
                 <Ionicons name="chevron-down" size={14} color="#0084FF" />
               </TouchableOpacity>
             </View>
@@ -292,11 +292,11 @@ export const CalendarScreen: React.FC = () => {
           <View style={styles.legendContainer}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#0084FF' }]} />
-              <Text style={styles.legendLabel}>มีกิจกรรม</Text>
+              <Text style={styles.legendLabel}>Active</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#D9EEFC' }]} />
-              <Text style={styles.legendLabel}>ไม่มีการเพิ่มกิจกรรม</Text>
+              <Text style={styles.legendLabel}>No Activity</Text>
             </View>
           </View>
         </View>
@@ -309,9 +309,9 @@ export const CalendarScreen: React.FC = () => {
                 <Ionicons name="calendar" size={22} color="#0084FF" />
               </View>
               <View>
-                <Text style={styles.activityHeaderTitle}>กิจกรรมล่าสุด</Text>
+                <Text style={styles.activityHeaderTitle}>Recent Activity</Text>
                 <Text style={styles.activityHeaderDate}>
-                  วันที่ {selectedDay.getDate()} {monthsFull[selectedDay.getMonth()]} {selectedDay.getFullYear() + 543}
+                  {monthsFull[selectedDay.getMonth()]} {selectedDay.getDate()}, {selectedDay.getFullYear()}
                 </Text>
               </View>
             </View>
@@ -326,7 +326,7 @@ export const CalendarScreen: React.FC = () => {
                   onPress={() => {
                     Alert.alert(
                       item.planName,
-                      `แต้ม: ${item.score}\nเวลา: ${Math.round(item.duration / 60)} นาที\nแคลอรี่: ${item.kcal} Cal\nวันที่: ${formatDateShort(item.createdAt)}`
+                      `Score: ${item.score}\nDuration: ${Math.round(item.duration / 60)} mins\nCalories: ${item.kcal} Cal\nDate: ${formatDateShort(item.createdAt)}`
                     );
                   }}
                 >
@@ -343,11 +343,11 @@ export const CalendarScreen: React.FC = () => {
 
                     <View style={styles.sessionStatRow}>
                       <Ionicons name="flame" size={14} color="#0084FF" style={{ marginRight: 3 }} />
-                      <Text style={styles.sessionStatScore}>{item.score} แต้ม</Text>
+                      <Text style={styles.sessionStatScore}>{item.score} pts</Text>
                       <Text style={styles.sessionStatDot}>•</Text>
                       <Ionicons name="time-outline" size={14} color="#64748B" style={{ marginRight: 3 }} />
                       <Text style={styles.sessionStatDuration}>
-                        {Math.round(item.duration / 60)} นาที ({item.kcal} Cal)
+                        {Math.round(item.duration / 60)} mins ({item.kcal} Cal)
                       </Text>
                     </View>
 
@@ -367,7 +367,7 @@ export const CalendarScreen: React.FC = () => {
               /* Empty state placeholder when no activity exists */
               <View style={styles.noActivityCard}>
                 <Ionicons name="calendar-outline" size={32} color="#94A3B8" />
-                <Text style={styles.noActivityText}>ไม่มีกิจกรรมในวันนี้</Text>
+                <Text style={styles.noActivityText}>No activity recorded on this day</Text>
               </View>
             )}
           </View>
@@ -388,7 +388,7 @@ export const CalendarScreen: React.FC = () => {
         >
           <View style={styles.pickerModalCard}>
             <View style={styles.pickerModalHeader}>
-              <Text style={styles.pickerModalTitle}>เลือกเดือน</Text>
+              <Text style={styles.pickerModalTitle}>Select Month</Text>
               <TouchableOpacity
                 onPress={() => setMonthPickerVisible(false)}
                 style={styles.modalCloseBtn}
@@ -440,7 +440,7 @@ export const CalendarScreen: React.FC = () => {
         >
           <View style={styles.pickerModalCard}>
             <View style={styles.pickerModalHeader}>
-              <Text style={styles.pickerModalTitle}>เลือกปี (พ.ศ.)</Text>
+              <Text style={styles.pickerModalTitle}>Select Year</Text>
               <TouchableOpacity
                 onPress={() => setYearPickerVisible(false)}
                 style={styles.modalCloseBtn}
@@ -472,7 +472,7 @@ export const CalendarScreen: React.FC = () => {
                           isSelected && styles.pickerItemTextSelected,
                         ]}
                       >
-                        {y + 543}
+                        {y}
                       </Text>
                     </TouchableOpacity>
                   );

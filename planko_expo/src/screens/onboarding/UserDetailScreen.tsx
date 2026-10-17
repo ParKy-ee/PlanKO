@@ -29,10 +29,10 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
   const [weight, setWeight] = useState(user.weight ? user.weight.toString() : '65');
   const [height, setHeight] = useState(user.height ? user.height.toString() : '170');
   const [age, setAge] = useState(user.age ? user.age.toString() : '25');
-  const [gender, setGender] = useState(user.gender || 'ผู้ชาย');
+  const [gender, setGender] = useState(user.gender || 'Male');
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
-  const genderOptions = ['ผู้ชาย', 'ผู้หญิง', 'อื่นๆ'];
+  const genderOptions = ['Male', 'Female', 'Other'];
 
   const handleSaveAndNext = () => {
     const numWeight = parseFloat(weight) || 60;
@@ -55,19 +55,19 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Top Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>ข้อมูลส่วนตัว</Text>
+          <Text style={styles.title}>Personal Details</Text>
           <Text style={styles.subtitle}>
-            กรุณาระบุข้อมูลร่างกายเพื่อปรับโปรแกรมการฝึกให้เหมาะสมกับคุณ
+            Please provide your body stats to personalize your training program
           </Text>
         </View>
 
         {/* Blue Card Form */}
         <View style={styles.cardContainer}>
           {/* Weight */}
-          <Text style={styles.inputLabel}>น้ำหนัก (กก.) :</Text>
+          <Text style={styles.inputLabel}>Weight (kg) :</Text>
           <TextInput
             style={styles.input}
-            placeholder="กรอก น้ำหนัก"
+            placeholder="Enter weight"
             placeholderTextColor="#94A3B8"
             keyboardType="numeric"
             value={weight}
@@ -75,10 +75,10 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           {/* Height */}
-          <Text style={styles.inputLabel}>ส่วนสูง (ซม.) :</Text>
+          <Text style={styles.inputLabel}>Height (cm) :</Text>
           <TextInput
             style={styles.input}
-            placeholder="กรอก ส่วนสูง"
+            placeholder="Enter height"
             placeholderTextColor="#94A3B8"
             keyboardType="numeric"
             value={height}
@@ -86,10 +86,10 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           {/* Age */}
-          <Text style={styles.inputLabel}>อายุ (ปี) :</Text>
+          <Text style={styles.inputLabel}>Age (years) :</Text>
           <TextInput
             style={styles.input}
-            placeholder="กรอก อายุ"
+            placeholder="Enter age"
             placeholderTextColor="#94A3B8"
             keyboardType="numeric"
             value={age}
@@ -97,7 +97,7 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
           />
 
           {/* Gender */}
-          <Text style={styles.inputLabel}>เพศ :</Text>
+          <Text style={styles.inputLabel}>Gender :</Text>
           <TouchableOpacity
             style={styles.dropdownButton}
             onPress={() => setShowGenderDropdown(!showGenderDropdown)}
@@ -148,7 +148,7 @@ export const UserDetailScreen: React.FC<Props> = ({ navigation }) => {
           onPress={handleSaveAndNext}
           activeOpacity={0.85}
         >
-          <Text style={styles.nextButtonText}>ต่อไป</Text>
+          <Text style={styles.nextButtonText}>Next</Text>
           <Ionicons name="arrow-forward" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </ScrollView>

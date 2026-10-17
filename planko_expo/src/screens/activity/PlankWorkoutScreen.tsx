@@ -522,8 +522,8 @@ export const PlankWorkoutScreen: React.FC = () => {
     addSessionPerformance({
       planName:
         mode === 'planned'
-          ? `ตามแผน - ${postureName}`
-          : 'กำหนดเอง - Custom Plank Session',
+          ? `Planned - ${postureName}`
+          : 'Custom - Plank Session',
       score: score || 650,
       duration: totalElapsedTime || 60,
       kcal: calculatedKcal,
@@ -768,11 +768,11 @@ export const PlankWorkoutScreen: React.FC = () => {
                   </View>
               </View>
 
-              <View style={[styles.centerSensorGrid, { gap: 8 * boardScale }]}>
+              <View style={[styles.centerSensorGrid, { gap: 8 * boardScale } as any]}>
                 {centerSensorRows.map((row) => (
                   <View
                     key={row.join('-')}
-                    style={[styles.centerSensorRow, { gap: 12 * boardScale }]}
+                    style={[styles.centerSensorRow, { gap: 12 * boardScale } as any]}
                   >
                     {row.map((padId) => renderPad(padId, boardScale))}
                   </View>
@@ -824,24 +824,24 @@ export const PlankWorkoutScreen: React.FC = () => {
             <View style={styles.summaryTrophy}>
               <MaterialIcons name="emoji-events" size={54} color="#FFD700" />
             </View>
-            <Text style={styles.summaryTitle}>ยอดเยี่ยม! การฝึกสำเร็จ</Text>
+            <Text style={styles.summaryTitle}>Workout Completed!</Text>
             <Text style={styles.summarySub}>
-              คุณฝึกแพลงก์ได้อย่างมีประสิทธิภาพตามมาตรฐาน Closed-Loop Biofeedback
+              Great job! You completed your workout with Closed-Loop Biofeedback.
             </Text>
 
             <View style={styles.statsSummaryGrid}>
               <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>คะแนนรวม</Text>
+                <Text style={styles.summaryStatLabel}>Total Score</Text>
                 <Text style={styles.summaryStatVal}>{score || 720}</Text>
               </View>
               <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>แคลอรี่</Text>
+                <Text style={styles.summaryStatLabel}>Calories</Text>
                 <Text style={styles.summaryStatVal}>
                   {Math.max(20, Math.round(totalElapsedTime * 0.22))} kcal
                 </Text>
               </View>
               <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>ความแม่นยำ</Text>
+                <Text style={styles.summaryStatLabel}>Accuracy</Text>
                 <Text style={styles.summaryStatVal}>94%</Text>
               </View>
               <View style={styles.summaryStatItem}>
@@ -855,7 +855,7 @@ export const PlankWorkoutScreen: React.FC = () => {
               onPress={handleSaveAndExit}
               activeOpacity={0.85}
             >
-              <Text style={styles.saveResultText}>บันทึกผลและกลับหน้าหลัก</Text>
+              <Text style={styles.saveResultText}>Save & Return Home</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -40,17 +40,17 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSendResetLink = () => {
     if (!identifier.trim()) {
-      setError('กรุณากรอกอีเมลหรือชื่อผู้ใช้ของคุณ');
+      setError('Please enter your email or username');
       return;
     }
     setError(null);
     setIsSent(true);
     Alert.alert(
-      'ส่งลิงก์สำเร็จ',
-      `ระบบได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยัง ${identifier} เรียบร้อยแล้ว โปรดตรวจสอบกล่องข้อความหรืออีเมลของคุณ`,
+      'Reset Link Sent',
+      `A password reset link has been sent to ${identifier}. Please check your inbox.`,
       [
         {
-          text: 'ตกลง',
+          text: 'OK',
           onPress: () => navigation.navigate('Login'),
         },
       ]
@@ -59,9 +59,9 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleContactSupport = () => {
     Alert.alert(
-      'ติดต่อฝ่ายสนับสนุน',
-      'หากคุณจำชื่อผู้ใช้หรืออีเมลไม่ได้ กรุณาติดต่อทีมงานได้ที่ support@planko.app หรือ Line Official: @planko',
-      [{ text: 'ตกลง' }]
+      'Contact Support',
+      'If you cannot remember your username or email, please contact our support team at support@planko.app',
+      [{ text: 'OK' }]
     );
   };
 
@@ -163,9 +163,9 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
                   <View style={[styles.sparkBar, styles.sparkBar3]} />
                 </View>
               </View>
-              <Text style={styles.welcomeTitle}>ลืมรหัสผ่าน?</Text>
+              <Text style={styles.welcomeTitle}>Forgot Password?</Text>
               <Text style={styles.welcomeSubtitle}>
-                กรอกอีเมลหรือชื่อผู้ใช้ของคุณ{'\n'}เพื่อรับลิงก์รีเซ็ตรหัสผ่าน
+                Enter your email or username{'\n'}to receive a password reset link
               </Text>
             </View>
 
@@ -282,18 +282,18 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={styles.labelIconBadge}>
                   <Ionicons name="mail" size={14} color="#0080FF" />
                 </View>
-                <Text style={styles.label}>อีเมลหรือชื่อผู้ใช้</Text>
+                <Text style={styles.label}>Email or Username</Text>
               </View>
               <View
                 style={[
                   styles.inputWrapper,
-                  isFocused && styles.inputWrapperFocused,
-                  error && styles.inputWrapperError,
+                  isFocused ? styles.inputWrapperFocused : null,
+                  error ? styles.inputWrapperError : null,
                 ]}
               >
                 <TextInput
                   style={styles.input}
-                  placeholder="กรอกอีเมลหรือชื่อผู้ใช้ของคุณ"
+                  placeholder="Enter your email or username"
                   placeholderTextColor="#94A3B8"
                   value={identifier}
                   onChangeText={(text) => {
@@ -340,16 +340,16 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
                   />
                 </Svg>
                 <View style={styles.submitButtonContent}>
-                  <Text style={styles.submitButtonText}>ส่งลิงก์รีเซ็ตรหัสผ่าน</Text>
+                  <Text style={styles.submitButtonText}>Send Reset Link</Text>
                   <Ionicons name="arrow-forward" size={19} color="#FFFFFF" style={styles.submitButtonIcon} />
                 </View>
               </View>
             </TouchableOpacity>
 
-            {/* Divider "หรือ" */}
+            {/* Divider "or" */}
             <View style={styles.dividerContainer}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>หรือ</Text>
+              <Text style={styles.dividerText}>or</Text>
               <View style={styles.dividerLine} />
             </View>
 
@@ -363,8 +363,8 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
                 <Ionicons name="help" size={18} color="#0080FF" />
               </View>
               <View style={styles.supportTextWrapper}>
-                <Text style={styles.supportTitle}>จำชื่อผู้ใช้ไม่ได้?</Text>
-                <Text style={styles.supportSubtitle}>ติดต่อฝ่ายสนับสนุนเพื่อขอความช่วยเหลือ</Text>
+                <Text style={styles.supportTitle}>Forgot your username?</Text>
+                <Text style={styles.supportSubtitle}>Contact support for assistance</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#60A5FA" />
             </TouchableOpacity>
@@ -378,7 +378,7 @@ export const ForgotPasswordScreen: React.FC<Props> = ({ navigation }) => {
           >
             <Ionicons name="shield-checkmark-outline" size={16} color="#0077E6" style={styles.shieldIcon} />
             <Ionicons name="arrow-back" size={14} color="#0077E6" style={styles.arrowIcon} />
-            <Text style={styles.backToLoginText}>กลับไปหน้าเข้าสู่ระบบ</Text>
+            <Text style={styles.backToLoginText}>Back to Sign In</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

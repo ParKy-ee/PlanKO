@@ -37,7 +37,7 @@ export const getPostureTheme = (id?: number, name?: string) => {
     };
   }
 
-  if (id === 3 || normName.includes('left') || normName.includes('ซ้าย')) {
+  if (id === 3 || normName.includes('left')) {
     return {
       bgColor: '#ECFDF5',
       borderColor: '#D1FAE5',
@@ -50,7 +50,7 @@ export const getPostureTheme = (id?: number, name?: string) => {
     };
   }
 
-  if (id === 4 || normName.includes('right') || normName.includes('ขวา')) {
+  if (id === 4 || normName.includes('right')) {
     return {
       bgColor: '#FAF5FF',
       borderColor: '#F3E8FF',
@@ -76,7 +76,7 @@ export const getPostureTheme = (id?: number, name?: string) => {
     };
   }
 
-  if (id === 6 || normName.includes('knee') || normName.includes('เข่า')) {
+  if (id === 6 || normName.includes('knee')) {
     return {
       bgColor: '#F0FDF4',
       borderColor: '#DCFCE7',
@@ -183,7 +183,7 @@ export const PostureIllustratedIcon: React.FC<PostureIllustratedIconProps> = ({
   }
 
   // 3. Side Plank Left Icon (Diagonal body, left arm on ground, teal/cyan)
-  if (postureId === 3 || normName.includes('left') || normName.includes('ซ้าย')) {
+  if (postureId === 3 || normName.includes('left')) {
     return (
       <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
         {/* Head */}
@@ -228,7 +228,7 @@ export const PostureIllustratedIcon: React.FC<PostureIllustratedIconProps> = ({
   }
 
   // 4. Side Plank Right Icon (Diagonal body, right arm on ground, purple/magenta)
-  if (postureId === 4 || normName.includes('right') || normName.includes('ขวา')) {
+  if (postureId === 4 || normName.includes('right')) {
     return (
       <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
         {/* Head */}

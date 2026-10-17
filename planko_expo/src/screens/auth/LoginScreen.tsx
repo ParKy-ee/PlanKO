@@ -35,7 +35,7 @@ interface Props {
 
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login } = useApp();
-  const [email, setEmail] = useState('somchai.fit@planko.app');
+  const [email, setEmail] = useState('john.fit@planko.app');
   const [password, setPassword] = useState('123456');
   const [hidePassword, setHidePassword] = useState(true);
   const [emailFocused, setEmailFocused] = useState(false);
@@ -44,7 +44,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleLogin = () => {
     if (!email.trim() || !password.trim()) {
-      setError('กรุณากรอกชื่อผู้ใช้งานหรืออีเมลและรหัสผ่าน');
+      setError('Please enter your email and password');
       return;
     }
     setError(null);
@@ -52,7 +52,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
     if (success) {
       navigation.replace('MainTabs', { screen: 'Home' });
     } else {
-      setError('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
+      setError('Invalid email or password');
     }
   };
 
@@ -144,9 +144,9 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={[styles.sparkBar, styles.sparkBar3]} />
               </View>
             </View>
-            <Text style={styles.welcomeTitle}>ยินดีต้อนรับกลับมา</Text>
+            <Text style={styles.welcomeTitle}>Welcome Back</Text>
             <Text style={styles.welcomeSubtitle}>
-              เข้าสู่ระบบเพื่อติดตามและพัฒนาการฝึกแพลงก์ของคุณ
+              Log in to track and elevate your plank workouts
             </Text>
           </View>
 
@@ -156,18 +156,18 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
                 <Ionicons name="mail-outline" size={16} color="#334155" style={styles.labelIcon} />
-                <Text style={styles.label}>ชื่อผู้ใช้งาน หรือ อีเมล</Text>
+                <Text style={styles.label}>Username or Email</Text>
               </View>
               <View
                 style={[
                   styles.inputWrapper,
-                  emailFocused && styles.inputWrapperFocused,
-                  error && styles.inputWrapperError,
+                  emailFocused ? styles.inputWrapperFocused : null,
+                  error ? styles.inputWrapperError : null,
                 ]}
               >
                 <TextInput
                   style={styles.input}
-                  placeholder="somchai.fit@planko.app"
+                  placeholder="john.fit@planko.app"
                   placeholderTextColor="#94A3B8"
                   value={email}
                   onChangeText={(text) => {
@@ -187,13 +187,13 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
                 <Ionicons name="lock-closed-outline" size={16} color="#334155" style={styles.labelIcon} />
-                <Text style={styles.label}>รหัสผ่าน</Text>
+                <Text style={styles.label}>Password</Text>
               </View>
               <View
                 style={[
                   styles.inputWrapper,
-                  passwordFocused && styles.inputWrapperFocused,
-                  error && styles.inputWrapperError,
+                  passwordFocused ? styles.inputWrapperFocused : null,
+                  error ? styles.inputWrapperError : null,
                 ]}
               >
                 <TextInput
@@ -232,7 +232,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
               onPress={() => navigation.navigate('ForgotPassword')}
               activeOpacity={0.7}
             >
-              <Text style={styles.forgotPasswordText}>ลืมรหัสผ่าน?</Text>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
             {/* Gradient Login Button with Arrow */}
@@ -265,7 +265,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                   />
                 </Svg>
                 <View style={styles.loginButtonContent}>
-                  <Text style={styles.loginButtonText}>ลงชื่อเข้าใช้</Text>
+                  <Text style={styles.loginButtonText}>Sign In</Text>
                   <Ionicons name="arrow-forward" size={20} color="#FFFFFF" style={styles.loginButtonIcon} />
                 </View>
               </View>
@@ -275,12 +275,12 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.registerDividerContainer}>
               <View style={styles.dividerLine} />
               <View style={styles.registerTextRow}>
-                <Text style={styles.registerPromptText}>คุณยังไม่มีบัญชีใช่ไหม? </Text>
+                <Text style={styles.registerPromptText}>Don't have an account? </Text>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('Register')}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.registerLinkText}>สร้างบัญชีผู้ใช้</Text>
+                  <Text style={styles.registerLinkText}>Create Account</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.dividerLine} />
@@ -290,13 +290,13 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <TouchableOpacity
               style={styles.guestDemoButton}
               onPress={() => {
-                login('somchai.fit@planko.app', '123456');
+                login('john.fit@planko.app', '123456');
                 navigation.replace('MainTabs', { screen: 'Home' });
               }}
               activeOpacity={0.8}
             >
               <Ionicons name="flash" size={14} color="#0080FF" style={styles.guestIcon} />
-              <Text style={styles.guestDemoText}>เข้ามาเพื่อดู Demo ทันที (Guest Mode)</Text>
+              <Text style={styles.guestDemoText}>Continue as Guest (Demo Mode)</Text>
               <Ionicons name="chevron-forward" size={13} color="#0077E6" />
             </TouchableOpacity>
           </View>

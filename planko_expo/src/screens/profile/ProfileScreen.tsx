@@ -44,7 +44,7 @@ export const ProfileScreen: React.FC = () => {
   const formatDate = (isoString: string) => {
     try {
       const d = new Date(isoString);
-      return `${d.getDate()}/${d.getMonth() + 1}/${(d.getFullYear() + 543).toString().slice(-2)}`;
+      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
     } catch {
       return isoString;
     }
@@ -62,7 +62,7 @@ export const ProfileScreen: React.FC = () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อเปลี่ยนรูปโปรไฟล์');
+        Alert.alert('Permission Required', 'Please allow photo library access to change your profile picture.');
         return;
       }
 
@@ -75,11 +75,11 @@ export const ProfileScreen: React.FC = () => {
 
       if (!result.cancelled && 'uri' in result) {
         updateUser({ avatarUrl: result.uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+        Alert.alert('Success', 'Profile photo updated successfully.');
       }
     } catch (error) {
       console.log('Error picking image:', error);
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถเลือกรูปภาพได้');
+      Alert.alert('Error', 'Unable to select image.');
     }
   };
 
@@ -87,7 +87,7 @@ export const ProfileScreen: React.FC = () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงกล้องเพื่อถ่ายรูปโปรไฟล์');
+        Alert.alert('Permission Required', 'Please allow camera access to take a profile picture.');
         return;
       }
 
@@ -99,29 +99,29 @@ export const ProfileScreen: React.FC = () => {
 
       if (!result.cancelled && 'uri' in result) {
         updateUser({ avatarUrl: result.uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+        Alert.alert('Success', 'Profile photo updated successfully.');
       }
     } catch (error) {
       console.log('Error taking photo:', error);
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถถ่ายรูปภาพได้');
+      Alert.alert('Error', 'Unable to take photo.');
     }
   };
 
   const handleChoosePhotoSource = () => {
     Alert.alert(
-      'เปลี่ยนรูปโปรไฟล์',
-      'เลือกวิธีการอัปโหลดรูปภาพที่คุณต้องการ',
+      'Change Profile Photo',
+      'Choose an option to upload your photo',
       [
         {
-          text: 'ถ่ายภาพใหม่',
+          text: 'Take Photo',
           onPress: handleTakePhoto,
         },
         {
-          text: 'เลือกจากคลังรูปภาพ',
+          text: 'Choose from Library',
           onPress: handlePickImageFromLibrary,
         },
         {
-          text: 'ยกเลิก',
+          text: 'Cancel',
           style: 'cancel',
         },
       ]
@@ -145,7 +145,7 @@ export const ProfileScreen: React.FC = () => {
 
         <View style={styles.headerTitleRow}>
           <Ionicons name="person" size={20} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.headerTitle}>โปรไฟล์</Text>
+          <Text style={styles.headerTitle}>Profile</Text>
         </View>
 
         <TouchableOpacity
@@ -195,7 +195,7 @@ export const ProfileScreen: React.FC = () => {
             <Text style={styles.userEmail}>{user.email}</Text>
             <View style={styles.memberBadge}>
               <Ionicons name="bookmark-outline" size={12} color="#0284C7" style={{ marginRight: 4 }} />
-              <Text style={styles.memberBadgeText}>สมาชิกทั่วไป</Text>
+              <Text style={styles.memberBadgeText}>Standard Member</Text>
             </View>
           </View>
         </View>
@@ -250,7 +250,7 @@ export const ProfileScreen: React.FC = () => {
 
               <View style={styles.missionTitleCol}>
                 <Text style={styles.missionTitle}>
-                  {mission ? mission.programName : 'สร้างแกนกลาง 7 วัน'}
+                  {mission ? mission.programName : '7-Day Core Foundation'}
                 </Text>
                 <View style={styles.missionStatusBadge}>
                   <Text style={styles.missionStatusBadgeText}>
@@ -279,9 +279,9 @@ export const ProfileScreen: React.FC = () => {
               <View style={styles.missionStatBox}>
                 <Ionicons name="flame" size={20} color="#BAE6FD" style={{ marginRight: 8 }} />
                 <View>
-                  <Text style={styles.missionStatLabel}>เริ่มเมื่อ</Text>
+                  <Text style={styles.missionStatLabel}>Started</Text>
                   <Text style={styles.missionStatVal}>
-                    {mission ? formatDate(mission.startAt) : '20/9/69'}
+                    {mission ? formatDate(mission.startAt) : '9/20/26'}
                   </Text>
                 </View>
               </View>
@@ -292,9 +292,9 @@ export const ProfileScreen: React.FC = () => {
               <View style={styles.missionStatBox}>
                 <Ionicons name="calendar-outline" size={19} color="#BAE6FD" style={{ marginRight: 8 }} />
                 <View>
-                  <Text style={styles.missionStatLabel}>สำเร็จไปแล้ว</Text>
+                  <Text style={styles.missionStatLabel}>Completed</Text>
                   <Text style={styles.missionStatVal}>
-                    {mission ? `${mission.current} วัน` : '3 วัน'}
+                    {mission ? `${mission.current} days` : '3 days'}
                   </Text>
                 </View>
               </View>
@@ -310,7 +310,7 @@ export const ProfileScreen: React.FC = () => {
               <Ionicons name="body-outline" size={22} color="#0284C7" />
             </View>
             <View style={styles.statTextCol}>
-              <Text style={styles.statGridLabel}>ส่วนสูง</Text>
+              <Text style={styles.statGridLabel}>Height</Text>
               <Text style={styles.statGridVal}>{user.height} cm</Text>
             </View>
           </View>
@@ -321,7 +321,7 @@ export const ProfileScreen: React.FC = () => {
               <MaterialCommunityIcons name="scale-bathroom" size={22} color="#0284C7" />
             </View>
             <View style={styles.statTextCol}>
-              <Text style={styles.statGridLabel}>น้ำหนัก</Text>
+              <Text style={styles.statGridLabel}>Weight</Text>
               <Text style={styles.statGridVal}>{user.weight} Kg</Text>
             </View>
           </View>
@@ -332,8 +332,8 @@ export const ProfileScreen: React.FC = () => {
               <Ionicons name="hourglass-outline" size={20} color="#4F46E5" />
             </View>
             <View style={styles.statTextCol}>
-              <Text style={styles.statGridLabel}>อายุ</Text>
-              <Text style={styles.statGridVal}>{user.age} ปี</Text>
+              <Text style={styles.statGridLabel}>Age</Text>
+              <Text style={styles.statGridVal}>{user.age} yrs</Text>
             </View>
           </View>
 
@@ -343,7 +343,7 @@ export const ProfileScreen: React.FC = () => {
               <Ionicons name="male-outline" size={22} color="#0284C7" />
             </View>
             <View style={styles.statTextCol}>
-              <Text style={styles.statGridLabel}>เพศ</Text>
+              <Text style={styles.statGridLabel}>Gender</Text>
               <Text style={styles.statGridVal}>{user.gender}</Text>
             </View>
           </View>
@@ -353,13 +353,13 @@ export const ProfileScreen: React.FC = () => {
         <View style={styles.historyHeaderRow}>
           <View style={styles.historyHeaderLeft}>
             <Ionicons name="time-outline" size={24} color="#0084FF" style={{ marginRight: 6 }} />
-            <Text style={styles.historyTitle}>ประวัติ</Text>
+            <Text style={styles.historyTitle}>History</Text>
           </View>
           <TouchableOpacity
             onPress={() => navigation.navigate('WorkoutHistory')}
             style={styles.seeAllBtn}
           >
-            <Text style={styles.historySeeAll}>ดูทั้งหมด</Text>
+            <Text style={styles.historySeeAll}>View All</Text>
             <Ionicons name="chevron-forward" size={16} color="#0084FF" style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
@@ -370,7 +370,7 @@ export const ProfileScreen: React.FC = () => {
               key={item.id}
               style={styles.historyCard}
               activeOpacity={0.7}
-              onPress={() => Alert.alert(item.planName, `แต้ม: ${item.score}\nเวลา: ${Math.round(item.duration / 60)} นาที\nแคลอรี่: ${item.kcal} Cal\nวันที่: ${formatDate(item.createdAt)}`)}
+              onPress={() => Alert.alert(item.planName, `Score: ${item.score}\nDuration: ${Math.round(item.duration / 60)} mins\nCalories: ${item.kcal} Cal\nDate: ${formatDate(item.createdAt)}`)}
             >
               <View style={styles.historyIconWrapper}>
                 <MaterialIcons name="fitness-center" size={24} color="#0084FF" />
@@ -378,7 +378,7 @@ export const ProfileScreen: React.FC = () => {
               <View style={styles.historyInfo}>
                 <Text style={styles.historyPlanTitle}>{item.planName}</Text>
                 <Text style={styles.historyScoreRow}>
-                  {item.score} แต้ม • {Math.round(item.duration / 60)} นาที ({item.kcal} Cal)
+                  {item.score} pts • {Math.round(item.duration / 60)} mins ({item.kcal} Cal)
                 </Text>
                 <View style={styles.historyDateRow}>
                   <Ionicons name="calendar-outline" size={13} color="#94A3B8" style={{ marginRight: 4 }} />

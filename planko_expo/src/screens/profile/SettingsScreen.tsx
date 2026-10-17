@@ -23,14 +23,14 @@ export const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, updateUser, logout } = useApp();
 
-  // 1. Edit Body Stats Modal State (ส่วนสูง, น้ำหนัก, อายุ, เพศ)
+  // 1. Edit Body Stats Modal State (height, weight, age, gender)
   const [editBodyModalVisible, setEditBodyModalVisible] = useState(false);
   const [editHeight, setEditHeight] = useState(user.height.toString());
   const [editWeight, setEditWeight] = useState(user.weight.toString());
   const [editAge, setEditAge] = useState(user.age.toString());
   const [editGender, setEditGender] = useState(user.gender);
 
-  // 2. Edit Account Info Modal State (ชื่อ, นามสกุล, อีเมล)
+  // 2. Edit Account Info Modal State (first name, last name, email)
   const [editAccountModalVisible, setEditAccountModalVisible] = useState(false);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
@@ -57,7 +57,7 @@ export const SettingsScreen: React.FC = () => {
     });
 
     setEditBodyModalVisible(false);
-    Alert.alert('สำเร็จ', 'บันทึกข้อมูลร่างกายเรียบร้อยแล้ว');
+    Alert.alert('Success', 'Body stats saved successfully.');
   };
 
   const handleOpenEditAccount = () => {
@@ -70,7 +70,7 @@ export const SettingsScreen: React.FC = () => {
 
   const handleSaveAccount = () => {
     if (!editFirstName.trim()) {
-      Alert.alert('ข้อผิดพลาด', 'กรุณากรอกชื่อของคุณ');
+      Alert.alert('Error', 'Please enter your name.');
       return;
     }
 
@@ -81,14 +81,14 @@ export const SettingsScreen: React.FC = () => {
     });
 
     setEditAccountModalVisible(false);
-    Alert.alert('สำเร็จ', 'บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว');
+    Alert.alert('Success', 'Profile information saved successfully.');
   };
 
   const handlePickImageFromLibrary = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงคลังรูปภาพเพื่อเปลี่ยนรูปโปรไฟล์');
+        Alert.alert('Permission Required', 'Please allow photo library access to change your profile picture.');
         return;
       }
 
@@ -101,11 +101,11 @@ export const SettingsScreen: React.FC = () => {
 
       if (!result.cancelled && 'uri' in result) {
         updateUser({ avatarUrl: result.uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+        Alert.alert('Success', 'Profile photo updated successfully.');
       }
     } catch (error) {
       console.log('Error picking image:', error);
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถเลือกรูปภาพได้');
+      Alert.alert('Error', 'Unable to select image.');
     }
   };
 
@@ -113,7 +113,7 @@ export const SettingsScreen: React.FC = () => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('ต้องการสิทธิ์การเข้าถึง', 'กรุณาอนุญาตให้แอปเข้าถึงกล้องเพื่อถ่ายรูปโปรไฟล์');
+        Alert.alert('Permission Required', 'Please allow camera access to take a profile picture.');
         return;
       }
 
@@ -125,27 +125,27 @@ export const SettingsScreen: React.FC = () => {
 
       if (!result.cancelled && 'uri' in result) {
         updateUser({ avatarUrl: result.uri });
-        Alert.alert('สำเร็จ', 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว');
+        Alert.alert('Success', 'Profile photo updated successfully.');
       }
     } catch (error) {
       console.log('Error taking photo:', error);
-      Alert.alert('ข้อผิดพลาด', 'ไม่สามารถถ่ายรูปภาพได้');
+      Alert.alert('Error', 'Unable to take photo.');
     }
   };
 
   const handleChoosePhotoSource = () => {
-    Alert.alert('เปลี่ยนรูปโปรไฟล์', 'เลือกวิธีการอัปโหลดรูปภาพที่คุณต้องการ', [
-      { text: 'ถ่ายภาพใหม่', onPress: handleTakePhoto },
-      { text: 'เลือกจากคลังรูปภาพ', onPress: handlePickImageFromLibrary },
-      { text: 'ยกเลิก', style: 'cancel' },
+    Alert.alert('Change Profile Photo', 'Choose an option to upload your photo', [
+      { text: 'Take Photo', onPress: handleTakePhoto },
+      { text: 'Choose from Library', onPress: handlePickImageFromLibrary },
+      { text: 'Cancel', style: 'cancel' },
     ]);
   };
 
   const handleLogout = () => {
-    Alert.alert('ออกจากระบบ', 'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?', [
-      { text: 'ยกเลิก', style: 'cancel' },
+    Alert.alert('Log Out', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'ออกจากระบบ',
+        text: 'Log Out',
         style: 'destructive',
         onPress: () => {
           logout();
@@ -170,7 +170,7 @@ export const SettingsScreen: React.FC = () => {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>ตั้งค่า</Text>
+        <Text style={styles.headerTitle}>Settings</Text>
 
         <View style={{ width: 40 }} />
       </View>
@@ -187,7 +187,7 @@ export const SettingsScreen: React.FC = () => {
           <View style={styles.statsCardHeaderRow}>
             <View style={styles.statsCardTitleRow}>
               <Ionicons name="body" size={17} color="#0084FF" style={{ marginRight: 6 }} />
-              <Text style={styles.statsCardTitle}>ข้อมูลร่างกาย</Text>
+              <Text style={styles.statsCardTitle}>Body Stats</Text>
             </View>
             <TouchableOpacity
               style={styles.editProfileBtn}
@@ -200,7 +200,7 @@ export const SettingsScreen: React.FC = () => {
                 color="#0084FF"
                 style={{ marginRight: 4 }}
               />
-              <Text style={styles.editProfileText}>แก้ไขข้อมูล</Text>
+              <Text style={styles.editProfileText}>Edit Stats</Text>
             </TouchableOpacity>
           </View>
 
@@ -210,7 +210,7 @@ export const SettingsScreen: React.FC = () => {
               <View style={[styles.statMiniIcon, { backgroundColor: '#E0F2FE' }]}>
                 <Ionicons name="body-outline" size={18} color="#0284C7" />
               </View>
-              <Text style={styles.statMiniLabel}>ส่วนสูง</Text>
+              <Text style={styles.statMiniLabel}>Height</Text>
               <Text style={styles.statMiniVal}>{user.height} cm</Text>
             </View>
 
@@ -219,7 +219,7 @@ export const SettingsScreen: React.FC = () => {
               <View style={[styles.statMiniIcon, { backgroundColor: '#E0F2FE' }]}>
                 <MaterialCommunityIcons name="scale-bathroom" size={18} color="#0284C7" />
               </View>
-              <Text style={styles.statMiniLabel}>น้ำหนัก</Text>
+              <Text style={styles.statMiniLabel}>Weight</Text>
               <Text style={styles.statMiniVal}>{user.weight} Kg</Text>
             </View>
 
@@ -228,8 +228,8 @@ export const SettingsScreen: React.FC = () => {
               <View style={[styles.statMiniIcon, { backgroundColor: '#EEF2FF' }]}>
                 <Ionicons name="hourglass-outline" size={17} color="#4F46E5" />
               </View>
-              <Text style={styles.statMiniLabel}>อายุ</Text>
-              <Text style={styles.statMiniVal}>{user.age} ปี</Text>
+              <Text style={styles.statMiniLabel}>Age</Text>
+              <Text style={styles.statMiniVal}>{user.age} yrs</Text>
             </View>
 
             {/* Gender */}
@@ -237,7 +237,7 @@ export const SettingsScreen: React.FC = () => {
               <View style={[styles.statMiniIcon, { backgroundColor: '#E0F2FE' }]}>
                 <Ionicons name="male-outline" size={18} color="#0284C7" />
               </View>
-              <Text style={styles.statMiniLabel}>เพศ</Text>
+              <Text style={styles.statMiniLabel}>Gender</Text>
               <Text style={styles.statMiniVal}>{user.gender}</Text>
             </View>
           </View>
@@ -245,7 +245,7 @@ export const SettingsScreen: React.FC = () => {
 
         {/* 3. Settings Menu Card */}
         <View style={styles.menuCard}>
-          {/* Row 1: Profile Info (ชื่อ, อีเมล) */}
+          {/* Row 1: Profile Info (name, email) */}
           <TouchableOpacity
             style={styles.menuRow}
             activeOpacity={0.7}
@@ -255,8 +255,8 @@ export const SettingsScreen: React.FC = () => {
               <Ionicons name="person" size={20} color="#0084FF" />
             </View>
             <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>ข้อมูลส่วนตัว</Text>
-              <Text style={styles.menuSubtitle}>แก้ไขชื่อ และอีเมล</Text>
+              <Text style={styles.menuTitle}>Personal Information</Text>
+              <Text style={styles.menuSubtitle}>Edit name and email</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -268,15 +268,15 @@ export const SettingsScreen: React.FC = () => {
             style={styles.menuRow}
             activeOpacity={0.7}
             onPress={() =>
-              Alert.alert('การแจ้งเตือน', 'เปิดใช้งานการแจ้งเตือนเตือนฝึกแพลงก์ประจำวันแล้ว')
+              Alert.alert('Notifications', 'Daily plank workout reminders enabled.')
             }
           >
             <View style={styles.menuIconCircle}>
               <Ionicons name="notifications" size={20} color="#0084FF" />
             </View>
             <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>การแจ้งเตือน</Text>
-              <Text style={styles.menuSubtitle}>เปิด/ปิด การแจ้งเตือนต่าง ๆ</Text>
+              <Text style={styles.menuTitle}>Notifications</Text>
+              <Text style={styles.menuSubtitle}>Configure notification alerts</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -288,15 +288,15 @@ export const SettingsScreen: React.FC = () => {
             style={styles.menuRow}
             activeOpacity={0.7}
             onPress={() =>
-              Alert.alert('ความเป็นส่วนตัว', 'ข้อมูลสุขภาพของคุณถูกจัดเก็บบนอุปกรณ์อย่างปลอดภัย')
+              Alert.alert('Privacy', 'Your health data is securely stored on this device.')
             }
           >
             <View style={styles.menuIconCircle}>
               <Ionicons name="shield-checkmark" size={20} color="#0084FF" />
             </View>
             <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>ความเป็นส่วนตัว</Text>
-              <Text style={styles.menuSubtitle}>จัดการข้อมูลและความปลอดภัย</Text>
+              <Text style={styles.menuTitle}>Privacy</Text>
+              <Text style={styles.menuSubtitle}>Manage data and security</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -309,8 +309,8 @@ export const SettingsScreen: React.FC = () => {
             activeOpacity={0.7}
             onPress={() =>
               Alert.alert(
-                'ช่วยเหลือ & คำถามที่พบบ่อย',
-                'หากมีข้อสงสัยหรือปัญหาการใช้งาน ติดต่อทีมงานได้ที่ support@planko.app'
+                'Help & FAQ',
+                'For inquiries or support, please contact support@planko.app'
               )
             }
           >
@@ -318,8 +318,8 @@ export const SettingsScreen: React.FC = () => {
               <Ionicons name="help-circle" size={20} color="#0084FF" />
             </View>
             <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>ช่วยเหลือ & คำถามที่พบบ่อย</Text>
-              <Text style={styles.menuSubtitle}>ดูวิธีการใช้งาน และติดต่อทีมสนับสนุน</Text>
+              <Text style={styles.menuTitle}>Help & FAQ</Text>
+              <Text style={styles.menuSubtitle}>Guides and customer support</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -331,15 +331,15 @@ export const SettingsScreen: React.FC = () => {
             style={styles.menuRow}
             activeOpacity={0.7}
             onPress={() =>
-              Alert.alert('เกี่ยวกับแอป PlankO', 'PlankO เวอร์ชัน 1.0.0\nแอปพลิเคชันช่วยฝึกแพลงก์เพื่อสุขภาพแกนกลางลำตัวที่แข็งแรง')
+              Alert.alert('About PlankO', 'PlankO Version 1.0.0\nSmart plank training for a stronger core.')
             }
           >
             <View style={styles.menuIconCircle}>
               <Ionicons name="document-text" size={20} color="#0084FF" />
             </View>
             <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>เกี่ยวกับแอป</Text>
-              <Text style={styles.menuSubtitle}>เวอร์ชัน 1.0.0</Text>
+              <Text style={styles.menuTitle}>About App</Text>
+              <Text style={styles.menuSubtitle}>Version 1.0.0</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -355,14 +355,14 @@ export const SettingsScreen: React.FC = () => {
             <Ionicons name="log-out" size={22} color="#EF4444" />
           </View>
           <View style={styles.logoutTextCol}>
-            <Text style={styles.logoutTitle}>ออกจากระบบ</Text>
-            <Text style={styles.logoutSubtitle}>หากต้องการเข้าสู่ระบบด้วยบัญชีอื่น</Text>
+            <Text style={styles.logoutTitle}>Log Out</Text>
+            <Text style={styles.logoutSubtitle}>Sign out of your account</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#EF4444" />
         </TouchableOpacity>
       </ScrollView>
 
-      {/* 1. Modal แก้ไขข้อมูลร่างกาย (ส่วนสูง, น้ำหนัก, อายุ, เพศ) */}
+      {/* 1. Modal Edit Body Stats */}
       <Modal
         visible={editBodyModalVisible}
         transparent={true}
@@ -372,7 +372,7 @@ export const SettingsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderRow}>
-              <Text style={styles.modalTitle}>แก้ไขข้อมูลร่างกาย</Text>
+              <Text style={styles.modalTitle}>Edit Body Stats</Text>
               <TouchableOpacity
                 onPress={() => setEditBodyModalVisible(false)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -385,24 +385,24 @@ export const SettingsScreen: React.FC = () => {
               {/* Row: Height & Weight */}
               <View style={styles.rowInputs}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.inputLabel}>ส่วนสูง (ซม.) :</Text>
+                  <Text style={styles.inputLabel}>Height (cm):</Text>
                   <TextInput
                     style={styles.input}
                     value={editHeight}
                     onChangeText={setEditHeight}
                     keyboardType="numeric"
-                    placeholder="ส่วนสูง"
+                    placeholder="Height"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
                 <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={styles.inputLabel}>น้ำหนัก (กก.) :</Text>
+                  <Text style={styles.inputLabel}>Weight (kg):</Text>
                   <TextInput
                     style={styles.input}
                     value={editWeight}
                     onChangeText={setEditWeight}
                     keyboardType="numeric"
-                    placeholder="น้ำหนัก"
+                    placeholder="Weight"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
@@ -411,20 +411,20 @@ export const SettingsScreen: React.FC = () => {
               {/* Row: Age & Gender */}
               <View style={styles.rowInputs}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.inputLabel}>อายุ (ปี) :</Text>
+                  <Text style={styles.inputLabel}>Age (yrs):</Text>
                   <TextInput
                     style={styles.input}
                     value={editAge}
                     onChangeText={setEditAge}
                     keyboardType="numeric"
-                    placeholder="อายุ"
+                    placeholder="Age"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
                 <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={styles.inputLabel}>เพศ :</Text>
+                  <Text style={styles.inputLabel}>Gender:</Text>
                   <View style={styles.genderSelectRow}>
-                    {['ผู้ชาย', 'ผู้หญิง'].map((g) => {
+                    {['Male', 'Female'].map((g) => {
                       const isSel = editGender === g;
                       return (
                         <TouchableOpacity
@@ -448,20 +448,20 @@ export const SettingsScreen: React.FC = () => {
                 style={styles.cancelBtn}
                 onPress={() => setEditBodyModalVisible(false)}
               >
-                <Text style={styles.cancelBtnText}>ยกเลิก</Text>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.saveBtn}
                 onPress={handleSaveBody}
               >
-                <Text style={styles.saveBtnText}>บันทึกข้อมูล</Text>
+                <Text style={styles.saveBtnText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* 2. Modal แก้ไขข้อมูลส่วนตัว (ชื่อ-นามสกุล, อีเมล) */}
+      {/* 2. Modal Edit Profile Info */}
       <Modal
         visible={editAccountModalVisible}
         transparent={true}
@@ -471,7 +471,7 @@ export const SettingsScreen: React.FC = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderRow}>
-              <Text style={styles.modalTitle}>แก้ไขข้อมูลส่วนตัว</Text>
+              <Text style={styles.modalTitle}>Edit Profile Info</Text>
               <TouchableOpacity
                 onPress={() => setEditAccountModalVisible(false)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -484,34 +484,34 @@ export const SettingsScreen: React.FC = () => {
               {/* Row: First Name & Last Name */}
               <View style={styles.rowInputs}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.inputLabel}>ชื่อ :</Text>
+                  <Text style={styles.inputLabel}>First Name:</Text>
                   <TextInput
                     style={styles.input}
                     value={editFirstName}
                     onChangeText={setEditFirstName}
-                    placeholder="กรอกชื่อ"
+                    placeholder="Enter first name"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
                 <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={styles.inputLabel}>นามสกุล :</Text>
+                  <Text style={styles.inputLabel}>Last Name:</Text>
                   <TextInput
                     style={styles.input}
                     value={editLastName}
                     onChangeText={setEditLastName}
-                    placeholder="กรอกนามสกุล"
+                    placeholder="Enter last name"
                     placeholderTextColor="#94A3B8"
                   />
                 </View>
               </View>
 
               {/* Email */}
-              <Text style={styles.inputLabel}>อีเมล :</Text>
+              <Text style={styles.inputLabel}>Email:</Text>
               <TextInput
                 style={styles.input}
                 value={editEmail}
                 onChangeText={setEditEmail}
-                placeholder="กรอกอีเมล"
+                placeholder="Enter email"
                 placeholderTextColor="#94A3B8"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -523,13 +523,13 @@ export const SettingsScreen: React.FC = () => {
                 style={styles.cancelBtn}
                 onPress={() => setEditAccountModalVisible(false)}
               >
-                <Text style={styles.cancelBtnText}>ยกเลิก</Text>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.saveBtn}
                 onPress={handleSaveAccount}
               >
-                <Text style={styles.saveBtnText}>บันทึกข้อมูล</Text>
+                <Text style={styles.saveBtnText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
