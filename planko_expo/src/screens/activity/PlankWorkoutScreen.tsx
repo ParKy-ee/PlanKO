@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
   type ViewStyle,
   useWindowDimensions,
 } from 'react-native';
@@ -511,7 +512,11 @@ export const PlankWorkoutScreen: React.FC = () => {
     );
   }, []);
 
-  const handleSaveAndExit = () => {
+  const hasSavedRef = useRef(false);
+
+  const saveSessionStats = () => {
+    if (hasSavedRef.current) return;
+    hasSavedRef.current = true;
     const calculatedKcal = Math.max(15, Math.round(totalElapsedTime * 0.22));
     const accuracy = Math.min(98, 85 + Math.floor(Math.random() * 12));
 
@@ -520,15 +525,42 @@ export const PlankWorkoutScreen: React.FC = () => {
         mode === 'planned'
           ? `Planned - ${postureName}`
           : 'Custom - Plank Session',
-      score: score || 650,
+      score: score || 500,
       duration: totalElapsedTime || 60,
       kcal: calculatedKcal,
       accuracy,
-      maxCombo: maxCombo || 12,
-      avgBpm: liveBio?.bpm ?? 0,
+      maxCombo: maxCombo || 50,
+      avgBpm: liveBio?.bpm ?? biofeedback.bpm ?? 0,
       postureHits: combo || 16,
     });
+  };
 
+  const handleBackToPrevious = () => {
+    saveSessionStats();
+    setIsFinished(false);
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('MainTabs', { screen: 'Activity' });
+    }
+  };
+
+  const handlePlayAgain = () => {
+    saveSessionStats();
+    hasSavedRef.current = false;
+    setIsFinished(false);
+    setCurrentPostureIndex(0);
+    setScore(0);
+    setCombo(0);
+    setMaxCombo(0);
+    setTotalElapsedTime(0);
+    setTimeLeft(durationPerPosture);
+    setIsResting(false);
+    setIsPaused(false);
+  };
+
+  const handleBackToHome = () => {
+    saveSessionStats();
     setIsFinished(false);
     navigation.replace('MainTabs', { screen: 'Home' });
   };
@@ -824,48 +856,176 @@ export const PlankWorkoutScreen: React.FC = () => {
 
       <Modal
         visible={isFinished}
-        animationType="slide"
-        transparent
-        onRequestClose={() => {}}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={handleBackToPrevious}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryTrophy}>
-              <MaterialIcons name="emoji-events" size={54} color="#FFD700" />
-            </View>
-            <Text style={styles.summaryTitle}>Workout Completed!</Text>
-            <Text style={styles.summarySub}>
-              Great job! You completed your workout with Closed-Loop Biofeedback.
-            </Text>
+        <View style={styles.completeModalOverlay}>
+          <View style={styles.completeCardWrapper}>
+            {/* Header Bar */}
+            <View style={styles.completeHeader}>
+              <TouchableOpacity
+                onPress={handleBackToPrevious}
+                style={styles.completeHeaderBackBtn}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                activeOpacity={0.75}
+              >
+                <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+              </TouchableOpacity>
 
-            <View style={styles.statsSummaryGrid}>
-              <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>Total Score</Text>
-                <Text style={styles.summaryStatVal}>{score || 720}</Text>
-              </View>
-              <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>Calories</Text>
-                <Text style={styles.summaryStatVal}>
-                  {Math.max(20, Math.round(totalElapsedTime * 0.22))} kcal
-                </Text>
-              </View>
-              <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>Accuracy</Text>
-                <Text style={styles.summaryStatVal}>94%</Text>
-              </View>
-              <View style={styles.summaryStatItem}>
-                <Text style={styles.summaryStatLabel}>Max Combo</Text>
-                <Text style={styles.summaryStatVal}>{maxCombo || 16}x</Text>
+              <Text style={styles.completeHeaderTitle}>Workout Complete</Text>
+
+              <View style={styles.completeLogoRow}>
+                <Text style={styles.completeLogoText}>PlankO</Text>
+                <MaterialIcons name="auto-awesome" size={14} color="#67E8F9" style={{ marginLeft: 3, marginTop: -4 }} />
               </View>
             </View>
 
-            <TouchableOpacity
-              style={styles.saveResultButton}
-              onPress={handleSaveAndExit}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.saveResultText}>Save & Return Home</Text>
-            </TouchableOpacity>
+            {/* Main Body (Landscape 2 Columns) */}
+            <View style={styles.completeBody}>
+              {/* Left Column: Session Grade */}
+              <View style={styles.completeGradeCard}>
+                <Text style={styles.gradeHeaderLabel}>SESSION GRADE</Text>
+
+                {/* Rainbow A+ Badge - requested by user */}
+                <Image
+                  source={require('../../../assets/icons/workout_summary/grade_a_plus_rainbow.png')}
+                  style={styles.rainbowGradeBadge}
+                  resizeMode="contain"
+                />
+
+                <View style={styles.gradeResultTextWrap}>
+                  <Text style={styles.gradeResultTitle}>Excellent Work!</Text>
+                  <Text style={styles.gradeResultSubtitle}>Keep up the great effort.</Text>
+                </View>
+              </View>
+
+              {/* Right Column: Stats & Summary */}
+              <View style={styles.completeStatsCol}>
+                {/* Top Row: Total Score & Best Combo */}
+                <View style={styles.completeTopStatsRow}>
+                  {/* Total Score */}
+                  <View style={styles.completeStatBox}>
+                    <Image
+                      source={require('../../../assets/icons/workout_summary/summary_trophy.png')}
+                      style={styles.completeStatIcon}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <View style={styles.scoreValRow}>
+                        <Text style={styles.completeStatNumber}>{score || 500}</Text>
+                        <Text style={styles.completeStatUnit}>pts</Text>
+                      </View>
+                      <Text style={styles.completeStatLabel}>Total Score</Text>
+                    </View>
+                  </View>
+
+                  {/* Best Combo */}
+                  <View style={[styles.completeStatBox, { marginLeft: 10 }]}>
+                    <Image
+                      source={require('../../../assets/icons/workout_summary/summary_flame.png')}
+                      style={styles.completeStatIcon}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <Text style={styles.completeStatNumber}>{maxCombo || 50}</Text>
+                      <Text style={styles.completeStatLabel}>Best Combo</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Middle Card: Session Summary */}
+                <View style={styles.completeSummaryCard}>
+                  <Text style={styles.sessionSummaryHeading}>Session Summary</Text>
+                  <View style={styles.summaryGrid}>
+                    {/* Row 1: Difficulty & Active Time */}
+                    <View style={styles.summaryGridRow}>
+                      <View style={styles.summaryPill}>
+                        <Image
+                          source={require('../../../assets/icons/workout_summary/summary_target.png')}
+                          style={styles.summaryPillIcon}
+                          resizeMode="contain"
+                        />
+                        <View>
+                          <Text style={styles.summaryPillVal}>General</Text>
+                          <Text style={styles.summaryPillLbl}>Difficulty</Text>
+                        </View>
+                      </View>
+
+                      <View style={[styles.summaryPill, { marginLeft: 8 }]}>
+                        <Image
+                          source={require('../../../assets/icons/workout_summary/summary_stopwatch.png')}
+                          style={styles.summaryPillIcon}
+                          resizeMode="contain"
+                        />
+                        <View>
+                          <Text style={styles.summaryPillVal}>
+                            {Math.max(20, Math.round(totalElapsedTime || 20))} sec
+                          </Text>
+                          <Text style={styles.summaryPillLbl}>Active Time</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Row 2: Rest Time & Miss Rate */}
+                    <View style={[styles.summaryGridRow, { marginTop: 8 }]}>
+                      <View style={styles.summaryPill}>
+                        <Image
+                          source={require('../../../assets/icons/workout_summary/summary_coffee.png')}
+                          style={styles.summaryPillIcon}
+                          resizeMode="contain"
+                        />
+                        <View>
+                          <Text style={styles.summaryPillVal}>15 sec</Text>
+                          <Text style={styles.summaryPillLbl}>Rest Time</Text>
+                        </View>
+                      </View>
+
+                      <View style={[styles.summaryPill, { marginLeft: 8 }]}>
+                        <Image
+                          source={require('../../../assets/icons/workout_summary/summary_miss_x.png')}
+                          style={styles.summaryPillIcon}
+                          resizeMode="contain"
+                        />
+                        <View>
+                          <Text style={styles.summaryPillVal}>10%</Text>
+                          <Text style={styles.summaryPillLbl}>Miss Rate</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Bottom Buttons: Play Again & Back to Home */}
+                <View style={styles.completeActionsRow}>
+                  <TouchableOpacity
+                    style={styles.playAgainBtn}
+                    onPress={handlePlayAgain}
+                    activeOpacity={0.85}
+                  >
+                    <Image
+                      source={require('../../../assets/icons/workout_summary/btn_play_again.png')}
+                      style={styles.playAgainIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.playAgainText}>Play Again</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.backHomeBtn}
+                    onPress={handleBackToHome}
+                    activeOpacity={0.85}
+                  >
+                    <Image
+                      source={require('../../../assets/icons/workout_summary/btn_home.png')}
+                      style={styles.backHomeIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.backHomeText}>Back to Home</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>
@@ -1317,5 +1477,246 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  completeModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  completeCardWrapper: {
+    width: '98%',
+    maxWidth: 750,
+    maxHeight: '96%',
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 22,
+    elevation: 12,
+  },
+  completeHeader: {
+    height: 44,
+    backgroundColor: '#0080FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+  },
+  completeHeaderBackBtn: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  completeHeaderTitle: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+  },
+  completeLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  completeLogoText: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  completeBody: {
+    backgroundColor: '#EDF5FE',
+    flexDirection: 'row',
+    padding: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  completeGradeCard: {
+    flex: 0.38,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  gradeHeaderLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 1.2,
+  },
+  rainbowGradeBadge: {
+    width: 130,
+    height: 130,
+  },
+  gradeResultTextWrap: {
+    alignItems: 'center',
+  },
+  gradeResultTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  gradeResultSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  completeStatsCol: {
+    flex: 0.62,
+    marginLeft: 12,
+    justifyContent: 'space-between',
+  },
+  completeTopStatsRow: {
+    flexDirection: 'row',
+  },
+  completeStatBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  completeStatIcon: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  scoreValRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  completeStatNumber: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  completeStatUnit: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+    marginLeft: 4,
+  },
+  completeStatLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginTop: 1,
+  },
+  completeSummaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 12,
+    marginTop: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  sessionSummaryHeading: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  summaryGrid: {},
+  summaryGridRow: {
+    flexDirection: 'row',
+  },
+  summaryPill: {
+    flex: 1,
+    backgroundColor: '#F0F7FF',
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryPillIcon: {
+    width: 26,
+    height: 26,
+    marginRight: 8,
+  },
+  summaryPillVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  summaryPillLbl: {
+    fontSize: 10,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  completeActionsRow: {
+    flexDirection: 'row',
+    marginTop: 6,
+  },
+  playAgainBtn: {
+    flex: 1,
+    height: 44,
+    backgroundColor: '#0080FF',
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+    shadowColor: '#0080FF',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  playAgainIcon: {
+    width: 18,
+    height: 18,
+    tintColor: '#FFFFFF',
+    marginRight: 6,
+  },
+  playAgainText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  backHomeBtn: {
+    flex: 1,
+    height: 44,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.8,
+    borderColor: '#0080FF',
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  backHomeIcon: {
+    width: 18,
+    height: 18,
+    tintColor: '#0080FF',
+    marginRight: 6,
+  },
+  backHomeText: {
+    color: '#0080FF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

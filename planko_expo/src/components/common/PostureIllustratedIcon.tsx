@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import Svg, { Path, Circle, Rect, G, Ellipse } from 'react-native-svg';
 
 interface PostureIllustratedIconProps {
@@ -112,163 +112,44 @@ export const PostureIllustratedIcon: React.FC<PostureIllustratedIconProps> = ({
   // 1. Standard Elbow Plank Icon (Person horizontal on floor, head right/left, arms bent)
   if (postureId === 1 || normName.includes('standard') || normName.includes('elbow')) {
     return (
-      <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-        {/* Head */}
-        <Circle cx="48" cy="24" r="5" fill={theme.headColor} />
-        {/* Torso & Legs (Horizontal Plank) */}
-        <Path
-          d="M14 36 L28 32 L44 28 C46 28 47 30 46 32 L40 37 L24 39 L13 39 C11.5 39 11 37 13 36 Z"
-          fill={theme.primaryColor}
-        />
-        {/* Legs detail */}
-        <Path
-          d="M13 37 L26 35 L14 41 Z"
-          fill={theme.secondaryColor}
-        />
-        {/* Elbow / Forearm supporting on floor */}
-        <Path
-          d="M44 28 L43 38 L49 39"
-          stroke={theme.primaryColor}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Feet support */}
-        <Circle cx="13" cy="38.5" r="2.5" fill={theme.headColor} />
-        {/* Ground accent line */}
-        <Path
-          d="M10 42 L52 42"
-          stroke={theme.accentColor}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeDasharray="3 3"
-        />
-      </Svg>
+      <Image
+        source={require('../../../assets/icons/missions/forearm_plank.png')}
+        style={{ width: size, height: size * 0.6 }}
+        resizeMode="contain"
+      />
     );
   }
 
   // 2. High Plank (Full Plank) Icon (Straight arms full body pose)
   if (postureId === 2 || normName.includes('high') || normName.includes('full')) {
     return (
-      <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-        {/* Head */}
-        <Circle cx="32" cy="18" r="5.5" fill={theme.headColor} />
-        {/* Torso & Core */}
-        <Path
-          d="M26 27 C26 25 38 25 38 27 L36 41 L28 41 Z"
-          fill={theme.primaryColor}
-        />
-        {/* Left Leg */}
-        <Path
-          d="M28 41 L27 53 C27 54.5 29 55 30 53.5 L31.5 41 Z"
-          fill={theme.secondaryColor}
-        />
-        {/* Right Leg */}
-        <Path
-          d="M32.5 41 L34 53.5 C35 55 37 54.5 37 53 L36 41 Z"
-          fill={theme.primaryColor}
-        />
-        {/* Extended Arms High Plank */}
-        <Path
-          d="M20 20 L27 27 M44 20 L37 27"
-          stroke={theme.secondaryColor}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-        {/* Hands */}
-        <Circle cx="19" cy="19" r="2.5" fill={theme.headColor} />
-        <Circle cx="45" cy="19" r="2.5" fill={theme.headColor} />
-      </Svg>
+      <Image
+        source={require('../../../assets/icons/missions/high_plank.png')}
+        style={{ width: size, height: size * 0.65 }}
+        resizeMode="contain"
+      />
     );
   }
 
-  // 3. Side Plank Left Icon (Diagonal body, left arm on ground, teal/cyan)
+  // 3. Side Plank Left Icon (Diagonal body, left arm on ground)
   if (postureId === 3 || normName.includes('left')) {
     return (
-      <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-        {/* Head */}
-        <Circle cx="19" cy="22" r="5" fill={theme.headColor} />
-        {/* Diagonal Body & Legs */}
-        <Path
-          d="M23 26 L48 46 C49.5 47 48.5 49 46.5 48.5 L25 34 L21 30 C20 28 21.5 25 23 26 Z"
-          fill={theme.primaryColor}
-        />
-        {/* Bottom leg / shadow */}
-        <Path
-          d="M25 33 L49 52 C50 53 48.5 54 47 53 L26 37 Z"
-          fill={theme.secondaryColor}
-        />
-        {/* Supporting Left Elbow */}
-        <Path
-          d="M23 28 L19 39 L25 40"
-          stroke={theme.headColor}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Upper Arm raised */}
-        <Path
-          d="M24 26 L17 17"
-          stroke={theme.secondaryColor}
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        {/* Upper Hand */}
-        <Circle cx="16" cy="16" r="2" fill={theme.headColor} />
-        {/* Ground */}
-        <Path
-          d="M14 43 L52 56"
-          stroke={theme.accentColor}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeDasharray="2 3"
-        />
-      </Svg>
+      <Image
+        source={require('../../../assets/icons/missions/side_plank.png')}
+        style={{ width: size * 0.9, height: size * 0.75 }}
+        resizeMode="contain"
+      />
     );
   }
 
-  // 4. Side Plank Right Icon (Diagonal body, right arm on ground, purple/magenta)
+  // 4. Side Plank Right Icon (Diagonal body, mirrored horizontally)
   if (postureId === 4 || normName.includes('right')) {
     return (
-      <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-        {/* Head */}
-        <Circle cx="19" cy="22" r="5" fill={theme.headColor} />
-        {/* Diagonal Body & Legs */}
-        <Path
-          d="M23 26 L48 46 C49.5 47 48.5 49 46.5 48.5 L25 34 L21 30 C20 28 21.5 25 23 26 Z"
-          fill={theme.primaryColor}
-        />
-        {/* Bottom leg / shadow */}
-        <Path
-          d="M25 33 L49 52 C50 53 48.5 54 47 53 L26 37 Z"
-          fill={theme.secondaryColor}
-        />
-        {/* Supporting Right Elbow */}
-        <Path
-          d="M23 28 L19 39 L25 40"
-          stroke={theme.headColor}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {/* Upper Arm raised */}
-        <Path
-          d="M24 26 L17 17"
-          stroke={theme.secondaryColor}
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-        {/* Upper Hand */}
-        <Circle cx="16" cy="16" r="2" fill={theme.headColor} />
-        {/* Ground */}
-        <Path
-          d="M14 43 L52 56"
-          stroke={theme.accentColor}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeDasharray="2 3"
-        />
-      </Svg>
+      <Image
+        source={require('../../../assets/icons/missions/side_plank.png')}
+        style={{ width: size * 0.9, height: size * 0.75, transform: [{ scaleX: -1 }] }}
+        resizeMode="contain"
+      />
     );
   }
 
