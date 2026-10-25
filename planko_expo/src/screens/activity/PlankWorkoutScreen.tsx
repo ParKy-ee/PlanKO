@@ -237,6 +237,11 @@ export const PlankWorkoutScreen: React.FC = () => {
     .map((node) => node.telemetry?.bio)
     .find((bio) => bio && (bio.bpm !== null || bio.spo2 !== null));
 
+  const currentBpm = liveBio?.bpm ?? 120;
+  const exertionLevel = currentBpm > 140 ? 'High' : currentBpm >= 105 ? 'Moderate' : 'Low';
+  const exertionPercent = (currentBpm > 140 ? '80%' : currentBpm >= 105 ? '52%' : '24%') as ViewStyle['left'];
+  const exertionColor = currentBpm > 140 ? '#EF4444' : currentBpm >= 105 ? '#EAA023' : '#16A34A';
+
   useEffect(() => {
     setStepElapsedTime(0);
   }, [currentPostureIndex, isResting]);
@@ -530,7 +535,7 @@ export const PlankWorkoutScreen: React.FC = () => {
       kcal: calculatedKcal,
       accuracy,
       maxCombo: maxCombo || 50,
-      avgBpm: liveBio?.bpm ?? biofeedback.bpm ?? 0,
+      avgBpm: liveBio?.bpm ?? 0,
       postureHits: combo || 16,
     });
   };
@@ -724,15 +729,16 @@ export const PlankWorkoutScreen: React.FC = () => {
 
         <View style={styles.gameArea}>
           <View style={styles.gameHud}>
-            <Text style={styles.comboText}>combo {combo || 0}x</Text>
-            <Text style={styles.pointsText}>{score || 0} Point</Text>
-            <View>
-              <Text style={styles.pointsText}>MQTT: {gameFrame.mqttStatus}</Text>
-              <Text style={styles.pointsText}>Bridge: {bridgeStatus}</Text>
-            </View>
-            <View style={styles.settingsBadge}>
-              <Ionicons name="settings" size={24} color="#B7B7B7" />
-            </View>
+            <Text style={styles.hudStatsText}>
+              combo {combo || 0}, {score || 0} Point
+              {'   '}
+              <Text style={styles.hudSensorStatus}>
+                Sensor: {bridgeStatus === 'connected' ? 'connected' : 'off'}
+              </Text>
+            </Text>
+            <TouchableOpacity style={styles.settingsBadge} activeOpacity={0.75}>
+              <Ionicons name="settings-sharp" size={18} color="#BDBDBD" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.rhythmGuide} pointerEvents="none">
@@ -761,52 +767,168 @@ export const PlankWorkoutScreen: React.FC = () => {
             <View
               style={[
                 styles.centerLane,
-                { width: 208 * boardScale, marginHorizontal: 3 * boardScale },
+                { width: 146 * boardScale, marginHorizontal: 3 * boardScale },
               ]}
             >
               <View
                 style={[
-                  styles.bioCard,
+                  styles.vitalsCard,
                   {
-                    width: 200 * boardScale,
-                    height: 110 * boardScale,
-                    borderRadius: 9 * boardScale,
-                    paddingHorizontal: 8 * boardScale,
-                    paddingVertical: 5 * boardScale,
-                    marginBottom: 8 * boardScale,
+                    width: 142 * boardScale,
+                    borderRadius: 10 * boardScale,
+                    paddingHorizontal: 6 * boardScale,
+                    paddingTop: 3.5 * boardScale,
+                    paddingBottom: 3.5 * boardScale,
+                    marginBottom: 3 * boardScale,
                   },
                 ]}
               >
-                <View style={styles.modelPanelHeader}>
-                  <Text style={[styles.modelPanelTitle, { fontSize: 9 * boardScale }]}>IMU MODEL</Text>
-                  <Text style={[styles.bioSmallValue, { fontSize: 8 * boardScale }]} numberOfLines={1}>
-                    {gameFrame.model.versions[0] || gameFrame.model.bundle.split('/')[0]}
+                {/* Header: Blue Dot + LIVE VITALS */}
+                <View style={styles.vitalsHeader}>
+                  <View
+                    style={[
+                      styles.vitalsBlueDot,
+                      {
+                        width: 4 * boardScale,
+                        height: 4 * boardScale,
+                        borderRadius: 2 * boardScale,
+                        marginRight: 3 * boardScale,
+                      },
+                    ]}
+                  />
+                  <Text style={[styles.vitalsTitle, { fontSize: 7 * boardScale }]}>
+                    LIVE VITALS
                   </Text>
                 </View>
-                <Text style={[styles.bioSmallValue, { fontSize: 8 * boardScale }]} numberOfLines={1}>
-                  BPM {liveBio?.bpm ?? '--'}  SpO₂ {liveBio?.spo2 ?? '--'}  |  Pressure {gameFrame.pressure?.raw ?? '--'}
-                </Text>
-                {gameFrame.nodes.map((node) => (
-                  <View key={node.nodeId} style={styles.nodeResultRow}>
-                    <Text style={[styles.nodeResultText, { fontSize: 8 * boardScale }]} numberOfLines={1}>
-                      N{node.nodeId} {node.status.toUpperCase()} · {getNodeActionLabel(node)} · {getNodeStageLabel(node)}
-                      {node.status === 'live' && node.prediction.score !== null ? ` · ${node.prediction.score.toFixed(2)}` : ''}
+
+                {/* 3 Columns: Heart Rate, SpO2, Temperature */}
+                <View style={[styles.vitalsGrid, { marginTop: 1.5 * boardScale }]}>
+                  {/* Heart Rate */}
+                  <View style={styles.vitalCol}>
+                    <Image
+                      source={require('../../../assets/icons/vitals/vitals_heart.png')}
+                      style={[styles.vitalIcon, { width: 14 * boardScale, height: 11.5 * boardScale }]}
+                      resizeMode="contain"
+                    />
+                    <Text style={[styles.vitalLabel, { fontSize: 5.5 * boardScale, marginTop: 0.5 * boardScale }]}>
+                      Heart Rate
                     </Text>
-                    {node.telemetry && (
-                      <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
-                        {getNodeMotionSummary(node)}
+                    <View style={styles.vitalValueRow}>
+                      <Text style={[styles.vitalValue, { fontSize: 9.5 * boardScale }]}>
+                        {currentBpm}
                       </Text>
-                    )}
-                    <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
-                      {getNodeReasonLabel(node)}
+                      <Text style={[styles.vitalUnit, { fontSize: 5.5 * boardScale, marginLeft: 1 * boardScale }]}>
+                        BPM
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.vitalDivider, { height: 17 * boardScale, marginHorizontal: 1 * boardScale }]} />
+
+                  {/* SpO2 */}
+                  <View style={styles.vitalCol}>
+                    <Image
+                      source={require('../../../assets/icons/vitals/vitals_spo2.png')}
+                      style={[styles.vitalIcon, { width: 11.5 * boardScale, height: 12 * boardScale }]}
+                      resizeMode="contain"
+                    />
+                    <Text style={[styles.vitalLabel, { fontSize: 5.5 * boardScale, marginTop: 0.5 * boardScale }]}>
+                      SpO₂
+                    </Text>
+                    <View style={styles.vitalValueRow}>
+                      <Text style={[styles.vitalValue, { fontSize: 9.5 * boardScale }]}>
+                        {liveBio?.spo2 ?? 98}
+                      </Text>
+                      <Text style={[styles.vitalUnit, { fontSize: 5.5 * boardScale, marginLeft: 1 * boardScale }]}>
+                        %
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.vitalDivider, { height: 17 * boardScale, marginHorizontal: 1 * boardScale }]} />
+
+                  {/* Temperature */}
+                  <View style={styles.vitalCol}>
+                    <Image
+                      source={require('../../../assets/icons/vitals/vitals_temp.png')}
+                      style={[styles.vitalIcon, { width: 9 * boardScale, height: 12 * boardScale }]}
+                      resizeMode="contain"
+                    />
+                    <Text style={[styles.vitalLabel, { fontSize: 5.5 * boardScale, marginTop: 0.5 * boardScale }]}>
+                      Temperature
+                    </Text>
+                    <View style={styles.vitalValueRow}>
+                      <Text style={[styles.vitalValue, { fontSize: 9.5 * boardScale }]}>
+                        36.5
+                      </Text>
+                      <Text style={[styles.vitalUnit, { fontSize: 5.5 * boardScale, marginLeft: 1 * boardScale }]}>
+                        °C
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Separator Line */}
+                <View style={[styles.exertionSeparator, { marginVertical: 2 * boardScale }]} />
+
+                {/* Estimated Exertion Header */}
+                <View style={styles.exertionHeader}>
+                  <Text style={[styles.exertionTitle, { fontSize: 7 * boardScale }]}>
+                    Estimated Exertion
+                  </Text>
+                  <View style={[styles.exertionBadge, { backgroundColor: exertionColor, paddingHorizontal: 4 * boardScale, paddingVertical: 1 * boardScale, borderRadius: 6 * boardScale }]}>
+                    <Text style={[styles.exertionBadgeText, { fontSize: 6 * boardScale }]}>
+                      {exertionLevel}
                     </Text>
                   </View>
-                ))}
-                {(bridgeError || gameFrame.mqttError) && (
-                  <Text style={[styles.nodeResultReason, { fontSize: 7 * boardScale }]} numberOfLines={1}>
-                    {bridgeError || gameFrame.mqttError}
+                </View>
+
+                {/* Exertion Track Bar + Thumb */}
+                <View style={[styles.exertionBarWrapper, { marginTop: 2 * boardScale }]}>
+                  <View style={[styles.exertionTrack, { height: 3.5 * boardScale, borderRadius: 1.75 * boardScale }]}>
+                    <View style={[styles.exertionSegmentLow, { flex: 4 }]} />
+                    <View style={[styles.exertionSegmentMod, { flex: 3.5 }]} />
+                    <View style={[styles.exertionSegmentHigh, { flex: 2.5 }]} />
+                  </View>
+                  <View
+                    style={[
+                      styles.exertionThumb,
+                      {
+                        left: exertionPercent,
+                        width: 6 * boardScale,
+                        height: 6 * boardScale,
+                        borderRadius: 3 * boardScale,
+                        top: -1.25 * boardScale,
+                        marginLeft: -3 * boardScale,
+                      },
+                    ]}
+                  />
+                </View>
+
+                {/* Exertion Labels: Low, Moderate, High */}
+                <View style={[styles.exertionLabelsRow, { marginTop: 1.5 * boardScale }]}>
+                  <Text style={[styles.exertionLabel, { fontSize: 5.5 * boardScale }]}>Low</Text>
+                  <Text style={[styles.exertionLabel, { fontSize: 5.5 * boardScale }]}>Moderate</Text>
+                  <Text style={[styles.exertionLabel, { fontSize: 5.5 * boardScale }]}>High</Text>
+                </View>
+
+                {/* Bottom Status: Green Dot + Posture aligned */}
+                <View style={[styles.vitalsFooter, { marginTop: 2 * boardScale }]}>
+                  <View
+                    style={[
+                      styles.vitalsGreenDot,
+                      {
+                        width: 3.5 * boardScale,
+                        height: 3.5 * boardScale,
+                        borderRadius: 1.75 * boardScale,
+                        marginRight: 3 * boardScale,
+                      },
+                    ]}
+                  />
+                  <Text style={[styles.vitalsStatusText, { fontSize: 6.5 * boardScale }]}>
+                    Posture aligned
                   </Text>
-                )}
+                </View>
               </View>
 
               <View style={styles.centerSensorGrid}>
@@ -1147,7 +1269,7 @@ const styles = StyleSheet.create({
   gameArea: {
     flex: 1,
     minHeight: 135,
-    backgroundColor: '#5F5F5F',
+    backgroundColor: '#444444',
     position: 'relative',
   },
   restBackdrop: {
@@ -1188,11 +1310,11 @@ const styles = StyleSheet.create({
   },
   gameHud: {
     position: 'absolute',
-    top: 3,
-    right: 9,
+    top: 6,
+    right: 12,
     zIndex: 2,
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     alignItems: 'center',
   },
   rhythmGuide: {
@@ -1235,13 +1357,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   settingsBadge: {
-    width: 38,
-    height: 38,
-    marginLeft: -2,
-    borderRadius: 19,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(125, 125, 125, 0.34)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  hudStatsText: {
+    color: '#E0E0E0',
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  hudSensorStatus: {
+    color: '#B0B0B0',
+    fontSize: 10,
+    fontWeight: '500',
   },
   comboText: {
     color: '#E7E7E7',
@@ -1273,9 +1404,130 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   centerLane: {
-    width: 208,
+    width: 146,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  vitalsCard: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#0080FF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  vitalsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  vitalsBlueDot: {
+    backgroundColor: '#007AFF',
+  },
+  vitalsTitle: {
+    color: '#0A2540',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  vitalsGrid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  vitalCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vitalIcon: {},
+  vitalLabel: {
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  vitalValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  vitalValue: {
+    color: '#0A2540',
+    fontWeight: '800',
+  },
+  vitalUnit: {
+    color: '#0A2540',
+    fontWeight: '700',
+  },
+  vitalDivider: {
+    width: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  vitalsFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vitalsGreenDot: {
+    backgroundColor: '#16A34A',
+  },
+  vitalsStatusText: {
+    color: '#16A34A',
+    fontWeight: '700',
+  },
+  exertionSeparator: {
+    height: 1,
+    backgroundColor: '#EDF2F7',
+    width: '100%',
+  },
+  exertionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  exertionTitle: {
+    color: '#0A2540',
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  exertionBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+  },
+  exertionBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  exertionBarWrapper: {
+    position: 'relative',
+    width: '100%',
+  },
+  exertionTrack: {
+    flexDirection: 'row',
+    overflow: 'hidden',
+    width: '100%',
+  },
+  exertionSegmentLow: {
+    backgroundColor: '#22C55E',
+  },
+  exertionSegmentMod: {
+    backgroundColor: '#F59E0B',
+  },
+  exertionSegmentHigh: {
+    backgroundColor: '#E2E8F0',
+  },
+  exertionThumb: {
+    position: 'absolute',
+    backgroundColor: '#0F2748',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  exertionLabelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  exertionLabel: {
+    color: '#64748B',
+    fontWeight: '500',
   },
   bioCard: {
     width: 200,
@@ -1345,9 +1597,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(72, 72, 72, 0.28)',
-    borderWidth: 3,
-    borderColor: '#F1F1F1',
+    backgroundColor: 'rgba(50, 50, 50, 0.45)',
+    borderWidth: 2.5,
+    borderColor: '#FFFFFF',
     overflow: 'visible',
     zIndex: 2,
   },
@@ -1357,13 +1609,13 @@ const styles = StyleSheet.create({
   },
   padText: {
     color: '#FFFFFF',
-    fontSize: 18,
-    lineHeight: 20,
+    fontSize: 19,
+    lineHeight: 21,
     fontWeight: '700',
   },
   noteRing: {
     position: 'absolute',
-    borderWidth: 3,
+    borderWidth: 3.5,
     borderColor: '#FFD400',
     backgroundColor: 'transparent',
     zIndex: 4,
@@ -1378,12 +1630,12 @@ const styles = StyleSheet.create({
   },
   hitRatingBadge: {
     position: 'absolute',
-    minWidth: 108,
+    minWidth: 80,
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 14,
-    backgroundColor: '#FFD400',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: '#FF3366',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
@@ -1392,17 +1644,17 @@ const styles = StyleSheet.create({
     elevation: 30,
   },
   hitRatingGood: {
-    backgroundColor: '#39FF14',
+    backgroundColor: '#10B981',
   },
   hitRatingBad: {
-    backgroundColor: '#FF9F1C',
+    backgroundColor: '#F59E0B',
   },
   hitRatingMiss: {
-    backgroundColor: '#FF4F9D',
+    backgroundColor: '#FF3366',
   },
   hitRatingText: {
-    color: '#202020',
-    fontSize: 18,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '900',
     letterSpacing: 0.8,
   },

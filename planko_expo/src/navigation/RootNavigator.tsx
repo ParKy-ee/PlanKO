@@ -14,6 +14,7 @@ import { PostureDetailScreen } from '../screens/posture/PostureDetailScreen';
 import { CustomWorkoutScreen } from '../screens/activity/CustomWorkoutScreen';
 import { WorkoutHistoryScreen } from '../screens/history/WorkoutHistoryScreen';
 import { SettingsScreen } from '../screens/profile/SettingsScreen';
+import { ReadyToPlayScreen } from '../screens/activity/ReadyToPlayScreen';
 import { PlankWorkoutScreen } from '../screens/activity/PlankWorkoutScreen';
 import { useApp } from '../context/AppContext';
 
@@ -55,6 +56,13 @@ export const RootNavigator: React.FC = () => {
         <Stack.Screen name="CustomWorkout" component={CustomWorkoutScreen} />
         <Stack.Screen name="WorkoutHistory" component={WorkoutHistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen
+          name="ReadyToPlay"
+          component={ReadyToPlayScreen}
+          options={{
+            animation: 'fade',
+          }}
+        />
         <Stack.Screen
           name="PlankWorkout"
           component={PlankWorkoutScreen}

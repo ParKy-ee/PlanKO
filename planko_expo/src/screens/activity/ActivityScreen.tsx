@@ -41,7 +41,7 @@ export const ActivityScreen: React.FC = () => {
   };
 
   const handleStartPlannedWorkout = () => {
-    navigation.navigate('PlankWorkout', {
+    navigation.navigate('ReadyToPlay', {
       mode: 'planned',
       program: mission?.program,
       durationPerPosture: 30,

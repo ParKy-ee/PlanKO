@@ -12,12 +12,22 @@ export type RootStackParamList = {
   CustomWorkout: undefined;
   WorkoutHistory: undefined;
   Settings: undefined;
+  ReadyToPlay?: {
+    mode?: 'planned' | 'custom';
+    program?: Program;
+    durationPerPosture?: number;
+    restTime?: number;
+    levelIndex?: number;
+  };
   PlankWorkout: {
     mode: 'planned' | 'custom';
     program?: Program;
     durationPerPosture?: number;
     restTime?: number;
     levelIndex?: number;
+    trackTitle?: string;
+    difficulty?: 'Easy' | 'Normal' | 'Hard';
+    bpm?: number;
   };
 };
 
