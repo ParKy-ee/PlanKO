@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   View,
   Image,
+  type ImageSourcePropType,
   type ViewStyle,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { RootStackParamList } from '../../navigation/types';
@@ -24,6 +25,15 @@ import {
 } from '../../services/gameModelBridge';
 import type { BridgeConnectionStatus, GameSensorFrame } from '../../types/gameModel';
 import { Posture } from '../../types';
+
+export type HitRating = 'PERFECT' | 'GOOD' | 'BAD' | 'MISS';
+
+const RATING_IMAGES: Record<HitRating, ImageSourcePropType> = {
+  PERFECT: require('../../../assets/icons/ratings/rating_perfect.png'),
+  GOOD: require('../../../assets/icons/ratings/rating_good.png'),
+  BAD: require('../../../assets/icons/ratings/rating_bad.png'),
+  MISS: require('../../../assets/icons/ratings/rating_miss.png'),
+};
 
 type PlankWorkoutRouteProp = RouteProp<RootStackParamList, 'PlankWorkout'>;
 type PlankWorkoutNavigationProp = NativeStackNavigationProp<
@@ -56,8 +66,9 @@ const formatTime = (seconds: number) => {
 
 const RHYTHM_CYCLE_LENGTH = Math.max(...mockBeatmap.map((note) => note.time));
 const RHYTHM_LOOK_AHEAD = 1;
-const RHYTHM_HIT_WINDOW = 0.2;
-const RHYTHM_GOOD_WINDOW = 0.12;
+const RHYTHM_PERFECT_WINDOW = 0.08;
+const RHYTHM_GOOD_WINDOW = 0.16;
+const RHYTHM_HIT_WINDOW = 0.24;
 const RING_START_SCALE = 2.35;
 const NODE_ACTION_LABELS: Record<string, string> = {
   lumbar_flexion: 'ก้มหลัง',
@@ -176,17 +187,14 @@ export const PlankWorkoutScreen: React.FC = () => {
     restTime = 10,
   } = route.params || {};
 
-  useEffect(() => {
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(
-      (err) => console.warn('Orientation lock error:', err),
-    );
-
-    return () => {
-      ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.PORTRAIT_UP,
-      ).catch(() => {});
-    };
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(
+        (err) => console.warn('Orientation lock error:', err),
+      );
+      return () => {};
+    }, [])
+  );
 
   const [currentPostureIndex, setCurrentPostureIndex] = useState(0);
   const [isResting, setIsResting] = useState(false);
@@ -197,7 +205,7 @@ export const PlankWorkoutScreen: React.FC = () => {
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [stepElapsedTime, setStepElapsedTime] = useState(0);
-  const [lastHitRating, setLastHitRating] = useState<string | null>(null);
+  const [lastHitRating, setLastHitRating] = useState<HitRating | null>(null);
   const [lastHitPadId, setLastHitPadId] = useState<string | null>(null);
   const [gameFrame, setGameFrame] = useState<GameSensorFrame>(INITIAL_GAME_MODEL_FRAME);
   const [bridgeStatus, setBridgeStatus] = useState<BridgeConnectionStatus>('connecting');
@@ -276,7 +284,7 @@ export const PlankWorkoutScreen: React.FC = () => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [isFinished, isPaused, isResting]);
 
-  const showHitRating = (rating: 'GOOD' | 'BAD' | 'MISS', padId: string) => {
+  const showHitRating = (rating: HitRating, padId: string) => {
     if (hitRatingTimeoutRef.current) {
       clearTimeout(hitRatingTimeoutRef.current);
     }
@@ -285,19 +293,19 @@ export const PlankWorkoutScreen: React.FC = () => {
     hitRatingOpacity.stopAnimation();
     setLastHitRating(rating);
     setLastHitPadId(padId);
-    hitRatingScale.setValue(0.7);
+    hitRatingScale.setValue(0.65);
     hitRatingOpacity.setValue(0);
 
     Animated.parallel([
       Animated.spring(hitRatingScale, {
         toValue: 1,
         useNativeDriver: true,
-        speed: 22,
-        bounciness: 8,
+        speed: 25,
+        bounciness: rating === 'PERFECT' ? 12 : 8,
       }),
       Animated.timing(hitRatingOpacity, {
         toValue: 1,
-        duration: 120,
+        duration: 100,
         useNativeDriver: true,
       }),
     ]).start();
@@ -305,7 +313,7 @@ export const PlankWorkoutScreen: React.FC = () => {
     hitRatingTimeoutRef.current = setTimeout(() => {
       Animated.timing(hitRatingOpacity, {
         toValue: 0,
-        duration: 220,
+        duration: 200,
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) {
@@ -478,12 +486,26 @@ export const PlankWorkoutScreen: React.FC = () => {
   const handlePadTap = (padId: string) => {
     const target = findNearestRhythmTarget(padId, rhythmTime);
     const absoluteDifference = target ? Math.abs(target.timeDiff) : Infinity;
+    const isUnhandled = target !== null && !handledRhythmNotes.has(target.key);
+
+    const isPerfect =
+      isUnhandled && absoluteDifference <= RHYTHM_PERFECT_WINDOW;
     const isGood =
-      target !== null &&
-      absoluteDifference <= RHYTHM_GOOD_WINDOW &&
-      !handledRhythmNotes.has(target.key);
+      isUnhandled && absoluteDifference <= RHYTHM_GOOD_WINDOW;
     const isWithinNoteWindow =
       target !== null && absoluteDifference <= RHYTHM_HIT_WINDOW;
+
+    if (isPerfect) {
+      markRhythmNoteHandled(target);
+      setScore((previous) => previous + 150);
+      setCombo((previous) => {
+        const nextCombo = previous + 1;
+        setMaxCombo((previousMax) => Math.max(previousMax, nextCombo));
+        return nextCombo;
+      });
+      showHitRating('PERFECT', padId);
+      return;
+    }
 
     if (isGood) {
       markRhythmNoteHandled(target);
@@ -499,7 +521,7 @@ export const PlankWorkoutScreen: React.FC = () => {
 
     // A press close to a note but outside the good window is BAD. It counts
     // as an attempt, so it will not later be reported as a missed note.
-    if (target && isWithinNoteWindow && !handledRhythmNotes.has(target.key)) {
+    if (isUnhandled && isWithinNoteWindow) {
       markRhythmNoteHandled(target);
     }
 
@@ -546,6 +568,7 @@ export const PlankWorkoutScreen: React.FC = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
       navigation.navigate('MainTabs', { screen: 'Activity' });
     }
   };
@@ -567,6 +590,7 @@ export const PlankWorkoutScreen: React.FC = () => {
   const handleBackToHome = () => {
     saveSessionStats();
     setIsFinished(false);
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
     navigation.replace('MainTabs', { screen: 'Home' });
   };
 
@@ -574,6 +598,7 @@ export const PlankWorkoutScreen: React.FC = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
       navigation.navigate('MainTabs', { screen: 'Activity' });
     }
   };
@@ -594,6 +619,8 @@ export const PlankWorkoutScreen: React.FC = () => {
     const ringOpacity = isOnBeat ? 1 : 0.34 + (0.66 * guideProgress);
     const padSize = 48 * scale;
     const isRatingPad = lastHitRating !== null && lastHitPadId === padId;
+    const badgeWidth = 84 * scale;
+    const badgeHeight = 28 * scale;
 
     return (
       <TouchableOpacity
@@ -628,22 +655,26 @@ export const PlankWorkoutScreen: React.FC = () => {
             ]}
           />
         )}
-        {isRatingPad && (
+        {isRatingPad && lastHitRating && (
           <Animated.View
+            pointerEvents="none"
             style={[
               styles.hitRatingBadge,
-              lastHitRating === 'GOOD' && styles.hitRatingGood,
-              lastHitRating === 'BAD' && styles.hitRatingBad,
-              lastHitRating === 'MISS' && styles.hitRatingMiss,
               {
-                left: (padSize - 108) / 2,
-                top: -50,
+                left: (padSize - badgeWidth) / 2,
+                top: -badgeHeight * 0.95,
+                width: badgeWidth,
+                height: badgeHeight,
                 opacity: hitRatingOpacity,
                 transform: [{ scale: hitRatingScale }],
               },
             ]}
           >
-            <Text style={styles.hitRatingText}>{lastHitRating}</Text>
+            <Image
+              source={RATING_IMAGES[lastHitRating]}
+              style={styles.hitRatingImage}
+              resizeMode="contain"
+            />
           </Animated.View>
         )}
       </TouchableOpacity>
@@ -1630,18 +1661,14 @@ const styles = StyleSheet.create({
   },
   hitRatingBadge: {
     position: 'absolute',
-    minWidth: 80,
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#FF3366',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    zIndex: 200,
-    elevation: 30,
+    justifyContent: 'center',
+    zIndex: 999,
+    elevation: 50,
+  },
+  hitRatingImage: {
+    width: '100%',
+    height: '100%',
   },
   hitRatingGood: {
     backgroundColor: '#10B981',

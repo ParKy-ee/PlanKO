@@ -10,12 +10,14 @@ import {
   Alert,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Svg, {
   Defs,
   LinearGradient as SvgGradient,
@@ -29,10 +31,6 @@ import { RootStackParamList } from '../../navigation/types';
 import { Colors } from '../../theme/colors';
 import { mockPostures } from '../../mocks/mockPostures';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const CAROUSEL_WIDTH = SCREEN_WIDTH - 40;
-const CAROUSEL_HEIGHT = 210;
-
 type PostureDetailRouteProp = RouteProp<RootStackParamList, 'PostureDetail'>;
 type PostureDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -43,6 +41,19 @@ export const PostureDetailScreen: React.FC = () => {
   const route = useRoute<PostureDetailRouteProp>();
   const navigation = useNavigation<PostureDetailNavigationProp>();
   const { posture } = route.params;
+
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const screenWidth = Math.min(windowWidth, windowHeight);
+  const screenHeight = Math.max(windowWidth, windowHeight);
+  const carouselWidth = screenWidth - 40;
+  const carouselHeight = Math.round(carouselWidth * (9 / 16)); // Exact 16:9 ratio to show full posture photos
+
+  useFocusEffect(
+    React.useCallback(() => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+      return () => {};
+    }, [])
+  );
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [customImages, setCustomImages] = useState<any[] | null>(null);
@@ -64,10 +75,11 @@ export const PostureDetailScreen: React.FC = () => {
   };
 
   const handleStartSoloPosture = () => {
-    navigation.navigate('PlankWorkout', {
+    navigation.navigate('ReadyToPlay', {
       mode: 'custom',
       durationPerPosture: posture.targetDurationSeconds || 30,
       restTime: 10,
+      posture,
     });
   };
 
@@ -97,7 +109,7 @@ export const PostureDetailScreen: React.FC = () => {
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const slide = Math.round(
-      event.nativeEvent.contentOffset.x / CAROUSEL_WIDTH
+      event.nativeEvent.contentOffset.x / carouselWidth
     );
     if (slide !== activeSlide && slide >= 0 && slide < (postureImages?.length || 1)) {
       setActiveSlide(slide);
@@ -108,8 +120,8 @@ export const PostureDetailScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Background SVG Waves and Gradients */}
       <Svg
-        width={SCREEN_WIDTH}
-        height={SCREEN_HEIGHT}
+        width={screenWidth}
+        height={screenHeight}
         style={StyleSheet.absoluteFillObject}
       >
         <Defs>
@@ -138,29 +150,29 @@ export const PostureDetailScreen: React.FC = () => {
         </Defs>
 
         {/* Base Background Fill */}
-        <Rect x="0" y="0" width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="url(#detailScreenBgGrad)" />
+        <Rect x="0" y="0" width={screenWidth} height={screenHeight} fill="url(#detailScreenBgGrad)" />
 
         {/* Top Organic Ambient Waves */}
         <Path
-          d={`M -20 0 L ${SCREEN_WIDTH + 20} 0 L ${SCREEN_WIDTH + 20} 140 Q ${SCREEN_WIDTH * 0.7} 90, ${SCREEN_WIDTH * 0.35} 125 T -20 100 Z`}
+          d={`M -20 0 L ${screenWidth + 20} 0 L ${screenWidth + 20} 140 Q ${screenWidth * 0.7} 90, ${screenWidth * 0.35} 125 T -20 100 Z`}
           fill="url(#detailWaveTopGrad)"
         />
         <Path
-          d={`M 0 0 L ${SCREEN_WIDTH} 0 L ${SCREEN_WIDTH} 80 Q ${SCREEN_WIDTH * 0.5} 130, 0 60 Z`}
+          d={`M 0 0 L ${screenWidth} 0 L ${screenWidth} 80 Q ${screenWidth * 0.5} 130, 0 60 Z`}
           fill="rgba(255, 255, 255, 0.4)"
         />
 
         {/* Decorative Floating Bubbles */}
-        <Circle cx={SCREEN_WIDTH * 0.85} cy={40} r={18} fill="rgba(255, 255, 255, 0.35)" />
-        <Circle cx={SCREEN_WIDTH * 0.15} cy={120} r={10} fill="rgba(255, 255, 255, 0.4)" />
+        <Circle cx={screenWidth * 0.85} cy={40} r={18} fill="rgba(255, 255, 255, 0.35)" />
+        <Circle cx={screenWidth * 0.15} cy={120} r={10} fill="rgba(255, 255, 255, 0.4)" />
 
         {/* Bottom Organic Waves */}
         <Path
-          d={`M -20 ${SCREEN_HEIGHT} L ${SCREEN_WIDTH + 20} ${SCREEN_HEIGHT} L ${SCREEN_WIDTH + 20} ${SCREEN_HEIGHT - 90} Q ${SCREEN_WIDTH * 0.6} ${SCREEN_HEIGHT - 40}, 0 ${SCREEN_HEIGHT - 80} Z`}
+          d={`M -20 ${screenHeight} L ${screenWidth + 20} ${screenHeight} L ${screenWidth + 20} ${screenHeight - 90} Q ${screenWidth * 0.6} ${screenHeight - 40}, 0 ${screenHeight - 80} Z`}
           fill="url(#detailWaveBottomGrad)"
         />
         <Path
-          d={`M 0 ${SCREEN_HEIGHT} L ${SCREEN_WIDTH} ${SCREEN_HEIGHT} L ${SCREEN_WIDTH} ${SCREEN_HEIGHT - 45} Q ${SCREEN_WIDTH * 0.4} ${SCREEN_HEIGHT - 85}, 0 ${SCREEN_HEIGHT - 40} Z`}
+          d={`M 0 ${screenHeight} L ${screenWidth} ${screenHeight} L ${screenWidth} ${screenHeight - 45} Q ${screenWidth * 0.4} ${screenHeight - 85}, 0 ${screenHeight - 40} Z`}
           fill="rgba(255, 255, 255, 0.45)"
         />
 
@@ -170,8 +182,8 @@ export const PostureDetailScreen: React.FC = () => {
             [0, 1, 2, 3].map((row) => (
               <Circle
                 key={`detail-dot-${col}-${row}`}
-                cx={SCREEN_WIDTH - 45 + col * 8}
-                cy={SCREEN_HEIGHT - 95 + row * 8}
+                cx={screenWidth - 45 + col * 8}
+                cy={screenHeight - 95 + row * 8}
                 r={2}
                 fill="#0077E6"
               />
@@ -207,20 +219,23 @@ export const PostureDetailScreen: React.FC = () => {
 
           {/* Visual Showcase: Swipeable Carousel OR Dashed Upload Card */}
           {postureImages && postureImages.length > 0 ? (
-            <View style={styles.carouselContainer}>
+            <View style={[styles.carouselContainer, { width: carouselWidth, height: carouselHeight }]}>
               <ScrollView
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
-                style={styles.carouselScrollView}
+                style={{ width: carouselWidth, height: carouselHeight }}
               >
                 {postureImages.map((imgSrc: any, index: number) => (
-                  <View key={`plank-slide-${index}`} style={styles.carouselSlide}>
+                  <View
+                    key={`plank-slide-${index}`}
+                    style={[styles.carouselSlide, { width: carouselWidth, height: carouselHeight }]}
+                  >
                     <Image
                       source={imgSrc}
-                      style={styles.carouselImage}
+                      style={{ width: carouselWidth, height: carouselHeight }}
                       resizeMode="cover"
                     />
                   </View>
@@ -354,14 +369,14 @@ export const PostureDetailScreen: React.FC = () => {
           >
             <View style={styles.startWorkoutButtonGradient}>
               <Svg
-                width={SCREEN_WIDTH - 40}
+                width={carouselWidth}
                 height={52}
                 style={StyleSheet.absoluteFillObject}
               >
                 <Rect
                   x="0"
                   y="0"
-                  width={SCREEN_WIDTH - 40}
+                  width={carouselWidth}
                   height={52}
                   rx="26"
                   ry="26"
@@ -442,8 +457,6 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   carouselContainer: {
-    width: CAROUSEL_WIDTH,
-    height: CAROUSEL_HEIGHT,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: '#0F172A',
@@ -456,20 +469,12 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 4,
   },
-  carouselScrollView: {
-    width: CAROUSEL_WIDTH,
-    height: CAROUSEL_HEIGHT,
-  },
+  carouselScrollView: {},
   carouselSlide: {
-    width: CAROUSEL_WIDTH,
-    height: CAROUSEL_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  carouselImage: {
-    width: CAROUSEL_WIDTH,
-    height: CAROUSEL_HEIGHT,
-  },
+  carouselImage: {},
   carouselOverlayFooter: {
     position: 'absolute',
     bottom: 12,

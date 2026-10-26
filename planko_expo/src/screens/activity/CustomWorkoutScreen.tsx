@@ -59,7 +59,7 @@ export const CustomWorkoutScreen: React.FC = () => {
   };
 
   const handleStartWorkout = () => {
-    navigation.navigate('PlankWorkout', {
+    navigation.navigate('ReadyToPlay', {
       mode: 'custom',
       durationPerPosture: timeOptions[timeIndex],
       restTime: restOptions[restIndex],

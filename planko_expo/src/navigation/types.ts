@@ -18,6 +18,7 @@ export type RootStackParamList = {
     durationPerPosture?: number;
     restTime?: number;
     levelIndex?: number;
+    posture?: Posture;
   };
   PlankWorkout: {
     mode: 'planned' | 'custom';
